@@ -1,4 +1,4 @@
-[TOC]
+{:toc}
 
 # 一、简介
 
@@ -94,7 +94,7 @@ public interface IWebContext extends IContext {
   - 文字标记：one，sometext，main，...
 - 文字操作
   - 字符串连接：+
-  - 文字替换：`|The name is ${name}|`
+  - 文字替换：|The name is ${name}|
 - 算术运算
   - 二元运算符：+，-，*，/，%
   - 负号（一元运算符）：-
@@ -656,7 +656,7 @@ Thymeleaf提供了一个默认属性处理器，允许设置任何属性的值�
 </div>
 ```
 
-# <span id="templateLayout">七、模版布局</span>
+# <span name="templateLayout">七、模版布局</span>
 
 ## 定义模版片段
 
@@ -1106,7 +1106,7 @@ date.format=yyyy-MM-dd
 </style>
 ```
 
-# <span id="textTemplate">十二、文本模板模式</span>
+# <span name="textTemplate">十二、文本模板模式</span>
 
 `TEXT`，`JAVASCRIPT`和`CSS`均属于文本模板，`HTML`和`XML`属于标记模板。
 
@@ -1319,7 +1319,7 @@ dialect.setConversionService(customConversionService);
 templateEngine.setDialect(dialect);
 ```
 
-## 日志‘
+## 日志
 
 Thymeleaf使用的日志门面是`slf4j`，配置示例：
 
