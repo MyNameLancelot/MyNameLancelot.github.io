@@ -1,5 +1,7 @@
-{:toc}
-
+<link rel="stylesheet" type="text/css" href="css/jquery.autoMenu.css">
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script> 
+<script src="../js/jquery.autoMenu.js"></script>
+<div class="autoMenu" id="autoMenu" data-autoMenu></div>
 # 一、简介
 
 Thymeleaf是一个适用于Web和独立环境的现代服务器端Java模板引擎，能够处理HTML，XML，JavaScript，CSS甚至纯文本。
