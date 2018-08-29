@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "thymeleaf"
-date: 2018/8/29 13:03:42
+date: 2018-08-29 13:03:42
 categories: thymeleaf
 ---
 
