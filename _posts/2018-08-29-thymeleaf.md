@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "thymeleaf"
+title: "thymeleaf base use"
 date: 2018-08-29 13:03:42
 categories: thymeleaf
 ---
