@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "thymeleaf基本使用"
+title: "thymeleaf"
 date: 2018/8/29 13:03:42
 categories: thymeleaf
 ---
