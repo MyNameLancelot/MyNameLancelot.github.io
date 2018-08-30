@@ -3,6 +3,8 @@
 
 {% include layout.css %}
 
+html,body{overflow:hidden;overflow-y:auto;}
+
 .right .github-fork-ribbon {
   background-color: #563d7c;
 }
