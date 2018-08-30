@@ -30,8 +30,10 @@
 }
 
 footer {
-  margin-top: 50px;
-  text-align: center;
+	text-align: center;
+	line-height: 28px;
+	margin-top: 20px;
+	color: #666;
 }
 
 /* small screens */
