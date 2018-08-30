@@ -99,7 +99,7 @@ public interface IWebContext extends IContext {
   - 文字标记：one，sometext，main，...
 - 文字操作
   - 字符串连接：+
-  - 文字替换：|The name is ${name}|
+  - 文字替换：`|The name is ${name}|`
 - 算术运算
   - 二元运算符：+，-，*，/，%
   - 负号（一元运算符）：-
