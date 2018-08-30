@@ -8,9 +8,10 @@
 }
 
 .pagetitle{
-	margin:0 auto;
 	font-weight: bold;
 	font-family: Open Sans;
+	font-size: 40px;
+	line-height: 80px;
 }
 
 .container {
