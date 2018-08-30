@@ -7,6 +7,12 @@
   background-color: #563d7c;
 }
 
+.pagetitle{
+	margin:0 auto;
+	font-weight: bold;
+	font-family: Open Sans;
+}
+
 .container {
   max-width: 100%;
   padding-top: 40px;

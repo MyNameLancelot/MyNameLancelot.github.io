@@ -15,7 +15,7 @@
     <script src="{{ site.url }}/assets/bootstrap-toc.min.js"></script>
   </head>
 <body data-spy="scroll" data-target="#toc">
-	{{ page.title }}
+	
   <div class="github-fork-ribbon-wrapper right">
 	<div class="github-fork-ribbon">
 	 <a href="#">Welcome To My Blog</a>
@@ -29,6 +29,7 @@
       </div>
       <!-- main content area -->
          <div class="col-lg-9">
+		 <div class="pagetitle">{{ page.title }}</div>
          {{ content }}
       </div>
     </div>
