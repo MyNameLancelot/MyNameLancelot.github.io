@@ -1,6 +1,11 @@
 nav[data-toggle='toc'] {
   top: 42px;
-  position: static !important;
+}
+
+@media screen and (min-width: 770px) and (max-width: 1200px) {
+	.affix {
+		position: static !important;
+	}
 }
 
 /* small screens */
