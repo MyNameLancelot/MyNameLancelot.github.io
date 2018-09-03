@@ -1691,18 +1691,18 @@ ${#calendars.listFormat(calList, 'dd/MMM/yyyy HH:mm')}
 ${#calendars.setFormat(calSet, 'dd/MMM/yyyy HH:mm')}
 
 //获取日期属性
-${#calendars.day(date)}             //arrayDay(...), listDay(...), etc.
-${#calendars.month(date)}           //arrayMonth(...), listMonth(...), etc.
-${#calendars.monthName(date)}		//arrayMonthName(...), listMonthName(...), etc.
-${#calendars.monthNameShort(date)}  //arrayMonthNameShort(...), listMonthNameShort(...), etc.
-${#calendars.year(date)}            //arrayYear(...), listYear(...), etc.
-${#calendars.dayOfWeek(date)}       //arrayDayOfWeek(...), listDayOfWeek(...), etc.
-${#calendars.dayOfWeekName(date)}   //arrayDayOfWeekName(...), listDayOfWeekName(...), etc.
-${#calendars.dayOfWeekNameShort(date)} //arrayDayOfWeekNameShort(...), listDayOfWeekNameShort(...), etc.
-${#calendars.hour(date)}            //arrayHour(...), listHour(...), etc.
-${#calendars.minute(date)}          //arrayMinute(...), listMinute(...), etc.
-${#calendars.second(date)}          //arraySecond(...), listSecond(...), etc.
-${#calendars.millisecond(date)}  //arrayMillisecond(...), listMillisecond(...), etc.
+${#calendars.day(date)}             	//arrayDay(...), listDay(...), etc.
+${#calendars.month(date)}           	//arrayMonth(...), listMonth(...), etc.
+${#calendars.monthName(date)}			//arrayMonthName(...), listMonthName(...), etc.
+${#calendars.monthNameShort(date)}  	//arrayMonthNameShort(...), listMonthNameShort(...), etc.
+${#calendars.year(date)}            	//arrayYear(...), listYear(...), etc.
+${#calendars.dayOfWeek(date)}       	//arrayDayOfWeek(...), listDayOfWeek(...), etc.
+${#calendars.dayOfWeekName(date)}   	//arrayDayOfWeekName(...), listDayOfWeekName(...), etc.
+${#calendars.dayOfWeekNameShort(date)} 	//arrayDayOfWeekNameShort(...), listDayOfWeekNameShort(...), etc.
+${#calendars.hour(date)}            	//arrayHour(...), listHour(...), etc.
+${#calendars.minute(date)}          	//arrayMinute(...), listMinute(...), etc.
+${#calendars.second(date)}         		//arraySecond(...), listSecond(...), etc.
+${#calendars.millisecond(date)}  		//arrayMillisecond(...), listMillisecond(...), etc.
 
 //创建日期
 ${#calendars.create(year,month,day)}
@@ -1991,3 +1991,17 @@ ${#ids.seq('someId')}
 ${#ids.next('someId')}
 ${#ids.prev('someId')}
 ```
+
+例如
+
+```html
+[[${#ids.seq('someId')}]]   ==>someId1
+[[${#ids.seq('someId')}]]	==>someId2 
+
+[[${#ids.next('someId')}]]	==>someId3
+[[${#ids.next('someId')}]]	==>someId3
+	
+[[${#ids.prev('someId')}]]	==>someId2
+[[${#ids.prev('someId')}]]	==>someId2
+```
+
