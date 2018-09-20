@@ -1,3 +1,7 @@
 theme: jekyll-theme-cayman
 permalink: /:categories/:title.html
-title: 王钰坤个人博客 
+title: 王钰坤个人博客
+author:                                     #自定义常量
+  name: 王钰坤
+  email: 1138014562@qq.com
+active: 技术
