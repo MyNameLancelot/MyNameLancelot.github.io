@@ -6,6 +6,7 @@ title: 首页
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{{ page.title }}</title>
 	<link rel="shortcut icon" href="{{ site.url }}/assets/favicon.ico" />
 	<link rel="bookmark"href="{{ site.url }}/assets/favicon.ico" />
     <link rel="stylesheet" href="{{ site.url }}/assets/bootstrap.min.css">
@@ -16,18 +17,26 @@ title: 首页
     <script src="{{ site.url }}/assets/bootstrap.min.js" ></script>
     <script src="{{ site.url }}/assets/bootstrap-toc.min.js"></script>
   </head>
-<body>
-	<div class="container">
-		{% for category in site.categories %}
+<body data-spy="scroll" data-target="#toc">
+    <div class="container">
+    <div class="row">
+      <!-- sidebar, which will move to the top on a small screen -->
+      <div class="col-lg-3">
+        <nav id="toc" data-toggle="toc" data-spy="affix"></nav>
+      </div>
+      <!-- main content area -->
+         <div class="col-lg-9">
+		 <div class="pagetitle">目录索引</div>
+		 {% for category in site.categories %}
 			<h2>{{ category | first }}</h2>
-				</span>{{ category | last | size }}</span>
 				<ul class="arc-list">
 				{% for post in category.last %}
 					<li>{{ post.date | date:"%d/%m/%Y"}} ——<a href="{{ post.url }}">{{ post.title }}</a></li>
 				{% endfor %}
 				</ul>
 		{% endfor %}
-	</div>
+      </div>
+    </div>
 	<footer>
 		<p>Copyright © By-WangYuKun, All Rights Reserved</p>
     </footer>
