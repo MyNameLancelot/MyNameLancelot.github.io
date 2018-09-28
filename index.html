@@ -28,12 +28,10 @@ title: 首页
          <div class="col-lg-9">
 		 <div class="pagetitle">目录索引</div>
 		 {% for category in site.categories %}
-			<h2>{{ category | first }}</h2>
-				<ul class="arc-list">
-				{% for post in category.last %}
-					<li>{{ post.date | date:"%d/%m/%Y"}} ——<a href="{{ post.url }}">{{ post.title }}</a></li>
-				{% endfor %}
-				</ul>
+			<h1>{{ category | first }}</h1>
+			{% for post in category.last %}
+				<h2>{{ post.date | date:"%Y/%m/%d"}} —— <a href="{{ post.url }}">{{ post.title }}</a></h2>
+			{% endfor %}
 		{% endfor %}
       </div>
     </div>
