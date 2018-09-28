@@ -1,11 +1,41 @@
+<!DOCTYPE html>
 <html>
-	{% for category in site.categories %}
-	<h2>{{ category | first }}</h2>
-	</span>{{ category | last | size }}</span>
-	<ul class="arc-list">
-		{% for post in category.last %}
-			<li>{{ post.date | date:"%d/%m/%Y"}}<a href="{{ post.url }}">{{ post.title }}</a></li>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{{ page.title }}</title>
+	<link rel="shortcut icon" href="{{ site.url }}/assets/favicon.ico" />
+	<link rel="bookmark"href="{{ site.url }}/assets/favicon.ico" />
+    <link rel="stylesheet" href="{{ site.url }}/assets/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ site.url }}/assets/bootstrap-toc.min.css">
+    <link rel="stylesheet" href="{{ site.url }}/assets/gh-fork-ribbon.min.css" />
+    <link rel="stylesheet" href="{{ site.url }}/assets/screen.css" media="screen" charset="utf-8">
+	<link rel="stylesheet" href="{{ site.url }}/assets/syntax.css" />
+    <script src="{{ site.url }}/assets//jquery-2.1.4.min.js"></script>
+    <script src="{{ site.url }}/assets/bootstrap.min.js" ></script>
+    <script src="{{ site.url }}/assets/bootstrap-toc.min.js"></script>
+  </head>
+<body data-spy="scroll" data-target="#toc">
+  <div class="container">
+    <div class="row">
+      <!-- sidebar, which will move to the top on a small screen -->
+      <div class="col-lg-3">
+        <nav id="toc" data-toggle="toc" data-spy="affix"></nav>
+      </div>
+		{% for category in site.categories %}
+		<h2>{{ category | first }}</h2>
+		</span>{{ category | last | size }}</span>
+		<ul class="arc-list">
+			{% for post in category.last %}
+				<li>{{ post.date | date:"%d/%m/%Y"}}<a href="{{ post.url }}">{{ post.title }}</a></li>
+			{% endfor %}
+		</ul>
 		{% endfor %}
-	</ul>
-	{% endfor %}
+      </div>
+    </div>
+	<footer>
+		<p>Copyright © By-WangYuKun, All Rights Reserved</p>
+    </footer>
+  </div>
+</body>
 </html>
