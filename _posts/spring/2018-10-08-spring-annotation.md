@@ -1120,11 +1120,11 @@ public class MyServletContainerInitializer implements ServletContainerInitialize
 
 - 异步请求
 
-  ![/img/spring/servlet3.0-before-request](assets/servlet3.0-before-request.png)
+  ![servlet3.0-before-request](/img/spring/servlet3.0-before-request.png)
 
   - 在Servlet3.0之前，Servlet采用Thread-Pre-Request的方式处理请求，即每一次Http请求都是由某一个线程从头到尾负责处理。如果一个请求需要进行IO操作，那么其所对应的线程将同步地等待IO操作完成，此时线程并不能及时的释放回线程池以供后续使用，在并发量越来越大的情况下这将带来严重的性能问题。
 
-  ![/img/spring/servlet-asnyc](assets/servlet-asnyc.png)
+  ![servlet-asnyc](/img/spring/servlet-asnyc.png)
 
   - Servlet3.0之后但是了异步处理机制，目的是解决大量低延迟、少量高延迟大并发情况下带来的性能瓶颈
 
