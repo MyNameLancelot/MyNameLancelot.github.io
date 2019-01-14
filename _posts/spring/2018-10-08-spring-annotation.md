@@ -18,10 +18,10 @@ categories: spring
 @Configuration
 public class MainConfig {
 
-	@Bean
-	public Person person() {
-		return new Person("小牛", 19);
-	}	
+    @Bean
+    public Person person() {
+        return new Person("小牛", 19);
+    }	
 }
 ```
 
@@ -113,8 +113,8 @@ public class LinuxSystemCondition implements Condition{
 	@Override
 	public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
 		String osName = context.getEnvironment().getProperty("os.name");
-		return !osName.contains("Windows");
-	}
+        return !osName.contains("Windows");
+    }
 }
 
 public class WindowsSystemCondition implements Condition{
@@ -128,7 +128,7 @@ public class WindowsSystemCondition implements Condition{
 @Configuration
 public class MainConfig {
 	
-    @Bean
+	@Bean
 	@Conditional(WindowsSystemCondition.class)
 	public Person personWindows() {
 		return new Person("Bill Gates", 60);
