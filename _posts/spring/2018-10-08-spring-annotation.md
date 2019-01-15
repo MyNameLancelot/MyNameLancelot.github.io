@@ -71,9 +71,10 @@ FilterType的种类
     public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
         //获得当前扫描类的注解信息
         AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
-
+  
         //获取当前扫描类的资源信息（类路径等）
-
+  ```
+  ```java
 Resource resource = metadataReader.getResource();
 
         //获得当前扫描类的类信息
@@ -797,8 +798,7 @@ public class ProxyTransactionManagementConfiguration extends AbstractTransaction
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public TransactionInterceptor transactionInterceptor() {
         TransactionInterceptor interceptor = new TransactionInterceptor();
-
-interceptor.setTransactionAttributeSource(transactionAttributeSource());
+        interceptor.setTransactionAttributeSource(transactionAttributeSource());
         if (this.txManager != null) {
             interceptor.setTransactionManager(this.txManager);
         }
