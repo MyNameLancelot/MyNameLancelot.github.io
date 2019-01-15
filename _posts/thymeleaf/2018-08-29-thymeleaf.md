@@ -626,11 +626,11 @@ Thymeleaf提供了一个默认属性处理器，允许设置任何属性的值�
 
 ```java
  ctx.setVariable(
-	"users",
-	new LazyContextVariable<List<User>>() {
-    	@Override
+    "users",
+    new LazyContextVariable<List<User>>() {
+        @Override
         protected List<User> loadValue() {
-        	return users.findAllUsers();
+            return users.findAllUsers();
         }
     })
 ```
@@ -712,7 +712,7 @@ Thymeleaf提供了一个默认属性处理器，允许设置任何属性的值�
 
   ```html
   <body> 
-  	<div>
+    <div>
           &copy; 2011 The Good Thymes Virtual Grocery
       </div>
   </body>
@@ -876,7 +876,7 @@ Thymeleaf提供了一个默认属性处理器，允许设置任何属性的值�
       <td>小红</td>
       <td>16</td>
     </tr>
-	<tr>
+    <tr>
       <td>小白</td>
       <td>20</td>
     </tr>
@@ -1006,9 +1006,9 @@ date.format=yyyy-MM-dd
 
   ```html
   <!--/* 
-  	...
-  	整块注释掉
-  	...
+    ...
+    整块注释掉
+    ...
   */-->  
   ```
 
@@ -1149,10 +1149,10 @@ date.format=yyyy-MM-dd
 
   ```text
   [# th:if="${oid}>0" ]
-  	大于0
+    大于0
   [/]
   [# th:if="${session.user.firstName}=='小明'" ]
-  	他叫小明
+    他叫小明
   [/]
   ```
 
@@ -1203,7 +1203,7 @@ var username = /*[[${session.user.name}]]*/ "Sebastian Lychee";
 
 ```javascript
 /*[# th:if="${user.admin}"]*/
-	alert('Welcome admin');
+    alert('Welcome admin');
 /*[/]*/
 ```
 
@@ -1219,20 +1219,20 @@ Thymeleaf 自身模板解析器
 ITemplateResolver
   |
   +- AbstractTemplateResolver
-	 |
-  	 +- DefaultTemplateResolver【默认模版解析器】
-  	 |
-  	 +- StringTemplateResolver【可以直接解析模板】
-  	 |
-  	 +- AbstractConfigurableTemplateResolver
-  	 	|
-  	 	+- ClassLoaderTemplateResolver【将模板解析为类加载器资源】
-  	 	|
-  	 	+- FileTemplateResolver【将模板解析为文件系统中的文件】
-  	 	|
-  	 	+- ServletContextTemplateResolver【从Servlet Context获取模板作为资源】
-  	 	|
-  	 	+- UrlTemplateResolver【将模板解析为URL】
+     |
+     +- DefaultTemplateResolver【默认模版解析器】
+     |
+     +- StringTemplateResolver【可以直接解析模板】
+     |
+     +- AbstractConfigurableTemplateResolver
+        |
+        +- ClassLoaderTemplateResolver【将模板解析为类加载器资源】
+        |
+        +- FileTemplateResolver【将模板解析为文件系统中的文件】
+        |
+        +- ServletContextTemplateResolver【从Servlet Context获取模板作为资源】
+        |
+        +- UrlTemplateResolver【将模板解析为URL】
 ```
 
 设置相关属性
@@ -1296,8 +1296,8 @@ servletContextTemplateResolver.setOrder(Integer.valueOf(2));
 IMessageResolver
   |
   +- AbstractMessageResolver
-  	 |
-  	 +- StandardMessageResolver【默认使用】
+     |
+     +- StandardMessageResolver【默认使用】
 ```
 
 ### 链接消息解析器

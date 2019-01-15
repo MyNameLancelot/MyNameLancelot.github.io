@@ -263,28 +263,28 @@ public class DateFormatter implements Formatter<Date> {
 <form action="@{/doCommit}" method="POST" th:object="${person}">
   <p>
     <!-- th:field相当于同时设置id、name、value属性 -->
-	<label for="personName" th:text="姓名">姓名</label>	
-	<input type="text" th:field="*{personName}">
+    <label for="personName" th:text="姓名">姓名</label>	
+    <input type="text" th:field="*{personName}">
   </p>
   <p>
     <!-- th:field和th:selected不可以同时使用。th:field会生成id、name但无法指定选定的值-->
-	<label for="city" th:text="出生城市">城市</label>
-	<select id="city" name="city">
-	  <option th:each="item:${citys}" 
+    <label for="city" th:text="出生城市">城市</label>
+    <select id="city" name="city">
+      <option th:each="item:${citys}" 
             th:value="${item.id}" 
             th:text="${item.cityName}" 
             th:selected="${item.id} == *{city.id}"></option>
-	</select>
+    </select>
   </p>
   <p>
     <label th:text="想居住城市">想居住城市</label>
-	<!-- 使用th:block th:each构造块，
-		th:field会生成name和自增的id,th:field和th:checked不可以同时使用-->
-	<!--/*/ <th:block th:each="item:${citys}"> /*/-->
-	<label th:for="${#ids.next('liveCitys')}" th:text="${item.cityName}"></label>
-	<input type="checkbox" th:id="${#ids.seq('liveCitys')}" name="liveCitys"
-	th:value="${item.id}" th:checked="${#lists.contains(person.liveCitys,item)}" >
-	<!--/*/ </th:block> /*/-->
+    <!-- 使用th:block th:each构造块，
+        th:field会生成name和自增的id,th:field和th:checked不可以同时使用-->
+    <!--/*/ <th:block th:each="item:${citys}"> /*/-->
+    <label th:for="${#ids.next('liveCitys')}" th:text="${item.cityName}"></label>
+    <input type="checkbox" th:id="${#ids.seq('liveCitys')}" name="liveCitys"
+    th:value="${item.id}" th:checked="${#lists.contains(person.liveCitys,item)}" >
+    <!--/*/ </th:block> /*/-->
   </p>
   <input type="submit" value="提交">
 </form>
@@ -312,8 +312,8 @@ public class DateFormatter implements Formatter<Date> {
 
 ```html
 <form action="">
-	<label for="goodMan1"></label>
-	<input type="checkbox" id="goodMan1" name="goodMan" value="true" />
+    <label for="goodMan1"></label>
+    <input type="checkbox" id="goodMan1" name="goodMan" value="true" />
     <input type="hidden" name="_goodMan" value="on"/>  
 </form>
 
@@ -432,7 +432,7 @@ HTML代码写法
 <form action="" th:action="@{/add}" method="post" th:object="${user}">
   <!--遍历所有错误描述，进行打印-->
   <ul>
-	<li th:each="err : ${#fields.errors('age')}" th:text="${err}" />
+    <li th:each="err : ${#fields.errors('age')}" th:text="${err}" />
   </ul>
   <label th:for="${#ids.next('age')}">Age</label>
   <!--输入框会被标红-->
@@ -534,6 +534,4 @@ public class DateFormatter implements Formatter<Date> {
 ## #conversions对象
 
 手动调用转换服务，`#conversions.convert(Object,ClassName)`：将对象转换为指定的类，例如${#conversions.convert(val,'String')}
-
-
 

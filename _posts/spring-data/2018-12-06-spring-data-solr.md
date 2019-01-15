@@ -29,25 +29,25 @@ categories: spring-data
 
 ```java
 public class Book {
-	
-	@Field private String id;
-	@Field private String name;
-	@Field private String issn;
-	@Field private List<String> authors;
-	@Field private double price;
-	private Classify classify;
-	@Field private Date pubshingTime;
-	@Field private Boolean hasMarc;
-	
-	public String getClassifyCode() {
-		return this.classify == null ? null : this.classify.getCode();
-	}
-	
-	@Field("classifyCode")
-	public void setClassifyCode(String classifyCode) {
-		this.classify = (this.classify == null ? new Classify() : this.classify);
-		this.classify.setCode(classifyCode);
-	}
+    
+    @Field private String id;
+    @Field private String name;
+    @Field private String issn;
+    @Field private List<String> authors;
+    @Field private double price;
+    private Classify classify;
+    @Field private Date pubshingTime;
+    @Field private Boolean hasMarc;
+
+    public String getClassifyCode() {
+        return this.classify == null ? null : this.classify.getCode();
+    }
+    
+    @Field("classifyCode")
+    public void setClassifyCode(String classifyCode) {
+        this.classify = (this.classify == null ? new Classify() : this.classify);
+        this.classify.setCode(classifyCode);
+    }
     //========================其他Getter/Setter========================
 }
 ```
@@ -67,42 +67,42 @@ import java.util.Date;
 
 public class DateUtil {
     //字符串转换为Date
-	static public Date parse(String dateStr) {
-		DateFormat formart = new SimpleDateFormat("yyyy-MM-dd");
-		Date date = null;
-		try {
-			date = formart.parse(dateStr);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		return date;
-	}
+    static public Date parse(String dateStr) {
+        DateFormat formart = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = null;
+        try {
+            date = formart.parse(dateStr);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
+    }
     
-	//日期类型转换为UTC字符串
-	static public String dateToUTCStr(Date date) {
+    //日期类型转换为UTC字符串
+    static public String dateToUTCStr(Date date) {
       Instant instant = date.toInstant();
       ZoneId zoneId = ZoneId.systemDefault();
       return instant.atZone(zoneId).format(DateTimeFormatter.ISO_INSTANT);
-	}
-	
+    }
+
     //UTC格式字符串转换为Date字符串
-	static public String UTCStrToDateStr(String utc) {
-		Instant ins = Instant.parse(utc);
-		Date date = Date.from(ins);
-		DateFormat formart = new SimpleDateFormat("yyyy-MM-dd");
-		return formart.format(date);
-	}
-	
+    static public String UTCStrToDateStr(String utc) {
+        Instant ins = Instant.parse(utc);
+        Date date = Date.from(ins);
+        DateFormat formart = new SimpleDateFormat("yyyy-MM-dd");
+        return formart.format(date);
+    }
+    
     //Date格式日期转换为字符串
-	static public String toDateStr(Date date) {
-		DateFormat formart = new SimpleDateFormat("yyyy-MM-dd");
-		return formart.format(date);
-	}
+    static public String toDateStr(Date date) {
+        DateFormat formart = new SimpleDateFormat("yyyy-MM-dd");
+        return formart.format(date);
+    }
     
     //Date字符串转UTC格式字符串
     static public String dateStrToUTCStr(String date) {
-		return dateToUTCStr(parse(date));
-	}
+        return dateToUTCStr(parse(date));
+    }
 }
 ```
 
@@ -139,9 +139,9 @@ public void testDelete() throws Exception {
 
   ```java
   public void testQueryByID() throws Exception {
-  		Optional<Book> book = solrTemplate.getById("book","115373065864171873622",Book.class);
-  		System.out.println(book.get());
-  	}
+        Optional<Book> book = solrTemplate.getById("book","115373065864171873622",Book.class);
+        System.out.println(book.get());
+    }
   ```
 
 - 普通语法查询
@@ -455,3 +455,5 @@ public void testDelete() throws Exception {
   ```
 
   详情参考[链接](https://mynamelancelot.github.io/searchengine/solr.html)
+  
+
