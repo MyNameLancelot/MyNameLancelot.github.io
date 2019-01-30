@@ -75,7 +75,7 @@ FilterType的种类
         //获取当前扫描类的资源信息（类路径等）
   ```
   ```java
-Resource resource = metadataReader.getResource();
+      Resource resource = metadataReader.getResource();
 
         //获得当前扫描类的类信息
         ClassMetadata classMetadata = metadataReader.getClassMetadata();
@@ -554,10 +554,9 @@ public @interface EnableAspectJAutoProxy {
 class AspectJAutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 
     @Override
-    public void registerBeanDefinitions(
-            AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+    public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 //注册了ID为org.springframework.aop.config.internalAutoProxyCreator的AnnotationAwareAspectJAutoProxyCreator.class组件信息
-        AopConfigUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(registry);
+         AopConfigUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(registry);
 
         //修改AnnotationAwareAspectJAutoProxyCreator的信息
         AnnotationAttributes enableAspectJAutoProxy =
@@ -566,13 +565,12 @@ class AspectJAutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
         if (enableAspectJAutoProxy != null) {
             if (enableAspectJAutoProxy.getBoolean("proxyTargetClass")) {
                 AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
-                }
-                if (enableAspectJAutoProxy.getBoolean("exposeProxy")) {
+            }
+            if (enableAspectJAutoProxy.getBoolean("exposeProxy")) {
                 AopConfigUtils.forceAutoProxyCreatorToExposeProxy(registry);
-                }
+            }
         }
     }
-
 }
 ```
 
@@ -1193,7 +1191,6 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
             for (Class<?> waiClass : webAppInitializerClasses) {
                 //如果不是接口和抽象类会被实例化
                 if (!waiClass.isInterface() && !Modifier.isAbstract(waiClass.getModifiers()) &&
-
 WebApplicationInitializer.class.isAssignableFrom(waiClass)) {
                     try {
                         initializers.add((WebApplicationInitializer)
