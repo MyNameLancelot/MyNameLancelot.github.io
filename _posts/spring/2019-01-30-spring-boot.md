@@ -185,10 +185,8 @@ public class HelloWorld {
   public static void register(BeanDefinitionRegistry registry, String... packageNames) {
       if (registry.containsBeanDefinition(BEAN)) {
           BeanDefinition beanDefinition = registry.getBeanDefinition(BEAN);
-          ConstructorArgumentValues constructorArguments = beanDefinition
-              .getConstructorArgumentValues();
-          constructorArguments.addIndexedArgumentValue(0,
-                                                       addBasePackages(constructorArguments, packageNames));
+          ConstructorArgumentValues constructorArguments = beanDefinition.getConstructorArgumentValues();
+          constructorArguments.addIndexedArgumentValue(0,addBasePackages(constructorArguments, packageNames));
       }
       else {
           //注册了BasePackages，构造函数参数为@SpringBootApplication所在包的包名，为ComponentScan服务
@@ -425,7 +423,7 @@ profile文件编写规则
 
 - yml多文档块
 
-  ```yaml
+```yaml
   # 指定激活的profile
   spring:
     profiles:
@@ -444,7 +442,7 @@ profile文件编写规则
   # profile环境名称
   spring: 
     profiles: prod  
-  ```
+```
 
 激活指定profile
 
