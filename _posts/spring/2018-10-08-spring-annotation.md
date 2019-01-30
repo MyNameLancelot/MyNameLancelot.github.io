@@ -1175,8 +1175,7 @@ public class HelloAsyncServlet extends HttpServlet {
 public class SpringServletContainerInitializer implements ServletContainerInitializer {
 
     @Override
-    public void onStartup(@Nullable Set<Class<?>> webAppInitializerClasses, ServletContext servletContext)
-            throws ServletException {
+    public void onStartup(@Nullable Set<Class<?>> webAppInitializerClasses, ServletContext servletContext) throws ServletException {
 
         List<WebApplicationInitializer> initializers = new LinkedList<>();
 
@@ -1186,8 +1185,7 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
                 if (!waiClass.isInterface() && !Modifier.isAbstract(waiClass.getModifiers()) &&
 WebApplicationInitializer.class.isAssignableFrom(waiClass)) {
                     try {
-                        initializers.add((WebApplicationInitializer)
-                                ReflectionUtils.accessibleConstructor(waiClass).newInstance());
+                        initializers.add((WebApplicationInitializer)ReflectionUtils.accessibleConstructor(waiClass).newInstance());
                     }
                     catch (Throwable ex) {
                         throw new ServletException("Failed to instantiate WebApplicationInitializer class", ex);
