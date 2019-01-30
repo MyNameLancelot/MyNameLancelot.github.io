@@ -13,7 +13,7 @@ categories: spring
 
 ​	Spring Boot目的是来简化Spring应用开发，使用约定大于配置的规则，去繁从简单，just run就能创建一个独立的，产品级别的应用，Spring勾画了一副企业级开发解决方案。
 
-![spring-flower](assets/spring-flower.png)
+![spring-flower](/img/spring/spring-flower.png)
 
 Spring Boot具有以下优点：
 
@@ -130,16 +130,16 @@ public class HelloWorld {
   * @SpringBootApplication
   *  |
   *  +- @SpringBootConfiguration
-  *  |		|
-  *  |		+- @Configuration【标志自己是一个配置类用于加载配置】
+  *  |      |
+  *  |      +- @Configuration【标志自己是一个配置类用于加载配置】
   *  |
   *  +- @EnableAutoConfiguration
-  *  |		|
-  *  |		+- @AutoConfigurationPackage
-  *  |		|		|
-  *  |	    |	    +- @Import(AutoConfigurationPackages.Registrar.class)【保存主配置包名，用于后续扫描】
   *  |      |
-  *  |	    +- @Import(AutoConfigurationImportSelector.class)【】
+  *  |      +- @AutoConfigurationPackage
+  *  |      |       |
+  *  |      |       +-@Import(AutoConfigurationPackages.Registrar.class)【保存主配置包名，用于后续扫描】
+  *  |      |
+  *  |      +- @Import(AutoConfigurationImportSelector.class)【】
   *  |
   *  +- @ComponentScan【设定包扫描过滤器，加载相应类】
   */
@@ -495,14 +495,9 @@ spring boot 启动会扫描以下位置的application.properties或者applicatio
 
 **市场上主流日志框架分类**
 
-| 日志门面                                                     | 日志实现                                   |
-| ------------------------------------------------------------ | ------------------------------------------ |
-| JCL（Jakarta Commons Logging）
-SLF4j（Simple Logging Facade for Java）
-jboss-logging | Log4j
-JUL（java.util.logging）
-Log4j2
-Logback |
+| 日志门面                                                     | 日志实现                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| JCL（Jakarta Commons Logging）<br />SLF4j（Simple Logging Facade for Java）<br />jboss-logging | Log4j<br />JUL（java.util.logging）<br />Log4j2<br />Logback |
 
 SpringBoot选用`SLF4j`作为日志门面，`Logback`作为日志实现
 
@@ -524,13 +519,13 @@ public class HelloWorld {
 
 **SLF4j与日志框架实现绑定图**
 
-![concrete-bindings](assets/concrete-bindings.png)
+![concrete-bindings](/img/spring/concrete-bindings.png)
 
 每个日志的实现框架都有自己的配置文件。使用slf4j以后，配置文件还是做成日志实现框架的配置文件
 
 **SLF4J统一日志实现框架**
 
-![legacy](assets/legacy.png)
+![legacy](/img/spring/legacy.png)
 
 > SpringBoot能自动适配所有的日志，而且底层使用slf4j+logback的方式记录日志，引入其他框架的时候，只需要把这个框架依赖的日志框架排除掉即
 
@@ -576,7 +571,7 @@ public class HelloWorld {
   ```xml
   <!-- 可以指定某段配置只在某个环境下生效 -->
   <springProfile name="dev">
-    <!-- 配置 -->
+  <!-- 配置 -->
   </springProfile>
   ```
 
@@ -588,9 +583,9 @@ public class HelloWorld {
     日志输出格式：
         %d			表示日期时间
         %thread		表示线程名
-        %‐5level	级别从左显示5个字符宽度
-        %logger{50} 表示logger名字最长50个字符，否则按照句点分割
-        %msg		日志消息
+        %‐5level	    级别从左显示5个字符宽度
+        %logger{50}   表示logger名字最长50个字符，否则按照句点分割
+        %msg		    日志消息
         %n			换行符
   -->
     <layout class="ch.qos.logback.classic.PatternLayout">
@@ -653,17 +648,15 @@ public class WebMvcAutoConfiguration {
             /**
              * staticPathPattern = "/**"
              * staticLocations = "classpath:/META-INF/resources/",
-             *					 "classpath:/resources/",
-             *					 "classpath:/static/", 
-             *					 "classpath:/public/"
+             *                   "classpath:/resources/",
+             *                   "classpath:/static/", 
+             *                   "classpath:/public/"
              */
             String staticPathPattern = this.mvcProperties.getStaticPathPattern();
             if (!registry.hasMappingForPattern(staticPathPattern)) {
                 customizeResourceHandlerRegistration(
                         registry.addResourceHandler(staticPathPattern)
-.addResourceLocations(getResourceLocations(
-	
-    this.resourceProperties.getStaticLocations()))
+                                .addResourceLocations(getResourceLocations(this.resourceProperties.getStaticLocations()))
                                 .setCachePeriod(getSeconds(cachePeriod))
                                 .setCacheControl(cacheControl));
             }
@@ -733,9 +726,9 @@ public class WebMvcAutoConfiguration {
 
 导入名称空间：`<html lang="en" xmlns:th="http://www.thymeleaf.org">`
 
-![thymeleaf语法规则](/assets/thymeleaf语法规则.png)
+![thymeleaf语法规则](/img/spring/thymeleaf语法规则.png)
 
-详细语法参考<>
+<a href="https://mynamelancelot.github.io/thymeleaf/thymeleaf.html">详细语法参考</a>
 
 ## SpringMVC自动配置
 
