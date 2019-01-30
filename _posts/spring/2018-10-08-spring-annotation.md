@@ -73,10 +73,7 @@ FilterType的种类
         AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
   
         //获取当前扫描类的资源信息（类路径等）
-  ```
-  ```java
-      Resource resource = metadataReader.getResource();
-
+        Resource resource = metadataReader.getResource();
         //获得当前扫描类的类信息
         ClassMetadata classMetadata = metadataReader.getClassMetadata();
         //获取类名
@@ -122,8 +119,7 @@ public class WindowsSystemCondition implements Condition{
     @Override
     public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
         String osName = context.getEnvironment().getProperty("os.name");
-    
-    return osName.contains("Windows");
+        return osName.contains("Windows");
     }
 }
 
@@ -317,8 +313,7 @@ public class MyBeanPostProcesser implements BeanPostProcessor {
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if(beanName.equals("car")) {
-
-    System.out.println("car after initialization do something");
+            System.out.println("car after initialization do something");
         }
         return bean;
     }
@@ -523,7 +518,6 @@ public class LogAspects {
 @EnableAspectJAutoProxy		//开启AOP自动配置
 public class MainConfig4 {
     //业务逻辑类加入容器中
-
     @Bean
     public MathCalculator calculator(){
         return new MathCalculator();
@@ -849,7 +843,6 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
     @Nullable
     default PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName)
             throws BeansException {
-
         return null;
     }
 }
