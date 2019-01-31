@@ -1260,3 +1260,121 @@ public class ServletInitializer extends SpringBootServletInitializer {
     }
 }
 ```
+
+# 十一、启动配置原理
+
+## 启动原理
+
+1. 创建SpringApplication对象
+
+   ```java
+   public SpringApplication(ResourceLoader resourceLoader, Class<?>... primarySources) {
+       this.resourceLoader = resourceLoader;
+       //传入run方法的配置类【配置类有多个】
+       this.primarySources = new LinkedHashSet<>(Arrays.asList(primarySources));
+       //根据加载的类判断当前环境【REACTIVE、SERVLET、NONE】
+       this.webApplicationType = WebApplicationType.deduceFromClasspath();
+       //加载META-INF/spring.factories的org.springframework.context.ApplicationContextInitializer
+       setInitializers((Collection) getSpringFactoriesInstances(
+           ApplicationContextInitializer.class));    //初始化器
+        //加载META-INF/spring.factories的org.springframework.context.ApplicationListener
+       setListeners((Collection) getSpringFactoriesInstances(ApplicationListener.class));    //监听器
+       //确定主配置类【当前main方法的类】
+       this.mainApplicationClass = deduceMainApplicationClass();
+   }
+   ```
+
+2. 运行run方法启动程序
+
+   ```java
+   public ConfigurableApplicationContext run(String... args) {
+       StopWatch stopWatch = new StopWatch();
+       stopWatch.start();
+       ConfigurableApplicationContext context = null;
+       Collection<SpringBootExceptionReporter> exceptionReporters = new ArrayList<>();
+       configureHeadlessProperty();
+       //获取SpringApplicationRunListeners，在创建SpringApplication已加载
+       SpringApplicationRunListeners listeners = getRunListeners(args);
+       //回调所有的获取SpringApplicationRunListener.starting()方法
+       listeners.starting();
+       try {
+           //封装命令行参数
+           ApplicationArguments applicationArguments = new DefaultApplicationArguments(
+               args);
+           //准备环境，并在最后回调SpringApplicationRunListener.environmentPrepared()；表示环境准备完成
+           ConfigurableEnvironment environment = prepareEnvironment(listeners,applicationArguments);
+           configureIgnoreBeanInfo(environment);
+           Banner printedBanner = printBanner(environment);
+           
+           //创建ApplicationContext【决定创建web的ioc还是普通的ioc】
+           context = createApplicationContext();
+           //异常报告使用
+           exceptionReporters = getSpringFactoriesInstances(
+               SpringBootExceptionReporter.class,
+               new Class[] { ConfigurableApplicationContext.class }, context);
+           //准备上下文环境【将environment保存到ioc中，并且applyInitializers()】
+           //applyInitializers()：回调之前保存的所有的ApplicationContextInitializer的initialize方法
+           //回调所有的SpringApplicationRunListener的contextPrepared()
+           prepareContext(context, environment, listeners, applicationArguments,
+                          printedBanner);
+           //刷新容器；ioc容器初始化（如果是web应用还会创建嵌入式的Tomcat）
+           refreshContext(context);
+           //留作子类扩展
+           afterRefresh(context, applicationArguments);
+           stopWatch.stop();
+           if (this.logStartupInfo) {
+               new StartupInfoLogger(this.mainApplicationClass)
+                   .logStarted(getApplicationLog(), stopWatch);
+           }
+           //调用SpringApplicationRunListener的started方法
+           listeners.started(context);
+           //从ioc容器中获取所有的ApplicationRunner和CommandLineRunner进行回调
+           //ApplicationRunner先回调，CommandLineRunner再回调
+           callRunners(context, applicationArguments);
+       }
+       catch (Throwable ex) {
+           handleRunFailure(context, ex, exceptionReporters, listeners);
+           throw new IllegalStateException(ex);
+       }
+   
+       try {
+           //调用SpringApplicationRunListener的running方法
+           listeners.running(context);
+       }
+       catch (Throwable ex) {
+           handleRunFailure(context, ex, exceptionReporters, null);
+           throw new IllegalStateException(ex);
+       }
+       return context;
+   }
+   ```
+
+
+## 事件监听机制
+
+- `ApplicationContextInitializer`的子类需要配置在`META-INF/spring.factories的org.springframework.context.ApplicationContextInitializer`属性中
+- `SpringApplicationRunListener`的实现类直接放入IOC容器中会被加载
+
+# 十二、自定义starter
+
+编写自定义starter
+
+- 使用以下注解将编写自动配置类
+
+  ```java
+  @Configuration          //指定这个类是一个配置类
+  @ConditionalOnXXX       //在指定条件成立的情况下自动配置类生效
+  @AutoConfigureAfter     //指定自动配置类的顺序
+  @Bean                   //给容器中添加组件
+  @ConfigurationProperties//结合相关xxxProperties类来绑定相关的配置
+  @EnableConfigurationProperties //让xxxProperties生效加入到容器中
+  ```
+
+- 将自动配置类配置在META‐INF/spring.factories文件中以`org.springframework.boot.autoconfigure.EnableAutoConfiguration`作为key
+
+- 约定
+
+  - 启动器只用来做依赖导入，是一个空工程
+  - 非spring自身的启动器以`自定义启动器名-spring-boot-starter`命名
+  - 专起一个maven工程来写一个自动配置模块
+  - 启动器依赖自动配，别人只需要引入启动器（starter）
