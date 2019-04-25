@@ -1,0 +1,2534 @@
+---
+layout: post
+title: "Java设计模式"
+date: 2018-04-25 17:05:12
+categories: java
+---
+
+# 一、软件设计七大原则
+
+**开闭原则**
+
+定义：一个软件实体如类、模块、函数应该对扩展开放，对修改关闭
+
+强调：用抽象构建框架，用实现扩展细节
+
+优点：提高软件系统的可复用性及可维护性
+
+---
+
+**依赖倒置原则**
+
+定义：高层模块不应该依赖底层模块，二者都应该依赖其抽象
+
+强调：抽象不应该依赖细节，细节应该依赖抽象；针对接口编程，不要针对实现编程
+
+优点：可以减少类间的耦合性、提高系统稳定性，提高代码的可读性和可维护性，可降低修改程序所造成的风险
+
+---
+
+**单一职责原则**
+
+定义：不要存在对于一个导致类变更的原因
+
+强调：一个类/接口/方法只负责一项职责
+
+优点：降低类的复杂度、提高类的可读性，提高系统的可维护性、降低变更引起的风险
+
+---
+
+**接口隔离原则**
+
+定义：用多个专门的接口，而不使用单一的总接口，客户端不应该依赖它不需要的接口
+
+强调：一个类对一个类的依赖应该建立在最小的接口上。建立单一接口，不要建立庞大臃肿的接口，尽量细化接口，接口中的方法尽量少
+
+优点：符合高内聚低耦合的设计思想从而使得类具有很好的可读性、可扩展性和可维护性
+
+---
+
+**迪米特法则（最少知道原则）**
+
+定义：一个对象应该对其他对象保持最少的了解
+
+强调：强调只和朋友交流，不和陌生人说话
+
+> 朋友：出现在成员变量、方法输入、输出参数中的类称为成员朋友类，而出现在方法体内部的类不属于
+
+优点：降低耦合
+
+---
+
+**里氏替换原则**
+
+定义：主张用抽象和多态将设计中的静态结构改为动态结构，维持设计的封闭性
+
+强调：某个对象实例的子类实例应当可以在不影响程序正确性的基础上替换它们
+
+优点：提高代码抽象层的可维护性，提高实现层代码与抽象层的一致性
+
+---
+
+**合成/复用原则（组合/复用原则）**
+
+定义：在一个新的对象里面使用一些已有的对象，使之成为新对象的一部分，不依靠继承关系
+
+强调：要尽量使用合成/聚合，尽量不要使用继承
+
+优点：减少耦合
+
+# 二、创建型设计模式
+
+## 简单工厂模式【创建型】
+
+**适用场景**
+
+- 工厂类负责创建的对象比较少
+- 客户端只知道传入工厂类的参数对于如何创建对象不关心
+
+**优点&缺点**
+
+优点：只需要传入正确的参数，就可以获取所需创建的对象而无需知道其创建的细节
+
+缺点：工厂类的职责相对过重，增加新的产品需要修改工厂类的逻辑判断，违背开闭原则
+
+**编码示例**
+
+```java
+//抽象基类
+public abstract class Video {
+    abstract public void produce();
+}
+
+//实现类
+public class JavaVideo extends Video{
+    @Override
+    public void produce() { System.out.println("Java学习视频"); }
+}
+public class PythonVideo extends Video{
+    @Override
+    public void produce() {
+        System.out.println("Python学习视频");
+    }
+}
+
+//简单工厂类
+public class VideoFactory {
+    //工厂方法，通过传入的字符串得到Video
+    public Video getVideo(String type) {
+        if("JavaVideo".equals(type)){
+            return new JavaVideo();
+        }
+        if("PythonVideo".equals(type)){
+            return new PythonVideo();
+        }
+        return null;
+    }
+
+    //升级版工厂方法，通过类限定，使得更加方便、安全
+    public Video getVideo(Class<? extends Video> cls) {
+        Video video = null;
+        try {
+            video = (Video) Class.forName(cls.getName()).newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+
+//测试简单工厂方法
+public class TestSimpleFactory {
+
+    public static void main(String[] args) {
+        VideoFactory videoFactory = new VideoFactory();
+        Video video = videoFactory.getVideo("JavaVideo");
+        video.produce();
+    }
+}
+```
+
+![simplefactory-uml](/img/pattern/simplefactory-uml.png)
+
+## 工厂方法模式【创建型】
+
+**定义**
+
+定义一个创建对象的接口但让实现这个接口的类来决定实例化哪个类，工厂方法让类的实例化推迟到子类中进行
+
+**适用场景**
+
+- 创建对象需要大量重复的代码
+- 客户端不依赖于产品类实例如何被实现的细节
+- 一个类通过其子类来指定创建哪个对象
+
+**优点**
+
+- 使用者只需要关心所需产品对应的工厂，无需关心实现细节
+- 加入新的产品符合开闭原则，提高可扩展性
+
+**缺点**
+
+- 类的个数容易过多，增加复杂度
+- 增加了系统的抽象性和理解难度
+
+**编码示例**
+
+```java
+//抽象基类
+public abstract class Video {
+    abstract public void produce();
+}
+
+//实现类
+public class JavaVideo extends Video{
+    @Override
+    public void produce() { System.out.println("Java学习视频"); }
+}
+public class PythonVideo extends Video{
+    @Override
+    public void produce() { System.out.println("Python学习视频"); }
+}
+
+//工厂方法类
+public class JavaVideoFactory extends VideoFactory{
+    @Override
+    public Video getVideo() { return new JavaVideo(); }
+}
+public class PythonVideoFactory extends VideoFactory{
+    @Override
+    public Video getVideo() { return new PythonVideo(); }
+}
+
+//测试工厂方法
+public class TestFactoryMethod {
+
+    public static void main(String[] args) {
+        VideoFactory videoFactory = new JavaVideoFactory();
+        Video video = videoFactory.getVideo();
+        video.produce();
+    }
+}
+```
+
+![factorymethod-uml](/img/pattern/factorymethod-uml.png)
+
+## 抽象工厂模式【创建型】
+
+**定义**
+
+抽象工厂模式提供一个创建一系列相关或相互依赖对象的接口且无需指向它们具体的类
+
+**适用场景**
+
+- 客户端不依赖于产品类示例如何被创建、实现等细节
+- 强调一系列相关的产品对象一起使用创建对象需要大量代码
+- 提供一个产品类库，所有的产品以同样的接口出现，从而使客户端不依赖于具体实现
+
+**优点**
+
+- 具体产品在应用层代码隔离，无须关心创建细节
+- 将一个系列的产品族统一到一起创建
+
+**缺点**
+
+- 规定了所有可能被创建的产品集合，产品族中扩展新的产品困难，需要修改抽象工厂的接口
+- 增加了系统的抽象性和理解难度
+
+**编码示例**
+
+```java
+//抽象基类
+public abstract class Video {
+    abstract public void produce();
+}
+public abstract class Article {
+    abstract public void produce();
+}
+
+//Video实现类
+public class JavaVideo extends Video{
+    @Override
+    public void produce() { System.out.println("Java学习视频"); }
+}
+public class PythonVideo extends Video{
+    @Override
+    public void produce() { System.out.println("Python学习视频"); }
+}
+//Article实现类
+public class JavaArtice extends Article {
+    @Override
+    public void produce() { System.out.println("Java学习笔记"); }
+}
+public class PythonArtice extends Article {
+    @Override
+    public void produce() { System.out.println("Python学习笔记"); }
+}
+
+//工厂方法类
+public class JavaCourseFactory implements CourseFactory{
+    @Override
+    public Video getVideo() { return new JavaVideo(); }
+
+    @Override
+    public Article getArticle() { return new JavaArtice(); }
+}
+
+public class PythonCourseFactory implements CourseFactory{
+    @Override
+    public Video getVideo() { return new PythonVideo(); }
+
+    @Override
+    public Article getArticle() {
+        return new PythonArtice();
+    }
+}
+
+//测试抽象工厂方法
+public class TestAbstractFactory {
+
+    public static void main(String[] args) {
+        CourseFactory courseFactory = new JavaCourseFactory();
+        courseFactory.getVideo().produce();
+        courseFactory.getArticle().produce();
+    }
+}
+```
+
+![abstractfactory-uml](/img/pattern/abstractfactory-uml.png)
+
+## 建造者模式【创建型】
+
+**定义**
+
+将一个复杂对象的构建与它的表示分离，使得同样的构建过程可以创建不同的表示
+
+**特点**
+
+用户只需指定需要建造的类型就可以得到它们，建造过程及细节不需要知道
+
+**适用场景**
+
+- 一个对象有非常复杂的内部结构（很多属性）
+- 分离复杂的对象创建与使用
+
+**优点**
+
+- 封装性好，创建与使用分离
+- 扩展性好、建造类之间独立、一定程度上解耦
+
+**缺点**
+
+- 产生多余的Builder对象
+- 产品内部发生变化，建造者都要修改，成本较大
+
+**编码示例**
+
+```java
+//需要构建的目标
+public class Course {
+    private String courseName;
+    private String coursePPT;
+    private String courseVideo;
+    private String courseArticle;
+
+    private Course(CourseBuilder courseBuilder) {
+        this.courseName     = courseBuilder.courseName;
+        this.coursePPT      = courseBuilder.coursePPT;
+        this.courseVideo    = courseBuilder.courseVideo;
+        this.courseArticle  = courseBuilder.courseArticle;
+    }
+
+    public String getCourseName() {
+        return courseName;
+    }
+
+    public String getCoursePPT() {
+        return coursePPT;
+    }
+
+    public String getCourseVideo() {
+        return courseVideo;
+    }
+
+    public String getCourseArticle() {
+        return courseArticle;
+    }
+
+    //构建器
+    public static class CourseBuilder {
+        private String courseName;
+        private String coursePPT;
+        private String courseVideo;
+        private String courseArticle;
+
+        public CourseBuilder buildCourseName(String courseName) {
+            this.courseName = courseName;
+            return this;
+        }
+        public CourseBuilder buildCoursePPT(String coursePPT) {
+            this.coursePPT = coursePPT;
+            return this;
+        }
+        public CourseBuilder buildCourseVideo(String courseVideo) {
+            this.courseVideo = courseVideo;
+            return this;
+        }
+        public CourseBuilder buildCourseArticle(String courseArticle) {
+            this.courseArticle = courseArticle;
+            return this;
+        }
+
+        //最后一步构建对象
+        public Course build() {
+            return new Course(this);
+        }
+    }
+}
+
+//测试构建者模式
+public class TestCreation {
+
+    public static void main(String[] args) {
+        CourseBuilder courseBuilder = new CourseBuilder();
+        Course course = courseBuilder.buildCourseName("java设计模式")
+            .buildCoursePPT("java设计模式PPT")
+            .buildCourseVideo("java设计模式Video")
+            .buildCourseArticle("java设计模式Article")
+            .build();
+    }
+}
+```
+
+![creational-uml](/img/pattern/creational-uml.png)
+
+## 单例模式【创建型】
+
+**定义**
+
+保证一个类仅有一个实例，并提供一个全局访问点
+
+**适用场景**
+
+想确保任何情况下都绝对只有一个实例
+
+**优点**
+
+- 减少内存开销
+- 避免对资源的多重占用
+- 设置全局访问点，严格控制访问
+
+**缺点**
+
+- 没有接口，扩展困难
+
+**编码示例**
+
+- 饿汉式
+
+```java
+public class Singleton {
+
+    private final static Singleton INSTANCE = new Singleton();
+
+    private Singleton(){}
+
+    public static Singleton getInstance(){
+        return INSTANCE;
+    }
+}
+```
+
+- 懒汉式
+
+```java
+public class Singleton {
+
+    private static Singleton singleton;
+
+    private Singleton() {}
+
+    public static synchronized Singleton getInstance() {
+        if (singleton == null) {
+            singleton = new Singleton();
+        }
+        return singleton;
+    }
+}
+```
+
+- 双重检查
+
+```java
+public class Singleton {
+
+    private static volatile Singleton singleton;
+
+    private Singleton() {}
+
+    public static Singleton getInstance() {
+        if (singleton == null) {
+            synchronized (Singleton.class) {
+                if (singleton == null) {
+                    singleton = new Singleton();
+                }
+            }
+        }
+        return singleton;
+    }
+}
+```
+
+- 静态内部类【推荐用】
+
+```java
+public class Singleton {
+
+    private Singleton() {}
+
+    private static class SingletonInstance {
+        private static final Singleton INSTANCE = new Singleton();
+    }
+
+    public static Singleton getInstance() {
+        return SingletonInstance.INSTANCE;
+    }
+}
+```
+
+- 枚举【推荐用】
+
+```java
+public enum Singleton {
+    
+    INSTANCE;
+    
+    private String content;
+    public String getContent() {
+        return content;
+    }
+    public void setContent(String content) {
+        this.content = content;
+    }
+}
+```
+
+## 原型模式【创建型】
+
+**定义**
+
+原型实例指定创建对象的种类，并且通过拷贝这些原型创建新的对象
+
+**特点**
+
+不需要知道任何创建细节，不调用构造函数
+
+**适用场景**
+
+- 类初始化消耗过多资源
+- new产生一个对象需要非常繁琐的过程（数据准备、访问权限等）
+- 构造函数比较复杂
+- 循环体中产生大量对象时
+
+**优点**
+
+- 性能相比new一个对象高
+- 简化创建过程
+
+**缺点**
+
+- 必须配备克隆方法
+- 对克隆复杂对象或对克隆出的对象进行复杂改造时容易引入风险
+- 深浅拷贝要运用得当
+
+**编码示例**
+
+```java
+//需要被克隆的类要实现Cloneable接口
+public class Mail implements Cloneable{
+    private String      userNameSender;
+    private String      content;
+    private String      subject;
+    private Date        writeDate;
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        Mail mail       = (Mail) super.clone();
+        //深拷贝，如果外面调用get拿到writeDate重新设置时间也不会产生影响
+        mail.writeDate  = (Date) writeDate.clone();
+        return mail;
+    }
+    //==================Getter/Setter==================
+}
+
+//测试原型模式
+public class TestPrototype {
+
+    public static void main(String[] args) throws Exception{
+        Mail mail = new Mail();
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        mail.setWriteDate(dateFormat.parse("2019-04-20"));
+        mail.setUserNameSender("kun");
+        mail.setSubject("会议");
+        mail.setContent("技术交流");
+
+        //创建克隆对象，不会调用构造函数
+        Mail backupMail = (Mail)mail.clone();
+
+        //mail do something
+        mail.getWriteDate().setTime(System.currentTimeMillis());
+        //backupMail do something, 此时backupMail的writeDate依旧为
+    }
+}
+```
+
+# 三、结构型设计模式
+
+## 外观模式【结构型】
+
+**定义**
+
+提供了一个统一的接口，用来访问子系统中的一群接口
+
+**特点**
+
+定义了一个高层接口，让子系统更容易使用
+
+**适用场景**
+
+- 子系统越来越复杂，增加外观模式提供简单的接口调用
+- 构建多层系统结构，利用外观对象作为每层的入口，简化层间调用
+
+**优点**
+
+- 简化了调用过程，无需了解深入子系统，防止带来风险
+- 减少系统依赖、松散耦合
+- 更好的划分访问的层次
+- 符合迪米特法则，即最少知道原则
+
+**缺点**
+
+- 增加子系统、扩展子系统行为容易引入风险
+- 不符合开闭原则
+
+**编码示例**
+
+```java
+public class PointsGift {
+    private String name;
+
+    public PointsGift(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
+//基础服务类
+public class PointsPaymentService {
+
+    public boolean pay(PointsGift pointsGift){
+        System.out.println("支付"+pointsGift.getName()+" 积分成功");//扣减积分
+        return true;
+    }
+}
+public class QualifyService {
+
+    public boolean isAvailable(PointsGift pointsGift){
+        System.out.println("校验"+pointsGift.getName()+" 积分资格通过,库存通过");
+        return true;
+    }
+}
+public class ShippingService {
+
+    public String shipGift(PointsGift pointsGift){
+        System.out.println(pointsGift.getName()+"进入物流系统");
+        String shippingOrderNo = "666";
+        return shippingOrderNo;
+    }
+}
+
+//暴露的门面【facade】，调用此逻辑完成了一整套操作，调用者不用再关心内部细节
+public class GiftExchangeService {
+
+    private QualifyService qualifyService = new QualifyService();
+    private PointsPaymentService pointsPaymentService = new PointsPaymentService();
+    private ShippingService shippingService = new ShippingService();
+
+    public void giftExchange(PointsGift pointsGift){
+        if(qualifyService.isAvailable(pointsGift)){//资格校验通过
+            if(pointsPaymentService.pay(pointsGift)){//如果支付积分成功
+                String shippingOrderNo = shippingService.shipGift(pointsGift);
+                System.out.println("物流系统下单成功,订单号是:"+shippingOrderNo);
+            }
+        }
+    }
+}
+
+//测试外观者模式
+public class TestFacade {
+
+    public static void main(String[] args) {
+        GiftExchangeService giftExchangeService = new GiftExchangeService();
+        giftExchangeService.giftExchange(new PointsGift("方便面"));
+    }
+}
+```
+
+![facade-uml](/img/pattern/facade-uml.png)
+
+## 装饰者模式【结构型】
+
+**定义**
+
+在不改变原有对象的基础之上，将功能附加到对象上
+
+**特点**
+
+提供了比继承更有弹性的替代方案（扩展原有对象功能）
+
+**适用场景**
+
+- 扩展一个类的功能或给一个类添加附加职责
+- 动态的给一个对象添加功能，这些功能可以再动态的撤销
+
+**优点**
+
+- 继承的有利补充，比继承灵活，不改变原有对象的情况下给一个对象扩展功能
+- 通过使用不同装饰类和装饰类的排列组合，可以实现不同的效果
+- 符合开闭原则
+
+**缺点**
+
+- 会出现更多的代码，更多的类，增加程序复杂性
+- 动态装饰时，多层装饰时会更复杂
+
+**编码示例**
+
+```java
+//被包装的基类的抽象
+public abstract class AbstractBattercake{
+    protected abstract String getDesc();
+    protected abstract int cost();
+}
+
+//需要被包装的基类
+public class Battercake extends AbstractBattercake {
+    @Override
+    protected String getDesc() {
+        return "煎饼";
+    }
+
+    @Override
+    protected int cost() {
+        return 8;
+    }
+}
+
+//抽象包装器，用于子类继承扩展被包装对象的某些功能
+public abstract class AbstractDecorator extends AbstractBattercake {
+
+    private AbstractBattercake battercake;
+
+    public AbstractDecorator(AbstractBattercake battercake) {
+        this.battercake = battercake;
+    }
+
+    @Override
+    protected String getDesc() {
+        return this.battercake.getDesc();
+    }
+
+    @Override
+    protected int cost() {
+        return this.battercake.cost();
+    }
+}
+
+//包装器
+public class EggDecorator extends AbstractDecorator {
+
+    public EggDecorator(AbstractBattercake battercake) {
+        super(battercake);
+    }
+
+    @Override
+    protected String getDesc() {
+        return super.getDesc() + " 加一个鸡蛋";
+    }
+
+    @Override
+    protected int cost() {
+        return super.cost() + 1;
+    }
+}
+
+//测试装饰者模式
+public class TestDecorator {
+
+    public static void main(String[] args) {
+        AbstractBattercake battercake = new EggDecorator(new Battercake());
+        System.out.println("需求:" + battercake.getDesc());
+        System.out.println("价格:" + battercake.cost());
+    }
+}
+```
+
+![decorator-uml](/img/pattern/decorator-uml.png)
+
+## 适配器模式【结构型】
+
+**定义**
+
+将一个类的接口转换为客户期望的另一个接口
+
+**特点**
+
+使原本接口不兼容的类可以一起工作
+
+**适用场景**
+
+- 已经存在的类，它的方法和需求不匹配时（方法结果相同或相似）
+- 不是软件设计阶段考虑的设计模式，是随着软件维护，由于不同产品，不同厂家造成功能类似而接口不相同情况下的解决方案
+
+**优点**
+
+- 能提高类的透明性和复用，现有的类复用但不需要改变
+- 目标类和适配器类解耦，提高程序扩展性
+
+**缺点**
+
+- 适配器编写过程需全面考虑，会增加系统的复杂性
+- 增加系统代码可读的难度
+
+**编码示例**
+
+- 类适配器模式
+
+```java
+//需要被适配的类
+public class Adaptee {
+    public void adapteeRequest(){
+        System.out.println("被适配的方法");
+    }
+}
+
+//适配器接口
+public interface AdatperInterface {
+    void adapteeRequest();
+}
+
+//适配器
+public class Adapter extends Adaptee implements AdatperInterface{
+    @Override
+    public void adapteeRequest() {
+        System.out.println("Do Something");
+        super.adapteeRequest();
+        System.out.println("Do Something");
+    }
+}
+
+//测试适配器模式
+public class TestClassAdapter {
+    public static void main(String[] args) {
+        AdatperInterface adatper = new Adapter();
+        adatper.adapteeRequest();
+    }
+}
+```
+
+![classadapter-uml](/img/pattern/classadapter-uml.png)
+
+- 对象适配器模式
+
+```java
+//需要被适配的类
+public class Adaptee {
+    public void adapteeRequest(){
+        System.out.println("被适配的方法");
+    }
+}
+
+//适配器接口
+public interface AdatperInterface {
+    void adapteeRequest();
+}
+
+//适配器
+public class Adapter implements AdatperInterface{
+
+    private Adaptee adaptee = new Adaptee();
+
+    @Override
+    public void adapteeRequest() {
+        System.out.println("Do Something");
+        adaptee.adapteeRequest();
+        System.out.println("Do Something");
+    }
+}
+
+//测试适配器模式
+public class TestClassAdapter {
+    public static void main(String[] args) {
+        AdatperInterface adatper = new Adapter();
+        adatper.adapteeRequest();
+    }
+}
+```
+
+![objectadapater-uml](/img/pattern/objectadapater-uml.png)
+
+## 享元模式【结构型】
+
+**定义**
+
+提供了减少对象数量从而改善应用所需的对象结构的方式
+
+**特点**
+
+运用共享技术有效的支持大量细粒度的对象
+
+**适用场景**
+
+- 常常应用于系统底层的开发，以便解决系统的性能问题
+
+- 系统有大量相似对象、需要缓存池的场景
+
+**优点**
+
+- 减少对象的创建、降低内存中的对象数量，降低系统内存，提高效率【String、Integer、数据库连接池】
+- 减少内存之外的其他资源的占用
+
+**缺点**
+
+- 关注内/外状态、关注线程安全问题
+- 使系统、程序的逻辑复杂化
+
+**编码示例**
+
+```java
+/**
+ * 享元类
+ * 内部状态指对象共享出来的信息，存储在享元对象内部并且不会随环境的改变而改变
+ * 外部状态指对象得以依赖的一个标记，是随环境改变而改变的、不可共享的状态
+ */
+public class Flyweight {
+
+    //内部状态。各个类都相同，在此只是示例，并未进行赋值
+    public String intrinsic;
+
+    //外部状态
+    protected final String extrinsic;
+
+    //要求享元角色必须接受外部状态
+    public Flyweight(String extrinsic) {
+        this.extrinsic = extrinsic;
+    }
+
+    //定义业务操作
+    public void operate(int extrinsic){ 
+         System.out.println("Do Something " + extrinsic);
+    };
+
+    public String getIntrinsic() {
+        return intrinsic;
+    }
+
+    public void setIntrinsic(String intrinsic) {
+        this.intrinsic = intrinsic;
+    }
+}
+
+//享元工厂
+public class FlyweightFactory {
+    //定义一个池容器
+    private static HashMap<String, Flyweight> pool = new HashMap<>();
+    
+    public static Flyweight getFlyweight(String extrinsic) {
+        Flyweight flyweight = pool.get(extrinsic);
+
+        if(flyweight != null) {     //池中有该对象
+            System.out.print("已有 " + extrinsic + " 直接从池中取---->");
+        } else {                    //根据外部状态创建享元对象
+            flyweight = new ConcreteFlyweight(extrinsic);
+            pool.put(extrinsic, flyweight); //放入池中
+            System.out.print("创建 " + extrinsic + " 并从池中取出---->");
+        }
+        return flyweight;
+    }
+}
+
+//测试享元模式
+public class TestFlyweight {
+
+    public static void main(String[] args) {
+        int extrinsic = 22;
+
+        Flyweight flyweightX = FlyweightFactory.getFlyweight("X");
+        flyweightX.operate(++extrinsic);
+
+        Flyweight flyweightY = FlyweightFactory.getFlyweight("Y");
+        flyweightY.operate(++extrinsic);
+
+        Flyweight flyweightReX = FlyweightFactory.getFlyweight("X");
+        flyweightReX.operate(++extrinsic);
+    }
+}
+```
+
+![flyweight-uml](/img/pattern/flyweight-uml.png)
+
+## 组合模式【结构型】
+
+**定义**
+
+将对象组合成树形结构以表示`部分-整体`的层次结构
+
+**特点**
+
+组合模式使客户端对单个对象和组合对象保持一致的处理方式
+
+**适用场景**
+
+- 希望客户端可以忽略组合对象与单个对象的差异时
+- 处理一个树形结构时
+
+**优点**
+
+- 清楚的定义分层次的复杂对象，表示对象的全部或部分层次
+- 让客户端忽略了层次的差异，方便对整个层次结构进行控制
+- 简化客户端代码
+- 符合开闭原则
+
+**缺点**
+
+- 限制类型时会较为复杂
+- 使设计变得更加抽象
+
+**编码示例**
+
+```java
+//需要抽象成的基类，基类一般不支持任何操作
+public class Component {
+
+    public void add(Component component){
+        throw new UnsupportedOperationException("不支持添加操作");
+    }
+ 
+    public void remove(Component component){
+        throw new UnsupportedOperationException("不支持删除操作");
+    }
+
+    public String getName(Component component){
+        throw new UnsupportedOperationException("不支持获取名称操作");
+    }
+
+    public double getPrice(Component component){
+        throw new UnsupportedOperationException("不支持获取价格操作");
+    }
+
+    public void print(){
+        throw new UnsupportedOperationException("不支持打印操作");
+    }
+}
+
+//一个组件的实现
+public class Course extends Component{
+
+    private String name;
+    private double price;
+
+    public Course(String name, double price) {
+        this.name = name;
+        this.price = price;
+    }
+
+    @Override
+    public String getName(Component component) {
+        return this.name;
+    }
+
+    @Override
+    public double getPrice(Component component) {
+        return this.price;
+    }
+
+    @Override
+    public void print() {
+        System.out.println("Course Name:"+name+" Price:"+price);
+    }
+}
+
+//顶层组件的实现
+public class CourseCatalog extends Component{
+
+    private List<Component> items = new ArrayList<Component>();
+    private String name;
+
+    public CourseCatalog(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void add(Component component) {
+        items.add(component);
+    }
+
+    @Override
+    public String getName(Component component) {
+        return this.name;
+    }
+
+    @Override
+    public void remove(Component component) {
+        items.remove(component);
+    }
+
+    @Override
+    public void print() {
+        System.out.println(this.name);
+        for(Component component : items){
+            component.print();
+        }
+    }
+}
+
+//测试组合模式
+public class TestComponent {
+
+    public static void main(String[] args) {
+        Component linuxCourse = new Course("Linux课程",11);
+        Component windowsCourse = new Course("Windows课程",11);
+
+        Component javaCourseCatalog = new CourseCatalog("Java课程目录");
+
+        Component mmallCourse1 = new Course("Java操作数据库",55);
+        Component designPattern = new Course("Java设计模式",77);
+
+        javaCourseCatalog.add(mmallCourse1);
+        javaCourseCatalog.add(mmallCourse2);
+        javaCourseCatalog.add(designPattern);
+
+        Component mainCourseCatalog = new CourseCatalog("课程主目录");
+        mainCourseCatalog.add(linuxCourse);
+        mainCourseCatalog.add(windowsCourse);
+        mainCourseCatalog.add(javaCourseCatalog);
+
+        mainCourseCatalog.print();
+    }
+}
+```
+
+![composite-uml](/img/pattern/composite-uml.png)
+
+## 桥接模式【结构型】
+
+**定义**
+
+将抽象部分与它的具体实现部分分离，使它们都可以独立地变化
+
+**特点**
+
+通过组合的方式建立两个类之间联系，而不是继承
+
+**适用场景**
+
+- 一个类存在两个（或多个）独立变化的维度，且这两个（或多个）维度都需要独立进行扩展
+
+**优点**
+
+- 分离抽象部分及其和具体实现部分
+- 提高了系统的可扩展性
+
+**缺点**
+
+- 增加系统理解和设计难度
+- 需要正确地识别出系统中两个（多个）独立变化的维度
+
+**编码示例**
+
+```java
+//桥接接口类，使得类之前产生关系，相当于桥梁
+public interface Account {
+    Account openAccount();
+}
+public abstract class Bank {
+
+    protected Account account;
+
+    public Bank(Account account){
+        this.account = account;
+    }
+
+    abstract Account openAccount();
+}
+
+//桥接接口实现类
+public class ABCBank extends Bank {
+
+    public ABCBank(Account account) {
+        super(account);
+    }
+
+    @Override
+    Account openAccount() {
+        System.out.println("打开中国农业银行账号");
+        account.openAccount();
+        return account;
+    }
+}
+
+public class ICBCBank extends Bank {
+
+    public ICBCBank(Account account) {
+        super(account);
+    }
+
+    @Override
+    Account openAccount() {
+        System.out.println("打开中国工商银行账号");
+        account.openAccount();
+        return account;
+    }
+}
+
+public class SavingAccount implements Account {
+
+    @Override
+    public Account openAccount() {
+        System.out.println("打开活期账号");
+        return new SavingAccount();
+    }
+}
+
+public class DepositAccount implements Account{
+
+    @Override
+    public Account openAccount() {
+        System.out.println("打开定期账号");
+        return new DepositAccount();
+    }
+}
+
+//测试桥接模式
+public class TestBridge {
+
+    public static void main(String[] args) {
+        Bank icbcBank = new ICBCBank(new DepositAccount());
+        Account icbcAccount = icbcBank.openAccount();
+
+        Bank icbcBank2 = new ICBCBank(new SavingAccount());
+        Account icbcAccount2 = icbcBank2.openAccount();
+
+        Bank abcBank = new ABCBank(new SavingAccount());
+        Account abcAccount = abcBank.openAccount();
+    }
+}
+```
+
+![bridge-uml](/img/pattern/bridge-uml.png)
+
+## 代理模式【结构型】
+
+**定义**
+
+为其它对象提高一种代理，以控制对这个对象的访问
+
+**特点**
+
+代理对象在客户端和目标对象之间起到中介作用
+
+**适用场景**
+
+- 保护目标对象
+- 增强目标对象
+
+**优点**
+
+- 能将代理对象与真实被调用的目标对象进行分离
+- 一定程度上降低了系统耦合，扩展性好
+- 保护目标对象
+
+**缺点**
+
+- 代理模式会造成系统设计中类数目的增加
+- 会造成请求速度变慢
+- 增加系统复杂度
+
+**编码示例**
+
+- 静态代理
+
+```java
+//接口
+public interface IUserDao {
+    void save();
+}
+
+//接口实现，目标对象
+public class UserDao implements IUserDao {
+    @Override
+    public void save() {
+        System.out.println("----保存数据----");
+    }
+}
+
+//代理对象
+public class UserDaoProxy implements IUserDao {
+
+    private IUserDao target;
+
+    public UserDaoProxy(IUserDao userDao){
+        this.target = userDao;
+    }
+
+    @Override
+    public void save() {
+        System.out.println("开始事务...");
+        target.save();//执行目标对象的方法
+        System.out.println("提交事务...");
+    }
+}
+
+//测试静态代理
+public class TestStaticProxy {
+
+    public static void main(String[] args) {
+        UserDao target = new UserDao();//目标对象
+        UserDaoProxy proxy = new UserDaoProxy(target);//代理对象,把目标对象传给代理对象,建立代理关系
+        proxy.save();//执行的是代理的方法
+    }
+}
+```
+
+- 动态代理
+
+  - jdk动态代理【只能代理实现接口的对象】
+
+  ```java
+  //接口
+  public interface IUserDao {
+      void save();
+  }
+  
+  //接口实现，目标对象
+  public class UserDao implements IUserDao {
+      @Override
+      public void save() {
+          System.out.println("----保存数据----");
+      }
+  }
+  
+  //生成代理对象工厂
+  public class ProxyFactory {
+  
+      private Object target;      //维护一个目标对象
+  
+      public ProxyFactory(Object target){
+          this.target=target;
+      }
+  
+      //为目标对象生成代理
+      public Object getProxyInstance() {
+          return Proxy.newProxyInstance(target.getClass().getClassLoader(),
+                                        target.getClass().getInterfaces(),
+                                        new DaoInvocationHandler());
+      }
+  
+      //处理逻辑
+      class  DaoInvocationHandler implements InvocationHandler{
+  
+          @Override
+          public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+              System.out.println("开始事务...");
+              //传入的proxy为当前已包装好的对象，target是原始对象
+              Object result = method.invoke(target, args);
+              System.out.println("提交事务...");
+              return result;
+          }
+      }
+  }
+  
+  //测试JDK动态代理
+  public class TestJDKDynamicProxy {
+  
+      public static void main(String[] args) {
+          IUserDao userDao = (IUserDao) new ProxyFactory(new UserDao()).getProxyInstance();
+          userDao.save();
+      }
+  }
+  ```
+
+  - CGLIB代理【可以代理没有实现任何接口的对象】
+
+  ```java
+  //接口
+  public interface IUserDao {
+      void save();
+  }
+  
+  //接口实现，目标对象
+  public class UserDao implements IUserDao {
+      @Override
+      public void save() {
+          System.out.println("----保存数据----");
+      }
+  }
+  
+  //生成代理对象工厂
+  public class ProxyFactory implements MethodInterceptor {
+  
+      private Object target;      //维护一个目标对象
+  
+      public ProxyFactory(Object target){
+          this.target=target;
+      }
+  
+      //给目标对象创建一个代理对象
+      public Object getProxyInstance(){
+          Enhancer en = new Enhancer();           //1.工具类
+          en.setSuperclass(target.getClass());    //2.设置父类
+          en.setCallback(this);                   //3.设置回调函数
+          return en.create();                     //4.创建子类(代理对象)
+      }
+  
+      @Override
+      public Object intercept(Object o, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+          System.out.println("开始事务...");
+          Object returnValue = method.invoke(target,args);
+          System.out.println("提交事务...");
+          return returnValue;
+      }
+  }
+  
+  //测试CGLIB动态代理
+  public class TestCGLIBPorxy {
+  
+      public static void main(String[] args) {
+          UserDao target = new UserDao();//目标对象
+          UserDao proxy = (UserDao)new ProxyFactory(target).getProxyInstance();//代理对象
+          proxy.save();//执行代理对象的方法
+      }
+  }
+  ```
+
+  注意：==代理的类不能为final==
+
+  ​			==目标对象的方法如果为final/static,那么就不会被拦截,即不会执行目标对象额外的业务方法==
+
+# 四、行为型设计模式
+
+## 模板方法模式【行为型】
+
+**定义**
+
+定义了一个算法的骨架，并允许子类为一个或多个步骤提供实现
+
+**特点**
+
+模板方法使得子类可以在不改变算法结构的情况下，重新定义算法的某些步骤
+
+**适用场景**
+
+- 一次性实现一个算法的不变部分，并将可变的行为留给子类来实现
+- 各子类中公共的行为被提取出来并集中到一个公共父类中，从而避免代码重复
+
+**优点**
+
+- 提高复用性
+- 提高扩展性
+- 符合开闭原则
+
+**缺点**
+
+- 类数目的增加
+- 增加了系统实现的复杂度
+- 继承关系自身的缺点，如果父类添加新的抽象方法，所有子类都要改一遍
+
+**编码示例**
+
+```java
+//模板类，abstract方法
+public abstract class Game {
+
+    abstract void initialize();
+    abstract void startPlay();
+    abstract void endPlay();
+
+    //模板方法必须定义为final，因为逻辑不应该被子类重写
+    public final void play(){
+        initialize();   //初始化游戏
+        startPlay();    //开始游戏
+        endPlay();      //结束游戏
+    }
+}
+
+//模板子类
+public class Football extends Game {
+    @Override
+    void endPlay() {
+        System.out.println("Football Game Finished!");
+    }
+    @Override
+    void initialize() {
+        System.out.println("Football Game Initialized! Start playing.");
+    }
+    @Override
+    void startPlay() {
+        System.out.println("Football Game Started. Enjoy the game!");
+    }
+}
+
+public class Cricket extends Game {
+    @Override
+    void endPlay() {
+        System.out.println("Cricket Game Finished!");
+    }
+    @Override
+    void initialize() {
+        System.out.println("Cricket Game Initialized! Start playing.");
+    }
+    @Override
+    void startPlay() {
+        System.out.println("Cricket Game Started. Enjoy the game!");
+    }
+}
+
+//测试模板模式
+public class TestTemplate {
+
+    public static void main(String[] args) {
+        Game cricket = new Cricket();
+        cricket.play();         //调用模板方法，按照模板类规定的逻辑调用
+        
+        Game football = new Football();
+        football.play();        //调用模板方法，按照模板类规定的逻辑调用
+    }
+}
+```
+
+![template-uml](/img/pattern/template-uml.png)
+
+## 迭代器模式【行为型】
+
+**定义**
+
+提供一种方法，顺序访问集合对象中的各个元素，而又不暴露该对象的内部表示
+
+**适用场景**
+
+- 访问一个集合对象而无需暴露它的内部表示
+- 为遍历不同的集合结构提供一个统一的接口
+
+**优点**
+
+- 分离了集合对象的遍历行为
+
+**缺点**
+
+- 类的个数成对增加
+
+**编码示例**
+
+```java
+/*
+ *容器接口
+ *Iterable 有Iterator<T> iterator();	声明
+ */
+public interface Container extends Iterable<String>{
+    void add(String ele);
+}
+
+//容器实现类
+public class NameRepository implements Container {
+
+    List<String> names = new ArrayList<>();
+
+    @Override
+    public Iterator<String> iterator() {
+        return new NameIterator();
+    }
+
+    @Override
+    public void add(String ele) {
+        names.add(ele);
+    }
+
+    private class NameIterator implements Iterator<String> {
+        
+        private int index;
+
+        @Override
+        public boolean hasNext() {
+            if(index < names.size()){
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public String next() {
+            if(this.hasNext()){
+                return names.get(index++);
+            }
+            return null;
+        }
+    }
+}
+
+//测试迭代器模式
+public class TestIterator {
+
+    public static void main(String[] args) {
+        Container container = new NameRepository();
+        container.add("Tom");
+        container.add("Lili");
+        container.add("Jack");
+        Iterator<String> iterator = container.iterator();
+        while (iterator.hasNext()){
+            String name = iterator.next();
+            System.out.println(name);
+        }
+    }
+}
+```
+
+## 策略模式【行为型】
+
+**定义**
+
+定义了算法家族，分别封装起来，让它们之间可以互相替换，此模式让算法的变化不会影响到使用算法的用户
+
+**适用场景**
+
+- 系统有很多类，而它们的区别仅仅在于他们的行为不同
+- 一个系统需要动态地在几种算法中选择一种
+
+**优点**
+
+- 符合开闭原则
+- 避免使用多重条件转移语句
+- 提高算法的保密性和安全性
+
+**缺点**
+
+- 客户端必须知道所有的策略类，并自行决定使用哪一个策略类
+- 产生很多的策略类
+
+**编码示例**
+
+```java
+//策略接口类
+public interface PromotionStrategy {
+    void doPromotion(Integer price);
+}
+
+//满减策略
+public class FullRductionStrategy implements PromotionStrategy {
+    
+    @Override
+    public void doPromotion(Integer price) {
+        System.out.println("满100减少10元，原价:" + price + ",实际应支付:" + (price - price / 100 * 10));
+    }
+}
+
+//返现策略
+public class CashbackStrategy implements PromotionStrategy {
+   
+    @Override
+    public void doPromotion(Integer price) {
+        System.out.println("满100返现15元，实际支付:" + price + ",返回账户余额+" + price / 100 * 15);
+    }
+}
+
+//使用策略的主体类，根据不同的策略会有不同的结果
+public class PromotionActivity {
+
+    private PromotionStrategy promotionStrategy;
+
+    public PromotionActivity(PromotionStrategy promotionStrategy) {
+        this.promotionStrategy = promotionStrategy;
+    }
+
+    public void executePromotionStrategy(Integer price){
+        promotionStrategy.doPromotion(price);
+    }
+}
+
+//测试策略模式
+public class TestStrategy {
+
+    public static void main(String[] args) {
+        PromotionActivity activity618 = new PromotionActivity(new FullRductionStrategy());
+        activity618.executePromotionStrategy(100);
+
+        PromotionActivity activity11d = new PromotionActivity(new CashbackStrategy());
+        activity11d.executePromotionStrategy(100);
+    }
+}
+```
+
+![strategy-uml](/img/pattern/strategy-uml.png)
+
+## 解释器模式【行为型】
+
+**定义**
+
+给定一个语言，定义它的文法的一种表示，并定义一个解释器，这个解释器使用该表示来解释语言中的句子
+
+**特点**
+
+为了解释一种语言，而为语言创建的解释器
+
+**适用场景**
+
+- 某个特定类型问题发生的频率足够高
+
+**优点**
+
+- 语法有很多类表示，容易改变及扩展此“语言”
+
+**缺点**
+
+- 当语法规则太多时，增加了系统复杂度
+
+**编码示例**
+
+```java
+//表达式解释器接口
+public interface Expression {
+
+    String interpret(String expression);
+}
+
+//解释器实现
+public class LoveExpression implements Expression {
+    
+    @Override
+    public String interpret(String expression) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        String[] splits = expression.split("\\s");
+        String sec = splits[0];
+        String min = splits[1];
+        String day = splits[2];
+        if(day.equals("*")){
+            stringBuilder.append("每天");
+        }
+        if(min.equals("*")){
+            stringBuilder.append("每分");
+        }
+        if(sec.equals("*")){
+            stringBuilder.append("每秒");
+        }
+        stringBuilder.append("，都爱你");
+
+        return stringBuilder.toString();
+    }
+}
+
+//测试解释器模式
+public class TestInterpret {
+
+    public static void main(String[] args) {
+        Expression expression = new LoveExpression();
+        String result = expression.interpret("* * *");
+        System.out.println(result);
+    }
+}
+```
+
+## 观察者模式【行为型】
+
+**定义**
+
+多个观察者对象同时监听某一个主题对象，当主题对象发生变化时，它的所有观察者都会收到通知并更新
+
+**适用场景**
+
+- 关联行为场景，建立一套触发机制
+
+**优点**
+
+- 观察者和被观察者之间建立一个抽象的耦合
+- 观察者模式支持广播通信
+
+**缺点**
+
+- 观察者之间有过多的细节依赖
+- 提高时间消耗及程序复杂度
+- 设计要得当，避免循环调用
+
+**编码示例**
+
+```java
+//被观察者，根据JDK规范继承Observable
+public class Child extends Observable {
+
+    private String name;
+
+    public Child(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    //通知改变，通知所有观察者
+    public void notifyEvent(String event) {
+        setChanged();
+        notifyObservers(event);
+    }
+}
+
+//观察者实现Observer接口
+public class Father implements Observer {
+    @Override
+    public void update(Observable o, Object arg) {
+        if (o instanceof Child){
+            Child child = (Child) o;
+            String event = (String) arg;
+            System.out.println("孩子" + child.getName() + "发生了" + event + ",父亲马上去处理。。。");
+        }
+    }
+}
+
+public class Mother implements Observer {
+    @Override
+    public void update(Observable o, Object arg) {
+        if (o instanceof Child){
+            Child child = (Child) o;
+            String event = (String) arg;
+            System.out.println("孩子" + child.getName() + "发生了" + event + ",母亲马上去处理。。。");
+        }
+    }
+}
+
+//测试观察者模式
+public class TestObserver {
+
+    public static void main(String[] args) {
+        Child child = new Child("Tom");
+        child.addObserver(new Mother());
+        child.addObserver(new Father());
+
+        child.notifyEvent("肚子疼");
+    }
+}
+```
+
+## 备忘录模式【行为型】
+
+**定义**
+
+保存一个对象的某个状态，以便在适当的时候恢复对象
+
+**特点**
+
+“后悔药”
+
+**适用场景**
+
+- 保存及恢复数据相关业务场景
+
+**优点**
+
+- 为用户提供一种可恢复机制
+- 存档信息的封装
+
+**缺点**
+
+- 资源占用
+
+**编码示例**
+
+```java
+//需要被保存部分状态的类
+public class Player {
+
+    private String name;
+    private Integer price;
+
+    private List<String> EquipmentList = new ArrayList<>();
+
+    public Player(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Integer getPrice() {
+        return price;
+    }
+
+    public void setPrice(Integer price) {
+        this.price = price;
+    }
+
+    public List<String> getEquipmentList() {
+        return EquipmentList;
+    }
+
+    public void setEquipmentList(List<String> equipmentList) {
+        EquipmentList = equipmentList;
+    }
+}
+
+//需要被保存的状态
+public class MementoShoppingState {
+    private List<String> EquipmentList;
+    private int    playerOldPrice;
+
+    public MementoShoppingState(List<String> equipmentList, int playerOldPrice) {
+        EquipmentList = new ArrayList<>(equipmentList);
+        this.playerOldPrice = playerOldPrice;
+    }
+
+    public int getPlayerOldPrice() {
+        return playerOldPrice;
+    }
+
+    public void setPlayerOldPrice(int playerOldPrice) {
+        this.playerOldPrice = playerOldPrice;
+    }
+
+    public List<String> getEquipmentList() {
+        return EquipmentList;
+    }
+
+    public void setEquipmentList(List<String> equipmentList) {
+        EquipmentList = equipmentList;
+    }
+}
+
+//实际业务
+public class Store {
+
+    private static Map<String, Integer> GOODS_MAP = new HashMap<>();
+    private Stack<MementoShoppingState> mementoShoppingState = new Stack<>();
+
+    static {
+        GOODS_MAP.put("黑色切割者", 2300);
+        GOODS_MAP.put("暴风大剑", 900);
+    }
+
+    public void Shopping(Player player,String goodsName){
+        //先进行存档用于回退
+        mementoShoppingState.add(new MementoShoppingState(player.getEquipmentList(),player.getPrice()));
+        //实际业务执行
+        int oldPrice = player.getPrice();
+        player.setPrice(oldPrice-GOODS_MAP.get(goodsName));
+        player.getEquipmentList().add(goodsName);
+        System.out.println("购买："+goodsName+" 原金币："+oldPrice+" 现金币："+player.getPrice());
+    }
+
+    //回滚存档
+    public void recentFallback(Player player){
+        MementoShoppingState shoppingState = mementoShoppingState.pop();
+        System.out.println("回退："+" 原金币："+player.getPrice()+" 现金币："+shoppingState.getPlayerOldPrice());
+        player.setPrice(shoppingState.getPlayerOldPrice());
+        player.setEquipmentList(shoppingState.getEquipmentList());
+    }
+}
+
+//测试备忘录模式
+public class TestMemento {
+
+    public static void main(String[] args) {
+        Player player = new Player("阿卡丽");
+        player.setPrice(6000);
+        Store store =  new Store();
+        store.Shopping(player,"暴风大剑");
+        store.Shopping(player,"黑色切割者");
+        System.out.println("打印现装备");
+        for (String equipment : player.getEquipmentList()) {
+            System.out.println(equipment);
+        }
+
+        store.recentFallback(player);
+        System.out.println("打印现装备");
+        for (String equipment : player.getEquipmentList()) {
+            System.out.println(equipment);
+        }
+        store.recentFallback(player);
+        System.out.println("打印现装备");
+        for (String equipment : player.getEquipmentList()) {
+            System.out.println(equipment);
+        }
+    }
+}
+```
+
+![memento-uml](/img/pattern/memento-uml.png)
+
+## 命令模式【行为型】
+
+**定义**
+
+将“请求”封装成对象，以便使用不同的请求
+
+**特点**
+
+解决了应用程序中对象的职责以及它们之间的通讯方式
+
+**适用场景**
+
+- 请求的调用者和请求的接收者需要解耦，使得调用者和接收者不直接交互
+
+**优点**
+
+- 降低耦合
+- 容易扩展新命令或者一组命令
+
+**缺点**
+
+- 命令的无限扩展会增加类的数量，体高系统实现复杂度
+
+**编码示例**
+
+```java
+//普通实体类
+public class Stock {
+
+    private String name;
+    private int quantity;
+
+    public Stock(String name, int quantity) {
+        this.name = name;
+        this.quantity = quantity;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+}
+
+//命令接口
+public interface StockCommand {
+    void execute();
+}
+
+//具体命令
+public class DepositGoodsCommand implements StockCommand {
+
+    private Stock stock;
+    private int buySize;
+
+    public DepositGoodsCommand(Stock stock, int buySize) {
+        this.stock = stock;
+        this.buySize = buySize;
+    }
+
+    @Override
+    public void execute() {
+        stock.setQuantity(stock.getQuantity() + buySize);
+        System.out.println(stock.getName() + "存入仓库" + buySize + ",仓库总计" + stock.getQuantity());
+    }
+}
+
+public class TakeOutGoodsCommand implements StockCommand {
+
+    private Stock stock;
+    private int takeSize;
+
+    public TakeOutGoodsCommand(Stock stock, int takeSize) {
+        this.stock = stock;
+        this.takeSize = takeSize;
+    }
+
+    @Override
+    public void execute() {
+        stock.setQuantity(stock.getQuantity() - takeSize);
+        System.out.println(stock.getName() + "取出仓库" + takeSize + ",仓库总计" + stock.getQuantity());
+    }
+}
+
+//命令的执行者
+public class Broker {
+
+    private List<StockCommand> StockCommandList = new ArrayList<StockCommand>();
+
+    public void receiveCommand(StockCommand command){
+        StockCommandList.add(command);
+    }
+
+    public void executeCommand(){
+        for (StockCommand command : StockCommandList) {
+            command.execute();
+        }
+        StockCommandList.clear();
+    }
+}
+
+//测试命令模式
+public class TestCommand {
+
+    public static void main(String[] args) {
+        Stock stock = new Stock("空气清新剂", 10);
+        StockCommand depositGoodsCommand = new DepositGoodsCommand(stock,200);
+        StockCommand takeOutGoodsCommand = new TakeOutGoodsCommand(stock,100);
+
+        Broker broker = new Broker();
+        broker.receiveCommand(depositGoodsCommand);
+        broker.receiveCommand(takeOutGoodsCommand);
+
+        broker.executeCommand();
+    }
+}
+```
+
+![command-uml](/img/pattern/command-uml.png)
+
+## 中介者模式【行为型】
+
+**定义**
+
+用一个中介对象来封装一系列的对象交互
+
+**特点**
+
+通过使对象明确地相互引用来促进松散耦合，并允许独立地改变它们的交互
+
+**适用场景**
+
+- 系统中对象之间存在复杂的引用关系，产生的相互依赖关系结构混乱切难以理解
+- 如果需要改变交互的公共行为可以增加中介者类
+
+**优点**
+
+- 将一对多转化成了一对一，降低程序复杂度
+- 类之间解耦
+
+**缺点**
+
+- 中介者过多，导致系统复杂
+
+**编码示例**
+
+```java
+//内部调用中介者完成消息发送
+public class User {
+    private String name;
+    private StudyGroup studyGroup;
+
+    public User(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public StudyGroup getStudyGroup() {
+        return studyGroup;
+    }
+
+    public void setStudyGroup(StudyGroup studyGroup) {
+        this.studyGroup = studyGroup;
+    }
+
+    public void sendMessage(String s) {
+        studyGroup.showMessage(this, s);	//由中介者进行发送
+    }
+}
+
+//中介者类，用来传递信息
+public class StudyGroup {
+    private String name;
+
+    public StudyGroup(String name) {
+        this.name = name;
+    }
+
+    public void showMessage(User user, String message){
+        System.out.println("Chat-" + name + " [" + user.getName() +"] : " + message);
+    }
+}
+
+//测试中介者模式
+public class TestMediator {
+
+    public static void main(String[] args) {
+        StudyGroup studyGroup = new StudyGroup("法语学习小组");
+
+        User robert = new User("Robert");
+        robert.setStudyGroup(studyGroup);
+
+        User john = new User("John");
+        john.setStudyGroup(studyGroup);
+
+        robert.sendMessage("Hi! John!");
+        john.sendMessage("Hello! Robert!");
+    }
+}
+```
+
+![](/img/pattern/mediator-uml.png)
+
+## 责任链模式【行为型】
+
+**定义**
+
+为请求创建一个接收此次请求对象的链
+
+**适用场景**
+
+- 一个请求的处理需要多个对象当中的一个或几个协作处理
+
+**优点**
+
+- 请求的发送者和接收者解耦
+- 责任链可以动态组合
+
+**缺点**
+
+- 责任链太长或者处理时间过长会影响性能
+- 责任链可能过多
+
+**编码示例**
+
+```java
+//普通实体类
+public class Course {
+
+    private String name;
+
+    public Course(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
+//抽象审批者
+public abstract class Approver {
+
+    protected  Approver nextApprover;
+
+    abstract boolean doApproval(Course course);
+
+    public void setNextApprover(Approver nextApprover) {
+        this.nextApprover = nextApprover;
+    }
+}
+
+//具体的审批方式
+public class VideoApprover extends Approver {
+
+    @Override
+    boolean doApproval(Course course) {
+        System.out.println("审核"+course.getName()+"视频内容通过。。。");
+        return nextApprover == null ? true : nextApprover.doApproval(course);
+    }
+}
+
+public class ArticleApprover extends Approver {
+
+    @Override
+    boolean doApproval(Course course) {
+        System.out.println("审核"+course.getName()+"手记内容通过。。。");
+        return nextApprover == null ? true : nextApprover.doApproval(course);
+    }
+}
+
+//测试责任链模式
+public class TestChain {
+
+    public static void main(String[] args) {
+        Course course = new Course("java设计模式");
+
+        VideoApprover videoApprover = new VideoApprover();
+        ArticleApprover articleApprover = new ArticleApprover();
+        videoApprover.setNextApprover(articleApprover);
+
+        videoApprover.doApproval(course);
+    }
+}
+
+```
+
+![chain-uml](/img/pattern/chain-uml.png)
+
+## 访问者模式【行为型】
+
+**定义**
+
+封装作用于某数据结构（如List/Set/Map等）中的各种元素的操作
+
+**特点**
+
+可以在不改变元素的类前提情况下，定义作用于这些元素的操作
+
+**适用场景**
+
+- 一个数据结构如（如List/Set/Map等）包含很多类型对象
+- 数据结构和数据操作分离
+
+**优点**
+
+- 增加新的操作简单，即增加一个新的访问者
+
+**缺点**
+
+- 增加新的数据结构困难
+- 具体元素的变更比较麻烦
+
+**编码示例**
+
+```java
+//被访问的抽象类
+public interface Bill {
+    void accept(AccountBookViewer viewer);	//不同的访问者对单子的重点看的不同
+}
+
+//被访问的抽象类的实现
+public class ConsumeBill implements Bill {
+   
+    private double amount;
+    private String item;
+
+    public ConsumeBill(double amount, String item) {
+        super();
+        this.amount = amount;
+        this.item = item;
+    }
+
+    @Override
+    public void accept(AccountBookViewer viewer) {
+        viewer.view(this);
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public String getItem() {
+        return item;
+    }
+}
+
+public class IncomeBill implements Bill{
+
+    private double amount;
+    private String item;
+
+    public IncomeBill(double amount, String item) {
+        super();
+        this.amount = amount;
+        this.item = item;
+    }
+
+    @Override
+    public void accept(AccountBookViewer viewer) {
+        viewer.view(this);
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public String getItem() {
+        return item;
+    }
+}
+
+//访问者抽象类
+public interface AccountBookViewer {
+    void view(ConsumeBill bill);//查看消费的单子
+    void view(IncomeBill bill);//查看收入的单子
+}
+
+//访问者的实现类
+public class Boss implements AccountBookViewer{
+
+    private double totalIncome;
+    private double totalConsume;
+
+    //老板只关注一共花了多少钱以及一共收入多少钱，其余并不关心
+    public void view(ConsumeBill bill) {
+        totalConsume += bill.getAmount();
+    }
+
+    public void view(IncomeBill bill) {
+        totalIncome += bill.getAmount();
+    }
+
+    public double getTotalIncome() {
+        System.out.println("查看一共收入多少，数目是：" + totalIncome);
+        return totalIncome;
+    }
+
+    public double getTotalConsume() {
+        System.out.println("查看一共花费多少，数目是：" + totalConsume);
+        return totalConsume;
+    }
+}
+
+public class CPA implements AccountBookViewer{
+
+    //注册会计在看账本时，如果是支出，则如果支出是工资，则需要看应该交的税交了没
+    public void view(ConsumeBill bill) {
+        if (bill.getItem().equals("工资")) {
+            System.out.println("查看工资是否交个人所得税。");
+        }
+    }
+    //如果是收入，则所有的收入都要交税
+    public void view(IncomeBill bill) {
+        System.out.println("查看收入交税了没。");
+    }
+
+}
+
+//一堆被访问者的集合存储类
+public class AccountBook {
+    //单子列表
+    private List<Bill> billList = new ArrayList<Bill>();
+    //添加单子
+    public void addBill(Bill bill){
+        billList.add(bill);
+    }
+    //供账本的查看者查看账本
+    public void show(AccountBookViewer viewer){
+        for (Bill bill : billList) {
+            bill.accept(viewer);
+        }
+    }
+}
+
+//测试访问者模式
+public class TestVisitor {
+    
+    public static void main(String[] args) {
+        AccountBook accountBook = new AccountBook();
+        //添加两条收入
+        accountBook.addBill(new IncomeBill(10000, "卖商品"));
+        accountBook.addBill(new IncomeBill(12000, "卖广告位"));
+        //添加两条支出
+        accountBook.addBill(new ConsumeBill(1000, "工资"));
+        accountBook.addBill(new ConsumeBill(2000, "材料费"));
+
+        AccountBookViewer boss = new Boss();
+        AccountBookViewer cpa = new CPA();
+
+        //两个访问者分别访问账本
+        accountBook.show(cpa);
+        accountBook.show(boss);
+
+        ((Boss) boss).getTotalConsume();
+        ((Boss) boss).getTotalIncome();
+    }
+}
+```
+
+![visitor-uml.png](/img/pattern/visitor-uml.png)
+
+## 状态模式【行为型】
+
+**定义**
+
+允许对象在内部状态发生改变时改变它的行为
+
+**特点**
+
+对象的行为依赖于它的状态（属性），并且可以根据它的状态改变而改变它的相关行为
+
+**适用场景**
+
+- 一个对象存在多个状态（不同状态下行为不同），且状态可相互转换
+
+**优点**
+
+- 将不同状态隔离
+- 把各种状态的转化逻辑，分布到State的子类中，减少相互依赖
+- 增加新的状态较为简单
+
+**缺点**
+
+- 状态多的业务场景导致类数目增加，系统变复杂
+
+**编码示例**
+
+```java
+//状态接口
+public interface VideoState {
+    void doAction(VideoPlayer player);	//处于此状态下要作的动作
+}
+
+//各种状态
+public class PlayState implements VideoState{
+
+    @Override
+    public void doAction(VideoPlayer player) {
+        System.out.println("开始播放");
+    }
+}
+
+public class StopState implements VideoState{
+
+    @Override
+    public void doAction(VideoPlayer player) {
+        System.out.println("停止播放");
+    }
+}
+
+public class PauseState implements VideoState{
+
+    @Override
+    public void doAction(VideoPlayer player) {
+        System.out.println("暂停播放");
+    }
+}
+
+//使用此状态的上下文
+public class VideoPlayer {
+    private VideoState state;
+
+    public static final VideoState stopState = new StopState();
+    public static final VideoState playState = new PlayState();
+    public static final VideoState pauseState = new PauseState();
+
+    public VideoPlayer(){
+    }
+
+    public void changeState(VideoState state){
+        this.state = state;
+        state.doAction(this);
+    }
+
+    public VideoState getState(){
+        return state;
+    }
+}
+
+//测试状态模式
+public class TestState {
+
+    public static void main(String[] args) {
+        VideoPlayer videoPlayer = new VideoPlayer();
+        videoPlayer.changeState(VideoPlayer.playState);
+        videoPlayer.changeState(VideoPlayer.pauseState);
+        videoPlayer.changeState(VideoPlayer.stopState);
+    }
+}
+```
+
+![state-uml](/img/pattern/state-uml.png)
