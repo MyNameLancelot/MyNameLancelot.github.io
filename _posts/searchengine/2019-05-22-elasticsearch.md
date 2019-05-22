@@ -176,31 +176,31 @@ su es
         <th>参数</th>
         <th>含义</th>
     </tr>
-	<tr>
+    <tr>
         <td>shards</td>
         <td>分片总个数</td>
-	</tr>
-	<tr>
+    </tr>
+    <tr>
         <td>pri</td>
         <td>primary shard个数</td>
-	</tr>
+    </tr>
     <tr>
         <td>relo</td>
         <td>replica shard个数</td>
-	</tr>
+    </tr>
     <tr>
         <td>unssign</td>
         <td>未分配个数</td>
-	</tr>
+    </tr>
     <tr>
         <td rowspan="5">status</td>
         <td>green【每个索引的primary shard和replica shard都是active的】</td>
     <tr>
     <tr>
-    	<td>yellow【每个索引的primary shard都是active的，但部分的replica shard不是active的】</td>
+        <td>yellow【每个索引的primary shard都是active的，但部分的replica shard不是active的】</td>
     </tr>
     <tr>
-    	<td>red【不是所有的索引都是primary shard都是active状态的】</td>
+        <td>red【不是所有的索引都是primary shard都是active状态的】</td>
     </tr>
 </table>
 
