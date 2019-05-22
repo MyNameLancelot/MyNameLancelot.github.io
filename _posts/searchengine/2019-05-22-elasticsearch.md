@@ -27,7 +27,7 @@ categories: searchengine
 
   代表索引分片，ElasticSearch可以把一个完整的索引分成多个分片，这样的好处是可以把一个大的索引拆分成多个，分布到不同的节点上。构成分布式搜索。分片的数量只能在索引创建前指定，并且索引创建后不能更改（primary shard）。
 
-  ==水平扩容时，需要重新设置分片数量，重新导入数据。==
+  水平扩容时，需要重新设置分片数量，重新导入数据
 
 - **replicas**
 
@@ -69,7 +69,7 @@ categories: searchengine
 
   ElasticSearch中的最小数据单元。一个Document就是一条数据，一般使用JSON数据结构表示。每个Index下的Type中都可以存储多个Document。一个Document中有多个field，field就是数据字段。
 
-  ==不要在Document中描述java对象的双向关联关系。在转换为JSON字符串的时候会出现无限递归问题。==
+  不要在Document中描述java对象的双向关联关系。在转换为JSON字符串的时候会出现无限递归问题。
 
 - **Index**
 
@@ -79,7 +79,7 @@ categories: searchengine
 
   类型。每个索引中都可以有若干Type，Type是Index中的一个**逻辑分类**，同一个Type中的Document都有相同的field。
 
-  ==6.x版本之后，type概念被弱化，一个index中只能有唯一的一个type。在7.x版本之后，会删除type。==
+  6.x版本之后，type概念被弱化，一个index中只能有唯一的一个type。在7.x版本之后，会删除type。
 
 > 一个index默认10个shard，5个primary shard，5个replica shard
 >
@@ -171,6 +171,14 @@ su es
 
 返回：![health-info](/img/searchengine/health-info.png)
 
+| 参数    | 含义                                                         |
+| ------- | ------------------------------------------------------------ |
+| shards  | 分片总个数                                                   |
+| pri     | primary shard个数                                            |
+| relo    | replica shard个数                                            |
+| unssign | 未分配个数                                                   |
+| status  | green【每个索引的primary shard和replica shard都是active的】<br />yellow【每个索引的primary shard都是active的，但部分的replica shard不是active的】<br />red【不是所有的索引都是primary shard都是active状态的】 |
+
 
 ## 检查分片信息
 
@@ -212,7 +220,7 @@ su es
 
 - **修改索引**
 
-  ==索引一旦创建，primary shard数量不可变化，可以改变replica shard数量==
+  索引一旦创建，primary shard数量不可变化，可以改变replica shard数量
 
   ```txt
   PUT /test_index/_settings
@@ -284,7 +292,7 @@ su es
     }
     ```
 
-  ==一个index中的所有type类型的Document是存储在一起的，如果index中的不同的type之间的field差别太大，也会影响到磁盘的存储结构和存储空间的占用==
+  一个index中的所有type类型的Document是存储在一起的，如果index中的不同的type之间的field差别太大，也会影响到磁盘的存储结构和存储空间的占用
 
   ```txt
   test_index:test_type1-->{"_id":"1","f1":"v1","f2":"v2"}
@@ -445,7 +453,7 @@ su es
   { "delete" : { "_index" : "test_index", "_type" : "my_type", "_id" : "2" } }
   ```
 
-  ==注意：bulk语法中要求一个完整的json串不能有换行==
+  注意：bulk语法中要求一个完整的json串不能有换行
 
 - **Document routing 机制**
 
@@ -511,7 +519,7 @@ su es
 
   代表的是document的版本。在ElasticSearch中，为document定义了版本信息，document数据每次变化，代表一次版本的变更。版本变更可以避免数据错误问题（并发问题，乐观锁），同时提供ES的搜索效率。第一次创建Document时，\_version版本号为1，默认情况下，后续每次对Document执行修改或删除操作都会对\_version数据自增1。
 
-  ==删除Document也会使\_version自增。当使用PUT命令再次增加同id的Document，_version会继续之前的版本继续自增。==
+  删除Document也会使\_version自增。当使用PUT命令再次增加同id的Document，_version会继续之前的版本继续自增。
 
 # 五、分布式架构分析
 
@@ -609,7 +617,7 @@ su es
 GET /current_index/_search?q=remark:test+AND+name:doc&sort=order_no:desc
 ```
 
-==此搜索操作一般只用在快速检索数据使用，如果查询条件复杂，很难构建query string，生产环境中很少使用==
+此搜索操作一般只用在快速检索数据使用，如果查询条件复杂，很难构建query string，生产环境中很少使用
 
 ## 全数据查询
 
@@ -702,7 +710,7 @@ GET /es/doc/_search
 
 ## 词元搜索
 
-搜索条件==不==分词，使用搜索条件进行精确匹配。如果搜索字段被分词，搜索条件是一段话则无法匹配这种情况下适合匹配不分词字段。
+搜索条件`不`分词，使用搜索条件进行精确匹配。如果搜索字段被分词，搜索条件是一段话则无法匹配这种情况下适合匹配不分词字段。
 
 ```txt
 GET /es/doc/_search
@@ -848,7 +856,7 @@ GET /emp_index/emp_type/_search
 
 - scroll搜索的返回结果一定会包含一个特殊的结果数据_scroll_id。这个数据就是scroll搜索的快照ID。scroll搜索的2次以后的请求，必须携带上这个ID。
 
-==scroll不是分页，不是用来替换分页技术。分页为用户提供数据的，scroll为系统内部处理分批提供数据的==
+scroll不是分页，不是用来替换分页技术。分页为用户提供数据的，scroll为系统内部处理分批提供数据的
 
 ```txt
 =====================================第一次搜索=====================================
@@ -1058,7 +1066,7 @@ GET student/java/_search
 }
 ```
 
-==**most fields策略是尽可能匹配更多的字段，所以会导致精确搜索结果排序问题。又因为cross fields搜索，不能使用minimum_should_match来去除长尾数据。所以在使用most fields和cross fields策略搜索数据的时候，都有不同的缺陷。所以商业项目开发中，都推荐使用best fields策略实现搜索。**==
+**most fields策略是尽可能匹配更多的字段，所以会导致精确搜索结果排序问题。又因为cross fields搜索，不能使用minimum_should_match来去除长尾数据。所以在使用most fields和cross fields策略搜索数据的时候，都有不同的缺陷。所以商业项目开发中，都推荐使用best fields策略实现搜索。**
 
 ## Suggest搜索建议
 
@@ -1192,7 +1200,7 @@ GET /es/doc/_search
 
 **前缀匹配搜索**
 
-==针对前缀搜索，是对keyword类型字段而言。而keyword类型字段数据大小写敏感==。前缀搜索效率比较低。前缀搜索不会计算相关度分数。前缀越短，效率越低。不推荐使用。
+针对前缀搜索，是对keyword类型字段而言。而keyword类型字段数据大小写敏感。前缀搜索效率比较低。前缀搜索不会计算相关度分数。前缀越短，效率越低。不推荐使用。
 
 ```txt
 GET /es/doc/_search
@@ -1727,7 +1735,7 @@ GET cars/_search
 
 **span_not**
 
-==搜索条件的差集，不是搜索结果的差集。==【大众中档车依旧会出现】
+搜索条件的差集，不是搜索结果的差集。【大众中档车依旧会出现】
 
 ```txt
 GET cars/_search
@@ -2857,7 +2865,7 @@ GET /cars/_search
 
 - `language analyzer`：对应语言的分词器，会忽略停止词、转换大小写、单复数转换、时态转换等。
 
-==搜索条件中的key_words也需要经过分词，且搜索条件中的条件数据使用的分词器与对应的字段使用的分词器是统一的。否则会导致搜索结果丢失。==
+搜索条件中的key_words也需要经过分词，且搜索条件中的条件数据使用的分词器与对应的字段使用的分词器是统一的。否则会导致搜索结果丢失。
 
 ## IK分词器
 
@@ -2877,7 +2885,7 @@ GET /cars/_search
 
 **IK分词器配置文件**
 
-==IK的所有的dic词库文件，必须使用UTF-8字符集==
+IK的所有的dic词库文件，必须使用UTF-8字符集
 
 ```txt
 config
@@ -3014,7 +3022,7 @@ dynamic mapping对字段的类型分配
 
 ## custom mapping
 
-==手工创建mapping时，只能新增mapping设置，不能对已有的mapping进行修改==
+手工创建mapping时，只能新增mapping设置，不能对已有的mapping进行修改
 
 ```txt
 PUT /book_index
@@ -3329,7 +3337,7 @@ PUT /dynamic_strategy/dynamic_type/1
 }
 ```
 
-==定制dynamic mapping，使用较少，因为很难去分析出一套完整的，有扩展能力的结构。如果使用，一般在固定的，几乎不会改变的数据结构中使用。如：身份证信息==
+定制dynamic mapping，使用较少，因为很难去分析出一套完整的，有扩展能力的结构。如果使用，一般在固定的，几乎不会改变的数据结构中使用。如：身份证信息
 
 # 十三、Document写入原理
 
@@ -3365,7 +3373,7 @@ PUT /dynamic_strategy/dynamic_type/1
 
 `Field-length Norm`：在匹配成功后，计算field字段数据的长度，长度越大，相关度越低。【TF算法的一部分】
 
-==ES中底层计算相关度的时候，不是简单的加减乘除，有其特有的算法==
+ES中底层计算相关度的时候，不是简单的加减乘除，有其特有的算法
 
 ```txt
 GET /es/doc/_search
@@ -3925,7 +3933,7 @@ POST /ecommerce_products_index/ecommerce/_bulk
 {"product_name" : "IPhone X", "remark" : "齐刘海手机", "price" : 899800, "sellpoint" : "卖肾买手机", "ecommerce_join_field" : { "name" : "product", "parent" : "3" }}
 ```
 
-==在父子关系数据模型中，要求有关系的父子数据必须在同一个shard中保存，否则ES无法实现数据的关联管理，所以在保存子数据的时候，必须使用其对应的父数据在存储时使用的routing。默认情况下，ES使用document的id作为routing值，所以子数据在保存的时候，必须使用父数据的id作为routing才可，否则无法建立父子关系。==
+在父子关系数据模型中，要求有关系的父子数据必须在同一个shard中保存，否则ES无法实现数据的关联管理，所以在保存子数据的时候，必须使用其对应的父数据在存储时使用的routing。默认情况下，ES使用document的id作为routing值，所以子数据在保存的时候，必须使用父数据的id作为routing才可，否则无法建立父子关系。
 
 **父子关系查询数据**
 
@@ -4115,7 +4123,7 @@ POST _aliases
 
 > 建议：在应用中使用别名而不是索引名。这样可以在任何时候重建索引，且别名的开销很小
 
-==其它使用场景：如电商中有手机索引，座机索引，使用别名电话设备作为两个索引的别名。访问电话设备，则可以在两个索引中搜索数据。==
+其它使用场景：如电商中有手机索引，座机索引，使用别名电话设备作为两个索引的别名。访问电话设备，则可以在两个索引中搜索数据。
 
 # 十七、正排索引
 
@@ -4132,21 +4140,21 @@ POST _aliases
 假设倒排索引的内容如下【文档模型中只有一列body】
 
 ```txt
-Term		Doc_1		Doc_2		Doc_3
+Term        Doc_1       Doc_2       Doc_3
 -------------------------------------------------------------------------------------
-brown		|   X		|   X		|
-dog		    |   X		|		    |   X
-dogs		|		    |   X		|   X
-fox		    |   X		|		    |   X
-foxes		|		    |   X		|
-in		    |		    |   X		|
-jumped		|   X		|		    |   X
-lazy		|   X		|   X		|
-leap		|		    |   X		|
-over		|   X		|   X		|   X
-quick		|   X		|   X		|   X
-summer		|		    |   X		|
-the		    |   X		|		    |   X
+brown       |   X       |   X       |
+dog         |   X       |           |   X
+dogs        |           |   X       |   X
+fox         |   X       |           |   X
+foxes       |           |   X       |
+in          |           |   X       |
+jumped      |   X       |           |   X
+lazy        |   X       |   X       |
+leap        |           |   X       |
+over        |   X       |   X       |   X
+quick       |   X       |   X       |   X
+summer      |           |   X       |
+the         |   X       |           |   X
 -------------------------------------------------------------------------------------
 ```
 
@@ -4255,7 +4263,7 @@ PUT /fieddata_filter
 
 ## fielddata的预加载
 
-fielddata是一个==query-time==生成的正排索引，如果某index中必须使用fielddata，又希望可以提升其效率，则可以使用预加载的方式来实现性能的提升。预加载fielddata会提高query过程的效率，但是降低index写入数据的效率。且始终对内存有很高的压力。不建议使用。
+fielddata是一个`query-time`生成的正排索引，如果某index中必须使用fielddata，又希望可以提升其效率，则可以使用预加载的方式来实现性能的提升。预加载fielddata会提高query过程的效率，但是降低index写入数据的效率。且始终对内存有很高的压力。不建议使用。
 
 ```txt
 PUT /fieddata_filter
@@ -5020,13 +5028,13 @@ input {
 
     # 可以直接写SQL语句在此处，使用大于等于避免丢失数据。如下：
     statement => "select * from test_logstash where update_time >= :sql_last_value"
-	
+    
     # 也可以将SQL定义在文件中，如下：
     #statement_filepath => "./config/jdbc.sql"
 
     # 这里类似crontab,可以定制定时操作，比如每分钟执行一次同步(分 时 天 月 年)
     schedule => "* * * * *"
-	
+    
     # 在ES6.x版本中，不需要定义type。即使定义，logstash也是自动创建索引type为doc，将此处定义的type作为document的一部分保存
     #type => "test"
 
@@ -5053,10 +5061,10 @@ input {
 
 output {
   elasticsearch {
-    hosts => "localhost:9200"		#如果是多个ES,使用逗号分隔多个ip和端口
-    index => "mysql_datas"			#索引名称 
-    document_id => "%{id}"			#数据库中数据与ES中document数据关联的字段，此处代表数据库中的id字段和ES中的document的id关联
-    template_overwrite => true		#是否使用模板，开启效率更高
+    hosts => "localhost:9200"       #如果是多个ES,使用逗号分隔多个ip和端口
+    index => "mysql_datas"          #索引名称 
+    document_id => "%{id}"          #数据库中数据与ES中document数据关联的字段，此处代表数据库中的id字段和ES中的document的id关联
+    template_overwrite => true      #是否使用模板，开启效率更高
   }
 
   # 这里输出调试，正式运行时可以注释掉
