@@ -730,6 +730,47 @@ public class WebMvcAutoConfiguration {
 
 <a href="https://mynamelancelot.github.io/thymeleaf/thymeleaf.html">详细语法参考</a>
 
+## 内容协商
+
+Web客户端通过不同的请求策略，实现服务端响应对应视图内容输出
+
+视图解析器ContentNegotiatingViewResolver：
+
+①关联ViewResolver Bean列表
+
+②关联ContentNegotiationManager
+
+③解析最佳匹配View
+
+常用的ContentNegotiatingViewResolver：
+
+- InternalResourceViewResolver
+- BeanNameViewResolver
+- ThymeleafViewResolver
+
+---
+
+内容协商管理器ContentNegotiationManager：
+
+①由ContentNegotitationConfigurer配置
+
+②由ContnetNegotiationManagerFactoryBean创建
+
+③关联ContentNegotiationStrategy集合
+
+---
+
+内容协商策略ContentNegotitationStragtegy
+
+常见的ContentNegotitationStragtegy：
+
+- 固定MediaType：FixedContentNegotitationStragtegy
+- ”Accept“请求头：HeaderContentNegotitationStragtegy
+- 请求参数：ParameterContentNegotitationStragtegy
+- 路径扩展名：PathExtensionContentNegotitationStragtegy
+
+![ContentNegotiating](/img/spring/ContentNegotiating.png)
+
 ## SpringMVC自动配置
 
 Spring Boot 自动配了SpringMVC，以下是SpringBoot对SpringMVC的默认配置:（WebMvcAutoConfiguration）
@@ -1060,7 +1101,212 @@ public class MyErrorAttributes extends DefaultErrorAttributes {
 }
 ```
 
-# 九、配置嵌入式Servlet容器
+## 配置跨域访问
+
+**Cross-Origin Resource Sharing(CORS)配置方式**
+
+①注解驱动 ：@CorssOrigin【也可以和@Controller或@RequestMapping同级更加精确】
+
+```java
+public @interface CrossOrigin {
+    @AliasFor("origins")
+    String[] value() default {};
+
+    //允许可访问的域列表，*代表所有
+    @AliasFor("value")
+    String[] origins() default {};
+
+    //运行的请求头
+    String[] allowedHeaders() default {};
+
+    //配置获取响应的头信息， 在其中可以设置其他的头信息，不进行配置时， 默认可以获取到
+    //Cache-Control、Content-Language、Content-Type、Expires、Last-Modified、Pragma字段
+    String[] exposedHeaders() default {};
+
+    //允许可访问的域发送请求的方法
+    RequestMethod[] methods() default {};
+
+    //浏览器是否应该同时发送凭证(如cookie)。默认false，开启设置为true
+    String allowCredentials() default "";
+
+    //准备响应前的缓存持续的最大时间（以秒为单位）
+    long maxAge() default -1L;
+}
+//----------------------------------------------------------------------------------
+@SpringBootApplication
+@CrossOrigin(origins = {"*"}, maxAge = 3600, methods = {RequestMethod.GET},allowCredentials = "true")
+public class WebApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(WebApplication.class, args);
+    }
+
+}
+```
+
+②代码驱动：WebMvcConfigurer#addCorsMappings
+
+```java
+@Configuration
+public class AppWebMvcConfigurer implements WebMvcConfigurer {
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+            .allowedOrigins("*")  
+            .allowCredentials(true)
+            .allowedMethods("GET", "POST", "DELETE", "PUT","PATCH")
+            .maxAge(3600);  
+    }
+}
+```
+
+# 九、Spring WebFlux
+
+## Reactive概念
+
+**Reactor**【反应堆模式】是事件驱动的，有一个或多个并发输入源，有一个Service Handler，有多个Request Handlers。Service Handler会同步的将输入的请求（Event）多路复用的分发给相应的Request Handler。
+
+**Reactive**是异步非阻塞的，可以提高程序性能。
+
+## CallBack和Future缺陷
+
+CallBack和Future均无法控制异步执行顺序，例如：加载资源和用户登陆同时进行而获取用户关注信息，需要等待用户登陆动作之后进行，CallBack和Future在此情景下不容易控制。Future可使用CompletableFuture解决问题。
+
+## Reactive编程定义
+
+**Reactive具有的原则**
+
+- 响应性的
+- 适应性强的
+- 弹性的
+- 消息驱动的
+
+效果：同步或异步非阻塞执行，数据传播被通知
+
+**Reactive的实现框架**
+
+- java9 Flow API
+- RxJava
+- Reactor
+
+## WebFlux基本介绍
+
+![diagram-boot-reactor](/img/spring/diagram-boot-reactor.svg)
+
+Spring WebFlux是一套全新的Reactive Web栈技术，是SpringFramework5.0添加的新功能。实现完全非阻塞，支持Reactive Streams背压等特性，并且运行环境不限于Servlet容器。WebFlux实现了在资源有限的情况下，尽可能多的接收并处理请求【提升负载】而不是更快的响应。
+
+webflux主要在如下两方面体现出独有的优势：
+
+- 在servlet3.1其实已经提供了非阻塞的API，WebFlux提供了一种比其更完美的解决方案。使用非阻塞的方式可以利用较小的线程或硬件资源来处理并发进而提高其可伸缩性
+
+- 函数式编程端点
+
+## Servlet模型&WebFlux
+
+**Servlet**
+
+servlet由servlet container进行生命周期管理。container运行时接受请求，并为每个请求分配一个线程（一般从线程池中获取空闲线程）然后调用service()。
+
+弊端：servlet是一个简单的网络编程模型，当请求进入servlet container时，servlet container就会为其绑定一个线程，一旦并发上升，线程数量就会上涨，而线程资源代价是昂贵的（上线文切换，内存消耗大）严重影响请求的处理时间。在一些简单的业务场景下，不希望为每个request分配一个线程，只需要1个或几个线程就能应对极大并发的请求，这种业务场景下servlet模型没有优势。
+
+Spring WebMvc是基于servlet的一个路由模型，即实现了所有请求处理的一个servlet【DispatcherServlet】，并由该servlet进行路由。所以spring webmvc无法摆脱servlet模型的弊端。
+
+**WebFlux**
+
+Webflux模式替换了旧的Servlet线程模型。用少量的线程处理request和response的IO操作，这些线程称为Loop线程，而业务交给响应式编程框架处理，用户可以将业务中阻塞的操作提交到响应式框架的work线程中执行，而不阻塞的操作依然可以在Loop线程中进行处理，大大提高了Loop线程的利用率。
+
+## SpringMVC与SpringWebFlux
+
+![springmvc-webflux](/img/spring/springmvc-webflux.png)
+
+它们都可以用注解式编程模型，都可以运行在tomcat，jetty，undertow等servlet容器当中。但是SpringMVC采用命令式编程方式，代码一句一句的执行，这样更有利于理解与调试，而WebFlux则是基于异步响应式编程，对于调试和理解增大了难度。两种框架官方给出的建议是：
+
+- 如果原先使用用SpringMVC好好的话，则没必要迁移。因为命令式编程是编写、理解和调试代码的最简单方法。因为老项目的类库与代码都是基于阻塞式的。
+- 如果打算使用非阻塞式web框架，WebFlux确实是一个可考虑的技术路线，而且它支持类似于SpringMvc的Annotation的方式实现编程模式，也可以在微服务架构中让WebMvc与WebFlux共用Controller，切换使用的成本相当小
+- 在SpringMVC项目里如果需要调用远程服务的话，你不妨考虑一下使用WebClient，而且方法的返回值可以考虑使用Reactive Type类型的，当每个调用的延迟时间越长，或者调用之间的相互依赖程度越高，其好处就越大
+
+## WebHandler
+
+WebFlux已经脱离了Servlet API，由WebHandler实现类处理会话机制、请求过滤、静态资源等等。其实在HttpHandler的基本实现类通过适配器模式及装饰模式也间接的实现了WebHandler接口。
+
+ WebHandlerDecorator：WebHandler的装饰器，利用装饰模式实现相关功能的扩展
+
+HttpWebHandlerAdapter: 进行Http请求处理，同时也是HttpHandler的实现类
+
+FilteringWebHandler：通过WebFilter进行过滤处理的类，类似于Servlet中的Filter
+
+ExceptionHandlingWebHandler: 针对于异常的处理类
+
+ResourceWebHandler：用于静态资源请求的处理类
+
+DispatcherHandler：请求的总控制器，类似于WebMVC中的DispatcherServlet
+
+## 实现WebFlux示例
+
+- 基于Annotated Controller方式实现和SpringMVC方式完全相同
+
+- 函数式编程方式
+
+```java
+/**
+ * 类似于Controller，处理用户请求的真实逻辑
+ */
+public class StudentHandler {
+
+	
+    //这里采用Mono模式类似于点对点，也可使用Flux类似于发布、订阅
+    public static Mono<ServerResponse> selectStudent(ServerRequest request) {
+        Student studentBody = new Student();
+        request.bodyToMono(Student.class).subscribe(student -> BeanUtils.copyProperties(student, studentBody));
+        return ok().contentType(APPLICATION_JSON_UTF8).body(fromObject(studentBody));
+    }
+
+    public static Mono<ServerResponse> insertStudent(ServerRequest request){
+        return ok().contentType(TEXT_PLAIN).body(fromObject("success"));
+
+    }
+    private static class Student {
+        private Integer id;
+        private String name;
+
+        public Integer getId() {
+            return id;
+        }
+
+        public void setId(Integer id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+}
+
+//===================================================================================
+
+//配置类
+@Configuration
+@EnableWebFlux
+public class WebConfig implements WebFluxConfigurer {
+
+    @Bean
+    public RouterFunction<?> routerFunctionA() {
+        RouterFunction<ServerResponse> route = route()
+                .GET("/student/{id}", accept(APPLICATION_JSON), StudentHandler::selectStudent)
+                .POST("/student", StudentHandler::insertStudent)
+                .build();
+        return route;
+    }
+}
+```
+
+# 十、配置嵌入式Servlet容器
 
 > SpringBoot默认使用Tomcat作为嵌入式的Servlet容器
 >
@@ -1231,7 +1477,7 @@ public class EmbeddedWebServerFactoryCustomizerAutoConfiguration {
 - SpringBoot根据导入的依赖情况，给容器中添加相应的`xxxServerFactoryCustomizer`
 - 使用WebServerFactoryCustomizerBeanPostProcessor调用定制器的定制方法
 
-# 十、使用外置的Servlet容器
+# 十一、使用外置的Servlet容器
 
 嵌入式Servlet容器简单、便携，但是不支持JSP
 
@@ -1261,7 +1507,7 @@ public class ServletInitializer extends SpringBootServletInitializer {
 }
 ```
 
-# 十一、启动配置原理
+# 十二、启动配置原理
 
 ## 启动原理
 
@@ -1355,7 +1601,7 @@ public class ServletInitializer extends SpringBootServletInitializer {
 - `ApplicationContextInitializer`的子类需要配置在`META-INF/spring.factories的org.springframework.context.ApplicationContextInitializer`属性中
 - `SpringApplicationRunListener`的实现类直接放入IOC容器中会被加载
 
-# 十二、自定义starter
+# 十三、自定义starter
 
 编写自定义starter
 
