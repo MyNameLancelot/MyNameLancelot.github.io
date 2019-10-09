@@ -2,7 +2,7 @@
 layout: post
 title: "Spring Security使用指南"
 date: 2019-10-09 10:06:30
-categories: git
+categories: spring
 ---
 
 # 一、基于游览器的安全
