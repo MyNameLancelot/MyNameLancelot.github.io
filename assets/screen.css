@@ -294,7 +294,7 @@ h3 tt, h3 code { font-size: inherit; }
 h4 tt, h4 code { font-size: inherit; }
 h5 tt, h5 code { font-size: inherit; }
 h6 tt, h6 code { font-size: inherit; }
-h1 { padding-bottom: 0.3em; font-size: 2.25em; line-height: 1.2; border-bottom: 1px solid rgb(238, 238, 238); }
+h1 { padding-bottom: 0.3em; font-size: 2.25em; line-height: 1.2;}
 h2 { padding-bottom: 0.3em; font-size: 1.75em; line-height: 1.225; border-bottom: 1px solid rgb(238, 238, 238); }
 h3 { font-size: 1.5em; line-height: 1.43; }
 h4 { font-size: 1.25em; }
