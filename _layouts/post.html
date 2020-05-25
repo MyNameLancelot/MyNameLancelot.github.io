@@ -26,7 +26,8 @@
     <div class="row">
       <!-- sidebar, which will move to the top on a small screen -->
       <div class="col-lg-3">
-        <nav id="toc" data-toggle="toc" data-spy="affix"></nav>
+	    <!-- data-toggle="toc" -->
+        <nav id="toc"  data-spy="affix"></nav>
       </div>
       <!-- main content area -->
          <div class="col-lg-9">
@@ -39,4 +40,14 @@
     </footer>
   </div>
 </body>
+<script>
+	$(function() {
+	  var navSelector = '#toc';
+	  var $myNav = $(navSelector);
+	  Toc.init($myNav);
+	  $('body').scrollspy({
+		target: navSelector
+	  });
+	});
+</script>
 </html>
