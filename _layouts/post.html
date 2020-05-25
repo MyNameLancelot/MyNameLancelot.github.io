@@ -15,8 +15,7 @@
     <script src="{{ site.url }}/assets/bootstrap.min.js" ></script>
     <script src="{{ site.url }}/assets/bootstrap-toc.min.js"></script>
   </head>
-  <!-- data-target="#toc" -->
-<body data-spy="scroll" >
+<body data-spy="scroll" data-target="#toc">
 	
   <div class="github-fork-ribbon-wrapper right">
 	<div class="github-fork-ribbon">
@@ -27,12 +26,11 @@
     <div class="row">
       <!-- sidebar, which will move to the top on a small screen -->
       <div class="col-lg-3">
-	    <!-- data-toggle="toc" data-spy="affix" data-scope="h2" -->
-        <nav id="toc" ></nav>
+        <nav id="toc" data-toggle="toc" data-spy="affix"></nav>
       </div>
       <!-- main content area -->
          <div class="col-lg-9">
-		 <h1 class="pagetitle">{{ page.title }}</h1>
+		 <h1 class="pagetitle" data-toc-skip>{{ page.title }} </h1>
          {{ content }}
       </div>
     </div>
@@ -41,15 +39,4 @@
     </footer>
   </div>
 </body>
-<script type="text/javascript">
-	$(function() {
-	  Toc.init({
-	     $scope: $("h2"),
-		 $nav: $("#toc"),
-	  });
-	  $("body").scrollspy({
-		target: "#toc"
-	  });
-	});
-</script>
 </html>
