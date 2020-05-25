@@ -40,6 +40,17 @@
   </div>
 </body>
 <script type="text/javascript">
+	$(function() {
+	  Toc.init({
+	     $scope: $("h2"),
+		 $nav: $("#toc"),
+	  });
+	  $("body").scrollspy({
+		target: navSelector
+	  });
+	});
+
+
 	Toc.init({
 	  $scope: $("h2")
 	});
