@@ -17,6 +17,16 @@
     <script src="{{ site.url }}/assets/bootstrap.min.js" ></script>
     <script src="{{ site.url }}/assets/bootstrap-toc.min.js"></script>
   </head>
+  <style>
+	@media print {
+	   #toc {
+		  display: none
+	   }
+	   .github-fork-ribbon-wrapper {
+	   		  display: none
+	   }
+	}
+  </style>
 <body data-spy="scroll" data-target="#toc">
 	
   <div class="github-fork-ribbon-wrapper right">
