@@ -3,9 +3,11 @@ layout: post
 title: "elasticsearch技术"
 date: 2019-05-22 14:43:02
 categories: searchengine
+keywords: "elasticsearch,搜索"
+description: "elasticsearch的技术"
 ---
 
-# 	一、ElasticSearch概念
+## 一、ElasticSearch概念
 
 ​	ElasticSearch是一个基于Lucene的搜索服务器。它提供了一个分布式多用户能力的全文搜索引擎，基于RESTful web接口。Elasticsearch是用Java开发的，并作为Apache许可条款下的开放源码发布，是当前流行的企业级搜索引擎。设计用于云计算中，能够达到实时搜索，稳定，可靠，快速，安装使用方便。
 
@@ -17,7 +19,7 @@ categories: searchengine
 
 （3）弥补数据库在全文检索，同义词处理，相关度排名，复杂数据分析，海量数据的近实时处理的不足
 
-## ElasticSearch的相关概念
+### ElasticSearch的相关概念
 
 - **cluster**
 
@@ -53,7 +55,7 @@ categories: searchengine
 
   代表ElasticSearch内部节点或集群与客户端的交互方式，默认内部是使用tcp协议进行交互，同时它支持http协议（json格式）、thrift、servlet、memcached、zeroMQ等的传输协议（通过插件方式集成）。
 
-## ElasticSearch的核心概念
+### ElasticSearch的核心概念
 
 - **Near Realtime (NRT)**
 
@@ -85,7 +87,7 @@ categories: searchengine
 >
 > 一个index分配到多个shard上，primary shard和他对应的replica shard不能在同一个节点中存储
 
-# 二、Linux环境下安装
+## 二、Linux环境下安装
 
 ```txt
 ElasticSearch
@@ -105,7 +107,7 @@ ElasticSearch
  |--data【在ES启动后，会自动创建的目录，内部保存ES运行过程中需要保存的数据】
 ```
 
-## 安装ElasticSearch
+### 安装ElasticSearch
 
 第一步、ElasticSearch不允许root用户启动，所以需要先创建用户
 
@@ -147,12 +149,13 @@ su es
 ./bin/elasticsearch
 ```
 
-## 安装Kibana
+### 安装Kibana
 
 第一步、修改客户端访问控制。修改`config/kibana.yml`
 
 ```yaml
-server.host:  "0.0.0.0" #默认localhost，非本机不可访问
+#默认localhost，非本机不可访问
+server.host:  "0.0.0.0"
 #elasticsearch.hosts: ["http://localhost:9200"]  有必要时修改
 ```
 
@@ -163,9 +166,9 @@ su es
 ./bin/kibana
 ```
 
-# 三、Kibana简单命令
+## 三、Kibana简单命令
 
-## 查看健康状态
+### 查看健康状态
 
 命令：`GET _cat/health?v`
 
@@ -180,7 +183,7 @@ su es
 | status  | green【每个索引的primary shard和replica shard都是active的】<br />yellow【每个索引的primary shard都是active的，但部分的replica shard不是active的】<br />red【不是所有的索引都是primary shard都是active状态的】 |
 
 
-## 检查分片信息
+### 检查分片信息
 
 命令：`GET _cat/shards?v`
 
@@ -190,7 +193,7 @@ su es
 
 显示了每个索引的分片信息
 
-## 查看索引信息
+### 查看索引信息
 
 命令：`GET _cat/indices?v`
 
@@ -198,7 +201,7 @@ su es
 
 ![indices-info](/img/searchengine/indices-info.png)
 
-## 索引相关
+### 索引相关
 
 - **新增索引**
 
@@ -210,8 +213,8 @@ su es
   PUT /test_index
   {
     "settings":{
-      "number_of_shards" : 2,		//指定primary shard个数
-      "number_of_replicas" : 1	//指定每个primary shard的replica shard个数
+      "number_of_shards" : 2,    //指定primary shard个数
+      "number_of_replicas" : 1   //指定每个primary shard的replica shard个数
     }
   }
   ```
@@ -225,7 +228,7 @@ su es
   ```txt
   PUT /test_index/_settings
   {
-     "number_of_replicas" : 1		//指定每个primary shard的replica shard个数
+     "number_of_replicas" : 1    //指定每个primary shard的replica shard个数
   }
   ```
 
@@ -243,13 +246,13 @@ su es
 
 缺点：只要index的结构发生任何变化，都必须重建索引。
 
-## 文档CRUD
+### 文档CRUD
 
 - **创建文档**
 
   - **PUT语法**
 
-    此操作为手工指定id的Document新增方式
+    此操作为手工指定id的Document新增方式【7以后必须使用POST新增】
 
     ```txt
     PUT /test_index/my_type/1
@@ -264,18 +267,18 @@ su es
 
     ```txt
     {
-      "_index" : "test_index",		#新增的document在什么index中
-      "_type" : "my_type",			#新增的document在什么type中
-      "_id" : "1",					#指定的id是多少
-      "_version" : 1,				#document的版本是多少，版本从1开始递增，每次写操作都会+1
-      "result" : "created",			#created创建，updated修改，deleted删除
+      "_index" : "test_index",   #新增的document在什么index中
+      "_type" : "my_type",       #新增的document在什么type中
+      "_id" : "1",               #指定的id是多少
+      "_version" : 1,            #document的版本是多少，版本从1开始递增，每次写操作都会+1
+      "result" : "created",      #created创建，updated修改，deleted删除
       "_shards" : {					
-        "total" : 2,				#分片数量只提示primary shard
-        "successful" : 1,			#成功几个
-        "failed" : 0				#失败几个
+        "total" : 2,             #分片数量只提示primary shard
+        "successful" : 1,        #成功几个
+        "failed" : 0             #失败几个
       },						
-      "_seq_no" : 0,				#执行的序列号
-      "_primary_term" : 1			#词条比对
+      "_seq_no" : 0,             #执行的序列号
+      "_primary_term" : 1        #词条比对
     }
     ```
 
@@ -350,7 +353,8 @@ su es
         }
       ]
     }
-        ==============================================================================
+        
+    ------------------------------------------------------------------------------
     GET /test_index/my_type/_mget
     {
       "docs":[
@@ -359,7 +363,8 @@ su es
         {"_id":3}
       ]
     }
-        ==============================================================================
+        
+    ------------------------------------------------------------------------------
     GET /test_index/my_type/_mget
     {
       "ids":[1,2,3,4]
@@ -501,7 +506,7 @@ su es
 
 ​	4）协调节点得到查询结果后，再将查询结果返回给客户端
 
-# 四、元数据
+## 四、元数据
 
 - **_index**
 
@@ -521,19 +526,19 @@ su es
 
   删除Document也会使\_version自增。当使用PUT命令再次增加同id的Document，_version会继续之前的版本继续自增。
 
-# 五、分布式架构分析
+## 五、分布式架构分析
 
-## 分布式机制的透明隐藏特性
+### 分布式机制的透明隐藏特性
 
 ​	ElasticSearch本身就是一个分布式系统，就是为了处理海量数据的应用。隐藏了复杂的分布式机制，简化了配置和操作的复杂度。ElasticSearch在现在的互联网环境中，盛行的原因，主要的核心就是分布式的简化。
 
 ​	ElasticSearch隐藏的分布式内容：分片机制、集群发现、负载均衡、路由请求、集群扩容、shard重分配等。
 
-## 节点变化时的数据重平衡
+### 节点变化时的数据重平衡
 
 ​	在节点发生变化时，ES的cluster会自动调整每个节点中的数据，也就是shard的重新分配。这个过程叫做rebalance。rebalance目的是为了提高性能，理论上，当数据量达到一定级别的时候，每个shard分片上的数据量是均等的。那么每个节点管理的shard数量是均等的情况，ES集群才能提供最好的服务性能。
 
-## master节点作用
+### master节点作用
 
 ​	维护集群元数据的节点。如：索引的变更（创建和删除）对应的元数据保存在master节点中。
 
@@ -541,7 +546,7 @@ su es
 
 ​	集群在默认配置中，会自动的选举出master节点。元数据是一个收集管理的过程。不是一个必要的不可替代的数据。Master如果宕机，集群会选举出新的master，新的master会在集群的所有节点中重新收集集群元数据并管理。
 
-## 节点平等的分布式架构
+### 节点平等的分布式架构
 
 - 节点平等
 
@@ -565,7 +570,7 @@ su es
 
 4）节点4将最终结果响应给客户端，这种操作就屏蔽了集群对客户端的影响。
 
-## 并发冲突
+### 并发冲突
 
 - **使用内置_version**【7.x版本以后废弃】
 
@@ -609,7 +614,7 @@ su es
   }
   ```
 
-# 六、Query String搜索
+## 六、Query String搜索
 
 语法：`GET [/index_name/type_name/]_search[?parameter_name=parameter_value&...]`
 
@@ -619,48 +624,48 @@ GET /current_index/_search?q=remark:test+AND+name:doc&sort=order_no:desc
 
 此搜索操作一般只用在快速检索数据使用，如果查询条件复杂，很难构建query string，生产环境中很少使用
 
-## 全数据查询
+### 全数据查询
 
 ```txt
 //查询所有索引下的数据，timeout为超时时长定义，不影响响应的正常返回，只影响返回条数
 GET _search?timeout=10ms
 ```
 
-## _all元数据搜索
+### _all元数据搜索
 
 `_all`是一个内置元数据，可是内置变量名。代表全部的含义。【很少使用】
 
 ```txt
-GET /_all/_search		//在所有索引中搜索数据
+GET /_all/_search                             //在所有索引中搜索数据
 
 GET /index_name/type_name/_search?q=key_words	//在指定的索引中搜素包含key_words的信息
 ```
 
 > 在ES维护Document的时候，会将Document中的所有字段数据连接作为一个_all元数据
 
-## 多索引搜索
+### 多索引搜索
 
 所谓的multi-index就是指从多个index中搜索数据。相对使用较少，只有在复合数据搜索的时候，可能出现。一般来说，如果真使用复合数据搜索，都会使用_all。
 
 如：搜索引擎中的无条件搜索。（现在的应用中都被屏蔽了。使用的是默认搜索条件，或不执行搜索）
 
 ```txt
-GET /products_es,products_index/_search		//在两个索引中搜索
+GET /products_es,products_index/_search   //在两个索引中搜索
 
-GET /products_*/_search						//使用通配符匹配
+GET /products_*/_search                   //使用通配符匹配
 
-GET /_all/_search							//_all代表所有索引
+GET /_all/_search                         //_all代表所有索引
 ```
 
-## 分页搜索与Deep Paging问题
+### 分页搜索与Deep Paging问题
 
 ```txt
-GET /_search?from=0&size=10 		// from从第几条开始查询，size返回的条数
+GET /_search?from=0&size=10               // from从第几条开始查询，size返回的条数
 ```
 
 ​		执行搜索时请求发送到协调节点中，协调节点将搜索请求发送给所有的节点，而数据可能分部在多个节点中，所以会造成以下现象：集群有4个节点，每个节点有1个分片（primary shard），发起GET /_search?from=100&size=50时，每个节点会返回150条数据，协调节点一共接收到600条数据，进行排序并取其中第100~150条数据，如果页数过深会造成效率低下问题
 
-## `-`,`+`符号条件**
+### `-`,`+`符号条件**
 
 ```txt
 GET /products_index/phone_type/_search?q=+name:plus		//搜索的关键字必须包含plus
@@ -672,11 +677,11 @@ GET /products_index/phone_type/_search?q=-name:plus		//搜索的关键字必须�
 
 `-` ：与`+`符号含义相反，就是搜索指定的字段中不包含key words的数据
 
-# 七、Query DSL搜索
+## 七、Query DSL搜索
 
 query DSL【Domain Specified Language】
 
-## 查询所有数据
+### 查询所有数据
 
 ```txt
 GET /current_index/_search?timeout=1ms	
@@ -685,14 +690,14 @@ GET /current_index/_search?timeout=1ms
 }
 ```
 
-## 全文检索
+### 全文检索
 
 ```txt
 GET /es/doc/_search
 {
   "query": {
-    "match": {				//单字段模式
-      "note": "only life"	//会根据field对应的analyzer对搜索条件做分词
+    "match": {            //单字段模式
+      "note": "only life" //会根据field对应的analyzer对搜索条件做分词
     }
   }
 }
@@ -700,15 +705,15 @@ GET /es/doc/_search
 GET /es/doc/_search
 {
   "query": {
-    "multi_match": {					//多字段模式
-      "query": "only life",				//会根据field对应的analyzer对搜索条件做分词
-      "fields": ["note","content"]		//指定field
+    "multi_match": {                //多字段模式
+      "query": "only life",         //会根据field对应的analyzer对搜索条件做分词
+      "fields": ["note","content"]  //指定field
     }
   }
 }
 ```
 
-## 词元搜索
+### 词元搜索
 
 搜索条件`不`分词，使用搜索条件进行精确匹配。如果搜索字段被分词，搜索条件是一段话则无法匹配这种情况下适合匹配不分词字段。
 
@@ -734,7 +739,7 @@ GET /es/doc/_search
 }
 ```
 
-## 排序
+### 排序
 
 当字段类型为text时，使用字符串类型的字段作为排序依据会有问题【ES对字段数据做分词，建立倒排索引。分词后，先使用哪一个单词做排序是不固定的】，此时需要在此字段上建立keyword类型的子字段，或者建立fielddata。
 
@@ -751,7 +756,7 @@ GET /kibana_sample_data_ecommerce/_search
 }
 ```
 
-## 分页
+### 分页
 
 ```txt
 GET /kibana_sample_data_ecommerce/_search
@@ -761,7 +766,7 @@ GET /kibana_sample_data_ecommerce/_search
 }
 ```
 
-## 范围搜索
+### 范围搜索
 
 ```txt
 GET /_search
@@ -787,7 +792,7 @@ GET /_search
 }
 ```
 
-## 只返回部分字段
+### 只返回部分字段
 
 ```txt
 GET /kibana_sample_data_ecommerce/_search
@@ -796,7 +801,7 @@ GET /kibana_sample_data_ecommerce/_search
 }
 ```
 
-## 组合搜索
+### 组合搜索
 
 bool - 用于组合多条件，相当于java中的布尔表达式。
 
@@ -846,7 +851,7 @@ GET /emp_index/emp_type/_search
 }
 ```
 
-## scroll搜索
+### scroll搜索
 
 ​	如果需要一次性搜索出大量数据，那么执行效率一定不会很高，这个时候可以使用scroll滚动搜索的方式实现搜索。scroll滚动搜索类似分页，是在搜索的时候，先查询一部分，之后再查询下一部分，分批查询总体数据。可以实现一个高效的响应。scroll搜索会在第一次搜索的时候保存一个快照，这个快照保存的时长由请求指定，后续的查询会依据这个快照执行再次查询。如果这个过程中，ES中的document发生了变化，是不会影响到原搜索结果的。
 
@@ -875,7 +880,7 @@ GET /_search/scroll
 }
 ```
 
-## 搜索精度控制
+### 搜索精度控制
 
 搜索精度的精确控制，条件是否是同时满足还是只需满足一个即可
 
@@ -915,7 +920,7 @@ GET /student/java/_search
 }
 ```
 
-## boost权重控制
+### boost权重控制
 
 设置指定字段的权重值，控制相关度分数
 
@@ -954,7 +959,7 @@ GET /student/java/_search
 
 ​	在shard0中，有100个document中包含java词组。在shard1中，有10个document中包含java词组，在执行搜索的时候，ES计算相关度分数时，就会出现计算不准确的问题。因为ES计算相关度分数是在shard本地计算的。根据TF/IDF算法，在shard0中的document相关度分数会低于shard1中的相关度分数。
 
-## 搜索策略
+### 搜索策略
 
 **基于dis_max实现best fields策略进行多字段搜索**
 
@@ -1068,7 +1073,7 @@ GET student/java/_search
 
 **most fields策略是尽可能匹配更多的字段，所以会导致精确搜索结果排序问题。又因为cross fields搜索，不能使用minimum_should_match来去除长尾数据。所以在使用most fields和cross fields策略搜索数据的时候，都有不同的缺陷。所以商业项目开发中，都推荐使用best fields策略实现搜索。**
 
-## Suggest搜索建议
+### Suggest搜索建议
 
 实现suggest的时，其构建的不是倒排索引，也不是正排索引，是纯的用于进行前缀搜索的一种特殊的数据结构，而且会全部放在内存中，所以suggest search进行的前缀搜索提示，性能非常高。
 
@@ -1113,7 +1118,7 @@ GET /suggest/doc/_search
 }
 ```
 
-## 近似匹配
+### 近似匹配
 
 **短语搜索**
 
@@ -1392,7 +1397,7 @@ GET /es/doc/_search
 }
 ```
 
-## 高亮显示
+### 高亮显示
 
 **plain highlighting**
 
@@ -1467,7 +1472,7 @@ PUT /posthightling
 }
 ```
 
-## 地理位置搜索
+### 地理位置搜索
 
 - 定义geo point mapping
 
@@ -1562,7 +1567,7 @@ GET /hotel_app/hotels/_search
 }
 ```
 
-## Span查询
+### Span查询
 
 ​	跨度查询是low-level查询，可以对指定术语的顺序和接近度进行专业控制。这些通常用于对法律文件或专利实施非常具体的查询。跨度查询不能与非跨度查询混合（span_multi查询除外）。跨度查询是非常专业的查询方式，在一般的商业应用中并不多见。
 
@@ -1808,7 +1813,7 @@ GET cars/_search
 
 这个查询与span_containing查询作用差不多，不过span_containing是基于lucene中的SpanContainingQuery，而span_within则是基于SpanWithinQuery。
 
-## 搜索模板
+### 搜索模板
 
 **一次性调用的template**
 
@@ -1897,9 +1902,9 @@ GET _scripts/test
 DELETE _scripts/test
 ```
 
-# 八、查询过滤
+## 八、查询过滤
 
-## 过滤语法
+### 过滤语法
 
 过滤的时候，不进行任何的匹配分数计算，且filter内置cache自动缓存常用的filter数据，有效提升过滤速度，相对于query来说，filter相对效率较高。Query要计算搜索匹配相关度分数。Query更加适合复杂的条件搜索。Query和Filter并行执行。
 
@@ -1944,7 +1949,7 @@ GET /es/doc/_search
 }
 ```
 
-## filter 底层执行原理
+### filter 底层执行原理
 
 - 构建bitset
 
@@ -1972,9 +1977,9 @@ GET /es/doc/_search
 
     只要在执行query的时候包含filter过滤条件，会先检查cache中是否有这个filter的bitset cache，如果有，则直接使用，如果没有，则搜索过滤index中的document。
 
-# 九、搜索相关
+## 九、搜索相关
 
-## match底层转换
+### match底层转换
 
 ​	ElasticSearch执行match搜索时，通常都会对搜索条件进行底层转换，来实现最终的搜索结果。
 
@@ -2096,7 +2101,7 @@ GET /student/java/_search
 
 *建议，如果不怕麻烦，尽量使用转换后的语法执行搜索，效率更高。*
 
-## 搜索语法分析
+### 搜索语法分析
 
 ​	validate语法可以对搜索语法进行分析。检查是否有错误语法。可以辅助搜索语法分析，排除错误。通常用于复杂搜索，检查语法格式。
 
@@ -2118,11 +2123,10 @@ GET /es/doc/_validate/query?explain
       "note": "people"
     }
   }
-
 }
 ```
 
-## Term Vector
+### Term Vector
 
 term vector是用于获取document中的某个field内的各个term的统计信息。这些统计信息包含下述内容：
 
@@ -2262,7 +2266,7 @@ GET /vector/doc/_termvectors
 }
 ```
 
-# 十、聚合搜索
+## 十、聚合搜索
 
 前序：分析，分组，聚合，字符串排序等操作需要设置正排索引【子字段keyword】或者字段的fielddata为true(建立正排索引)
 
@@ -2280,7 +2284,7 @@ PUT /products_index/phone_type/_mapping
 }
 ```
 
-## 词元统计
+### 词元统计
 
 在ElasticSearch中默认为分组数据做排序使用的是`_count`[统计个数]执行降序排列。也可以使用`_key`[统计列的内容]元数据
 
@@ -2301,7 +2305,7 @@ GET /cars/sales/_search
 }
 ```
 
-## 计算平均值
+### 计算平均值
 
 ```txt
 GET /products_index/phone_type/_search
@@ -2317,7 +2321,7 @@ GET /products_index/phone_type/_search
 }
 ```
 
-## 最大值&最小值&总计
+### 最大值&最小值&总计
 
 ```txt
 GET /cars/sales/_search
@@ -2343,7 +2347,7 @@ GET /cars/sales/_search
 }
 ```
 
-## 聚合嵌套【下钻】
+### 聚合嵌套【下钻】
 
 聚合是可以嵌套的，内层聚合是依托于外层聚合的结果之上实现聚合计算。
 
@@ -2395,7 +2399,7 @@ GET /cars/sales/_search
 }
 ```
 
-## 聚合平铺
+### 聚合平铺
 
 聚合类嵌套的聚合条件是平级关系
 
@@ -2425,7 +2429,7 @@ GET /cars/sales/_search
 }
 ```
 
-## 聚合排序
+### 聚合排序
 
 聚合中如果使用order排序的话，要求排序字段必须是一个聚合相关字段【聚合下的子聚合命名】
 
@@ -2453,7 +2457,7 @@ GET /products_index/phone_type/_search
 }
 ```
 
-## 范围区间
+### 范围区间
 
 指定分组区间，统计区间数据个数
 
@@ -2550,7 +2554,7 @@ GET /hotel_app/hotels/_search
 }
 ```
 
-## top_hits聚合
+### top_hits聚合
 
 对组内的数据进行排序，并选择其中排名高的数据，那么可以使用top_hits来实现。
 
@@ -2585,7 +2589,7 @@ GET /cars/_search
 }
 ```
 
-## Global Bucket
+### Global Bucket
 
 在聚合统计数据的时候，有些时候需要对比部分数据和总体数据。global是用于定义一个全局bucket，这个bucket会忽略query的条件，检索所有document进行对应的聚合统计。
 
@@ -2618,7 +2622,7 @@ GET /cars/_search
 }
 ```
 
-## 聚合内filter
+### 聚合内filter
 
 这个过滤器只对query搜索得到的结果执行filter过滤。如果filter放在aggs外部，过滤器则会过滤所有的数据。
 
@@ -2645,7 +2649,7 @@ GET /cars/_search
 }
 ```
 
-## 去除重复
+### 去除重复
 
 使用`cardinality`语法去除重复数据后，统计数据量。这种语法的计算类似SQL中的distinct count计算。
 
@@ -2708,7 +2712,7 @@ PUT /cars
 
 单个文档节省的时间是非常少的，但是如果聚合一亿数据，每个字段多花费10纳秒的时间，那么在每次查询时都会额外增加1秒，如果我们要在非常大量的数据里面使用 cardinality ，我们可以权衡使用。
 
-## 百分比算法
+### 百分比算法
 
 **percentiles**
 
@@ -2790,7 +2794,7 @@ GET /test_percentiles/logs/_search
 }
 ```
 
-## 海量bucket优化
+### 海量bucket优化
 
 默认ElasticSearch执行聚合分析时，是按照top_hits深度优先的方式去执行的。会计算出每一项结果。但是遇到计算销量前五的品牌中前十的车型这种问题时，使用深度优先计算不太合适，应该逐层聚合bucket，并过滤后，在当前层的结果基础上再次执行下一层的聚合（广度优先）。
 
@@ -2817,7 +2821,7 @@ GET /cars/_search
 }
 ```
 
-## 聚合算法简介
+### 聚合算法简介
 
 - **易并行聚合算法**
 
@@ -2839,9 +2843,9 @@ GET /cars/_search
 
 大数据 + 实时性 ： 这是一种不精准的计算，近似估计，一般都会有一定错误率（一般5%以内）。如ES中的近似聚合算法。
 
-# 十一、同义词与分词器
+## 十一、同义词与分词器
 
-## 概念
+### 概念
 
 同义词：
 
@@ -2855,7 +2859,7 @@ GET /cars/_search
 
 - 分词器的功能是处理Document中的field即创建倒排索引过程中用于切分field数据
 
-## 默认提供的常见分词器
+### 默认提供的常见分词器
 
 - `standard analyzer`：是ES中的默认分词器。标准分词器，处理英语语法的分词器。这种分词器也是ES中默认的分词器。切分过程中会忽略停止词等。会进行单词的大小写转换。过滤连接符或括号等常见符号。
 
@@ -2867,7 +2871,7 @@ GET /cars/_search
 
 搜索条件中的key_words也需要经过分词，且搜索条件中的条件数据使用的分词器与对应的字段使用的分词器是统一的。否则会导致搜索结果丢失。
 
-## IK分词器
+### IK分词器
 
 **安装步骤**
 
@@ -2948,11 +2952,11 @@ GET /_analyze
 }
 ```
 
-# 十二、Mapping
+## 十二、Mapping
 
 ​	Mapping决定了一个index中的field使用什么数据格式存储，使用什么分词器解析，是否有子字段，是否需要copy to其他字段等。Mapping决定了index中的field的特征。
 
-## 查询当前索引mapping信息
+### 查询当前索引mapping信息
 
 ```txt
 GET /book_index/_mapping
@@ -2996,7 +3000,7 @@ GET /book_index/_mapping
 
 字段类型为text，分词器为standard，一定创建xxx.keyword子字段，类型是keyword类型，长度为256个字符
 
-## mapping核心数据类型
+### mapping核心数据类型
 
 | 类型名称 | 关键字                     |
 | -------- | -------------------------- |
@@ -3006,7 +3010,7 @@ GET /book_index/_mapping
 | 布尔型   | boolean                    |
 | 日期型   | date                       |
 
-## dynamic mapping
+### dynamic mapping
 
 ​	ES自动建立index，创建type，以及type对应的mapping，mapping中包含了每个field对应的数据类型，以及如何分词等设置
 
@@ -3020,7 +3024,7 @@ dynamic mapping对字段的类型分配
 | 2018-01-01    | date                                 |
 | hello world   | text（string）【默认standard分词器】 |
 
-## custom mapping
+### custom mapping
 
 手工创建mapping时，只能新增mapping设置，不能对已有的mapping进行修改
 
@@ -3078,7 +3082,7 @@ GET /book_index/_analyze
 }
 ```
 
-## mapping的复杂定义
+### mapping的复杂定义
 
 - **multi field**
 
@@ -3277,7 +3281,7 @@ GET /book_index/_analyze
 
   copy_to字段【上述的search_key】未必存储，但是在逻辑上是一定存在
 
-## root object
+### root object
 
 ​	mapping的root object就是指设置index的mapping时，一个type对应的json数据。包括的内容有：properties， metadata（_id, _source, _all）等。
 
@@ -3303,7 +3307,7 @@ PUT /test_index9
 }
 ```
 
-## 定制dynamic策略
+### 定制dynamic策略
 
 ​	ES中支持在自定义mapping时，为type定制dynamic mapping策略，让index更加的友好。定制dynamic mapping策略时，可选值有：true（默认值）-遇到陌生字段自动进行dynamic mapping， false-遇到陌生字段，不进行dynamic mapping（会保存数据，但是不做倒排索引，无法实现任何的搜索），strict-遇到陌生字段，直接报错。
 
@@ -3339,7 +3343,7 @@ PUT /dynamic_strategy/dynamic_type/1
 
 定制dynamic mapping，使用较少，因为很难去分析出一套完整的，有扩展能力的结构。如果使用，一般在固定的，几乎不会改变的数据结构中使用。如：身份证信息
 
-# 十三、Document写入原理
+## 十三、Document写入原理
 
 ​	ElasticSearch为了实现搜索的近实时，结合了内存buffer、OS cache、disk三种存储，尽可能的提升搜索能力。ElasticSearch的底层使用lucene实现。在lucene中一个index是分为若干个segment（分段）的，每个segment都会存放index中的部分数据。在ElasticSearch中，是将一个index先分解成若干shard，在shard中，使用若干segment来存储具体的数据。
 
@@ -3361,9 +3365,9 @@ PUT /dynamic_strategy/dynamic_type/1
 
 8）ElasticSearch会自动的执行segment merge操作。被标记为deleted状态的document会在此时被物理删除。merge的流程是：①选择一些大小相近的segment文件，merge成一个大的segment文件②将merge后的文件持久化到磁盘中③执行一个commit操作，commit point除记录要持久化的OS cache中的index segment外，还记录了merge后的segment文件和要删除的原segment文件④commit操作执行成功后，将merge后的segment打开为搜索提供服务，将旧的segment关闭并删除。
 
-# 十四、相关度评分算法
+## 十四、相关度评分算法
 
-## 算法介绍
+### 算法介绍
 
 ​	ES中使用的是term frequency / inverse document frequency算法，简称TF/IDF算法。是ElasticSearch相关度评分算法的一部分，也是最重要的部分。
 
@@ -3387,7 +3391,7 @@ GET /es/doc/_search
 }
 ```
 
-## 相关**度分数计算步骤**
+### 相关**度分数计算步骤**
 
 **第一步：boolean model**
 
@@ -3403,7 +3407,7 @@ GET /es/doc/_search
 
 ​	ElasticSearch会根据一个term对于所有document的相关度分数，来计算得出一个query vector。在根据多个term对于一个document的相关度分数，来计算得出若干document vector。将这些计算结果放入一个向量空间，再通过一些数学算法来计算document vector相对于query vector的相似度，来得到最终相关度分数。
 
-## 调节、优化相关对评分的方式
+### 调节、优化相关对评分的方式
 
 **query-time boost**
 
@@ -3496,9 +3500,9 @@ GET /fscore/doc/_search
 }
 ```
 
-# 十五、数据建模
+## 十五、数据建模
 
-## 模拟关系型数据库数据建模
+### 模拟关系型数据库数据建模
 
 ```txt
 PUT /product
@@ -3549,7 +3553,7 @@ PUT /category
 }
 ```
 
-##  一对一数据建模
+###  一对一数据建模
 
 一般对数据进行组合存储。将某一个数据结构作为一部分（对象类型属性）实现数据的存储。
 
@@ -3590,7 +3594,7 @@ PUT person_index
 }
 ```
 
-## 一对多数据建模
+### 一对多数据建模
 
 ```txt
 ==================================一个用户对应多个地址==================================
@@ -3657,7 +3661,7 @@ PUT address
 
 缺点：数据大量冗余、耦合程度高、不易修改与维护
 
-**==nested object==**
+**nested object**
 
 如果使用`一个用户对应多个地址`的存储方式，查询市和街道同时满足条件会返回大量不是我们想要的数据【返回中包含市匹配而街道不匹配的和街道匹配而市不匹配的】,原因是ElasticSearch对底层对象做了扁平化处理。
 
@@ -3813,7 +3817,7 @@ GET /user_index/user/_search
 
 虽然语法变的复杂了，但是在数据的读写操作上都不会有错误发生，是推荐的设计方式。
 
-## 文件系统数据建模
+### 文件系统数据建模
 
 用于实现文件目录搜索
 
@@ -3875,7 +3879,7 @@ GET /code/doc/_search
 }
 ```
 
-## 父子关系数据建模
+### 父子关系数据建模
 
 父子关系数据建模是模拟关系型数据库的建模方式，用不同的索引保存各自的数据，通过底层提供的父子关系，让ElasticSearch辅助实现类似关系型数据库的多表联合查询。这种建模方式，数据几乎没有冗余，且查询效率高。
 
@@ -4012,13 +4016,13 @@ GET /ecommerce_products_index/ecommerce/_search
 }
 ```
 
-##  祖孙三代关系数据模型
+###  祖孙三代关系数据模型
 
 原理和父子关系数据模型一致，就是在数据层级关系上更加深入。`type`为`join`用于描述关系的字段mapping继续向下扩展即可。
 
-# 十六、重建索引&零停机
+## 十六、重建索引&零停机
 
-## 重建索引-reindex
+### 重建索引-reindex
 
 ​	索引类型一旦建立便不可更改，如果要修改数据类型，只能重建索引：用新的设置创建新的索引并把文档从旧的索引复制到新的索引。
 
@@ -4089,7 +4093,7 @@ POST _reindex
 }
 ```
 
-## 零停机
+### 零停机
 
 **零停机问题**：reindex索引，操作指向新的index，则必须停止后台服务，更改索引名称，这样会引起停机问题。
 
@@ -4125,7 +4129,7 @@ POST _aliases
 
 其它使用场景：如电商中有手机索引，座机索引，使用别名电话设备作为两个索引的别名。访问电话设备，则可以在两个索引中搜索数据。
 
-# 十七、正排索引
+## 十七、正排索引
 
 ​	ElasticSearch在存储document时，会根据document中的field类型建立对应的索引。通常来说只创建倒排索引，倒排索引是为了搜索而存在的。但是如果对数据进行排序、聚合、过滤等操作的时候，就需要创建正排索引（doc values）。doc values会保存到磁盘中，如果OS的内存足够会被缓存。
 
@@ -4135,7 +4139,7 @@ POST _aliases
 
 ​	如果真的需要同时使用倒排索引和正排索引，都是使用子字段的方式来实现。
 
-## Doc Values与聚合分析内部原理
+### Doc Values与聚合分析内部原理
 
 假设倒排索引的内容如下【文档模型中只有一列body】
 
@@ -4184,9 +4188,9 @@ Doc_3   | dog, dogs, fox, jumped, over, quick, the
 
 当数据被转置之后，收集到 Doc中的token信息会非常容易。获得每个文档行，获取所有的词项即可。
 
-==Doc values 不仅可以用于聚合。还包括排序，访问字段值的脚本，父子关系处理。Doc values是在不可分词的类型field中创建的。如：keyword、int、date、long等==
+Doc values 不仅可以用于聚合。还包括排序，访问字段值的脚本，父子关系处理。Doc values是在不可分词的类型field中创建的。如：keyword、int、date、long等
 
-## doc values特征总结
+### doc values特征总结
 
 - doc values也是索引创建时生成的，简单来说，就是数据录入索引时创建正排索引（index-time）
 
@@ -4194,7 +4198,7 @@ Doc_3   | dog, dogs, fox, jumped, over, quick, the
 
 ElasticSearch大部分操作都是基于系统缓存进行的，而不是JVM。官方建议不要给JVM分配太多的内存空间，这样会导致GC开销太大。通常来说，给JVM分配的内存不超过服务器物理内存的1/4。
 
-## fielddata
+### fielddata
 
 如何没有建立doc value可设置fielddata=true，这样可以反转倒排索引并加载到内存中。大量消耗资源不推荐使用。默认fielddata在query time时产生。
 
@@ -4204,7 +4208,7 @@ ElasticSearch大部分操作都是基于系统缓存进行的，而不是JVM。�
 
 - 在text类型的field中，设置fielddata=true，辅助完成聚合分析。【以内存为代价】
 
-## fielddata内存
+### fielddata内存
 
 - fielddata对内存的开销极大，可以通过参数来设置内存限制。在配置文件config/elasticsearch.yml中增加
 
@@ -4230,7 +4234,7 @@ indices.breaker.request.limit: 40% 		# 执行聚合的一次请求的内存限�
 indices.breaker.total.limit: 70% 		# 综合上述两个限制，总计内存限制多少。默认无限制。
 ```
 
-## fielddata的filter过滤
+### fielddata的filter过滤
 
 在创建index时，为fielddata增加filter过滤器，实现一个更加细粒度的内存控制。
 
@@ -4261,7 +4265,7 @@ PUT /fieddata_filter
 }
 ```
 
-## fielddata的预加载
+### fielddata的预加载
 
 fielddata是一个`query-time`生成的正排索引，如果某index中必须使用fielddata，又希望可以提升其效率，则可以使用预加载的方式来实现性能的提升。预加载fielddata会提高query过程的效率，但是降低index写入数据的效率。且始终对内存有很高的压力。不建议使用。
 
@@ -4287,9 +4291,9 @@ PUT /fieddata_filter
 }
 ```
 
-# 十八、JAVA API
+## 十八、JAVA API
 
-## 创建连接客户端
+### 创建连接客户端
 
 ```java
  @Test
@@ -4317,7 +4321,7 @@ public void testCreateClient() {
 }
 ```
 
-## 索引操作
+### 索引操作
 
 - **创建索引**
 
@@ -4498,7 +4502,7 @@ public void testDeleteIndex() {
 }
 ```
 
-## 文档操作
+### 文档操作
 
 - **创建文档**
 
@@ -4861,7 +4865,7 @@ public void testBulk() throws IOException {
 }
 ```
 
-## 搜索操作
+### 搜索操作
 
 ```java
 /**
@@ -4931,7 +4935,7 @@ public void testSearch() {
 }
 ```
 
-## 聚合操作
+### 聚合操作
 
 ```java
 /**
@@ -4994,9 +4998,9 @@ public void testAggregationSearch(){
 }
 ```
 
-# 十九、Logstash
+## 十九、Logstash
 
-## 从数据库MySQL中增量导入数据到ES
+### 从数据库MySQL中增量导入数据到ES
 
 **第一步：环境准备**
 
