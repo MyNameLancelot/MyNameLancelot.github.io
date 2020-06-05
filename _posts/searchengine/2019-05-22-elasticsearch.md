@@ -219,8 +219,6 @@ su es
   }
   ```
 
-  
-
 - **修改索引**
 
   索引一旦创建，primary shard数量不可变化，可以改变replica shard数量
@@ -231,8 +229,6 @@ su es
      "number_of_replicas" : 1    //指定每个primary shard的replica shard个数
   }
   ```
-
-  
 
 - **删除索引**
 
@@ -320,7 +316,7 @@ su es
 
     语法：
 
-    ```txt
+    ```text
     GET /_mget
     {
       "docs" : [
@@ -370,8 +366,7 @@ su es
       "ids":[1,2,3,4]
     }    
     ```
-    
-
+  
 - **修改Document**
 
   - **替换Document（全量替换）**
