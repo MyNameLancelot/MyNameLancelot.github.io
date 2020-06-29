@@ -3,29 +3,31 @@ layout: post
 title: "Java多线程并发编程"
 date: 2020-01-01 22:34:31
 categories: java
+keywords: "Java并发,并发，juc"
+description: "Java并发编程"
 ---
 
-# 一、线程的状态
+## 一、线程的状态
 
 ![thread-status](/img/concurrent/thread-status.png)
 
-# 二、JDK创建线程的方式
+## 二、JDK创建线程的方式
 
 - 继承Thread类
 
 ```java
 public class ThreadTest {
-    public static void main(String[] args) {
-        Thread thread = new ThreadDemo();
-        thread.start();
-    }
+  public static void main(String[] args) {
+    Thread thread = new ThreadDemo();
+    thread.start();
+  }
 }
 
 class ThreadDemo extends Thread {
-    @Override
-    public void run() {
-        System.out.println("do something");
-    }
+  @Override
+  public void run() {
+    System.out.println("do something");
+  }
 }
 ```
 
@@ -33,17 +35,17 @@ class ThreadDemo extends Thread {
 
 ```java
 public class ThreadTest {
-    public static void main(String[] args) {
-        Thread thread = new Thread(new RunnableDemo());
-        thread.start();
-    }
+  public static void main(String[] args) {
+    Thread thread = new Thread(new RunnableDemo());
+    thread.start();
+  }
 }
 
 class RunnableDemo implements Runnable {
-    @Override
-    public void run() {
-        System.out.println("do something");
-    }
+  @Override
+  public void run() {
+    System.out.println("do something");
+  }
 }
 ```
 
@@ -51,20 +53,20 @@ class RunnableDemo implements Runnable {
 
 ```java
 public class ThreadTest {
-    public static void main(String[] args) throws Exception {
-        FutureTask<String> futureTask = new FutureTask<>(new CallableDemo());
-        Thread thread = new Thread(futureTask);
-        thread.start();     //此时Callable接口已经被调用
-        String result = futureTask.get();
-        System.out.println(result);
-    }
+  public static void main(String[] args) throws Exception {
+    FutureTask<String> futureTask = new FutureTask<>(new CallableDemo());
+    Thread thread = new Thread(futureTask);
+    thread.start();     //此时Callable接口已经被调用
+    String result = futureTask.get();
+    System.out.println(result);
+  }
 }
 
 class CallableDemo implements Callable<String> {
-    @Override
-    public String call() throws Exception {
-        return "do something";
-    }
+  @Override
+  public String call() throws Exception {
+    return "do something";
+  }
 }
 ```
 
@@ -72,17 +74,17 @@ class CallableDemo implements Callable<String> {
 
 ```java
 public class ThreadTest {
-    public static void main(String[] args) {
-        Timer timer = new Timer();
-        timer.schedule(new TimerTaskDemo(),1000);
-    }
+  public static void main(String[] args) {
+    Timer timer = new Timer();
+    timer.schedule(new TimerTaskDemo(),1000);
+  }
 }
 
 class TimerTaskDemo extends TimerTask {
-    @Override
-    public void run() {
-        System.out.println("do something");
-    }
+  @Override
+  public void run() {
+    System.out.println("do something");
+  }
 }
 ```
 
@@ -90,24 +92,24 @@ class TimerTaskDemo extends TimerTask {
 
 ```java
 public class ThreadTest {
-    public static void main(String[] args) {
-        ExecutorService executor = Executors.newFixedThreadPool(5);
-        executor.execute(new ExecutorDemo());
-        executor.shutdown();	//线程池销毁，正在执行和在队列等待的线程不会销毁
-    }
+  public static void main(String[] args) {
+    ExecutorService executor = Executors.newFixedThreadPool(5);
+    executor.execute(new ExecutorDemo());
+    executor.shutdown();	//线程池销毁，正在执行和在队列等待的线程不会销毁
+  }
 }
 
 class ExecutorDemo implements Runnable {
-    @Override
-    public void run() {
-        System.out.println("do something");
-    }
+  @Override
+  public void run() {
+    System.out.println("do something");
+  }
 }
 ```
 
-# 三、线程带来的风险
+## 三、线程带来的风险
 
-## 线程安全性问题
+### 线程安全性问题
 
 **出现线程安全性问题的条件**
 
@@ -122,11 +124,11 @@ class ExecutorDemo implements Runnable {
 - 针对多个线程操作同一共享资源<span style="color:Gold">——</span>不共享资源（ThreadLocal、不共享、操作无状态化、不可变）
 - 针对多个线程进行非原子性操作<span style="color:Gold">——</span>将非原子性操作改成原子性操作（使用加锁机制来保证可见性和有序性以及原子性、使用JDK自带的原子性操作的类、JUC提供的相应的并发工具类）
 
-## 活跃性问题
+### 活跃性问题
 
 **死锁问题**
 
-​	是指两个或两个以上的进程（或线程）在执行过程中，因争夺资源而造成的一种互相等待的现象，若无外力作用，它们都将无法推进下去。此时称系统处于死锁状态或系统产生了死锁，这些永远在互相等待的进程称为死锁进程。
+​	指两个或两个以上的进程（或线程）在执行过程中，因争夺资源而造成的一种互相等待的现象，若无外力作用，它们都将无法推进下去。此时称系统处于死锁状态或系统产生了死锁，这些永远在互相等待的进程称为死锁进程。
 
 > 比喻解释：线程A和线程B都要过独立桥走上桥互不相让(资源均不释放)。
 >
@@ -148,17 +150,17 @@ class ExecutorDemo implements Runnable {
 > 
 > ![hunger](/img/concurrent/hunger.png)
 
-## 性能问题
+### 性能问题
 
 1. 线程的生命周期开销非常高。在线程切换时存在CPU上下文切换开销，内存同步也存在着开销。
 2. 消耗过多的CPU资源。如果可运行的线程数量多于可用处理器的数量，那么有线程将会被闲置。大量空闲的线程会占用许多内存，给垃圾回收器带来压力，而且大量的线程在竞争CPU资源时还将产生其他性能的开销。
 3. 降低稳定性
 
-# 四、synchronized的原理和使用
+## 四、synchronized的原理和使用
 
 ​	synchronized是一个：`非公平`、`悲观`、`独享`、`互斥`、`可重入`锁。自JDK6优化以后，基于JVM可以根据竞争激烈程度，从`偏向锁`-->>`轻量级锁`-->>`重量级锁`升级。
 
-## synchronized的用法
+### synchronized的用法
 
 - 修饰方法
 
@@ -200,7 +202,7 @@ class ExecutorDemo implements Runnable {
   }
   ```
 
-## synchronized3种级别锁原理
+### synchronized3种级别锁原理
 
 使用了对象的[MarkWord](https://mynamelancelot.github.io/java/JVM.html#%E5%AF%B9%E8%B1%A1%E7%9A%84%E7%BB%93%E6%9E%84)
 
@@ -208,7 +210,7 @@ class ExecutorDemo implements Runnable {
 2. 随着锁的竞争：偏向锁-->轻量级锁-->重量级锁，只能升级
 3. 不同锁状态的MarkWord结构不同
 
-### 偏向锁的原理
+#### 偏向锁的原理
 
 **偏向锁状态的消息头结构**
 
@@ -231,7 +233,7 @@ class ExecutorDemo implements Runnable {
 - 新线程获取偏向锁，但是没有竞争，只需要在满足条件的时候CAS偏向线程ID即可
 - 完美支持重入功能，而且没有任何CAS操作
 
-### 轻量级【自旋】锁
+#### 轻量级【自旋】锁
 
 **轻量级锁状态的消息头结构**
 
@@ -253,7 +255,7 @@ class ExecutorDemo implements Runnable {
 
 ​	在获取锁的耗时不长的时候（比如锁的执行时间短、或者争抢的线程不多可以很快获得锁），通过一定次数的自旋，避免了重量级锁的线程阻塞和切换，提升了响应速度也兼顾了CPU的性能。
 
-### 重量级锁
+#### 重量级锁
 
 **重量级锁状态的消息头结构**
 
@@ -273,9 +275,9 @@ class ExecutorDemo implements Runnable {
 - 处于ContentionList、EntryList、WaitSet中的线程都处于阻塞状态，该阻塞是由操作系统来完成的
 - Synchronized是非公平锁（类似RentrenLock)。Synchronized在线程进入ContentionList时，等待的线程会先尝试自旋获取锁，如果获取不到就进入ContentionList，这明显对于已经进入队列的线程是不公平的。
 
-# 五、早期线程通信机制
+## 五、早期线程通信机制
 
-## wait\notify\notifyAll
+### wait\notify\notifyAll
 
 ​	`wait()`、`notify`/`notifyAll()`<span style="color:red">必须要在synchronized代码块执行</span>，且一定是操作同一个对象【wait\notify\notifyAll会操作synchronized锁定对象】。由于 wait()、notify/notifyAll() 在synchronized 代码块执行，说明当前线程一定是获取了锁的。当线程执行wait()方法时候，会释放当前的锁，然后让出CPU，进入`等待状态`。只有当`notify/notifyAll()`被执行时候，才会<span style="color:red">随机</span>唤醒一个或多个正处于等待状态的线程，然后继续往下执行，直到执行完synchronized 代码块的代码或是中途遇到wait() ，再次释放锁。
 
@@ -284,74 +286,74 @@ class ExecutorDemo implements Runnable {
 ```java
 public class NotifyTest {
 
-    public static void main(String[] args) throws InterruptedException {
-        NotifyRunnable notifyRunnable = new NotifyRunnable();
-        new Thread(notifyRunnable).start();
-        TimeUnit.SECONDS.sleep(5);
-        notifyRunnable.setFlag(false);
-        synchronized (notifyRunnable) {
-            notifyRunnable.notify();
-        }
+  public static void main(String[] args) throws InterruptedException {
+    NotifyRunnable notifyRunnable = new NotifyRunnable();
+    new Thread(notifyRunnable).start();
+    TimeUnit.SECONDS.sleep(5);
+    notifyRunnable.setFlag(false);
+    synchronized (notifyRunnable) {
+      notifyRunnable.notify();
     }
+  }
 }
 
 class NotifyRunnable implements Runnable {
-    private volatile boolean flag = true;
+  private volatile boolean flag = true;
 
-    public void setFlag(boolean flag) {
-        this.flag = flag;
-    }
+  public void setFlag(boolean flag) {
+    this.flag = flag;
+  }
 
-    public synchronized void deal() {
-        try {
-            // synchronized的是当期对象，这里需要while循环，被唤醒之后是继续执行的
-            while(flag) {
-                wait();
-            }
-            System.out.println("唤醒了一个线程");
-        } catch ( InterruptedException e) {
-            e.printStackTrace();
-        }
+  public synchronized void deal() {
+    try {
+      // synchronized的是当期对象，这里需要while循环，被唤醒之后是继续执行的
+      while(flag) {
+        wait();
+      }
+      System.out.println("唤醒了一个线程");
+    } catch ( InterruptedException e) {
+      e.printStackTrace();
     }
+  }
 
-    @Override
-    public void run() {
-        deal();
-    }
+  @Override
+  public void run() {
+    deal();
+  }
 }
 ```
 
 <span style="color:red">当一个线程生命周期结束【线程run完成】，会发送这个线程对象的notifyAll()</span>
 
-## 线程的join
+### 线程的join
 
 ​	`join`内部使用的是判断线程是否存活如果存活一直调用`wait()`。唤醒原理是当调用者的线程死亡时自动发送的`notifyAll()`，此时`wait()`被唤醒且线程已死亡。`join`这种机制并不常用。
 
 ```java
 public class JoinDemo extends Thread{
-    int i;
-    Thread previousThread; //上一个线程
-    public JoinDemo(Thread previousThread,int i){
-        this.previousThread=previousThread;
-        this.i=i;
+  int i;
+  Thread previousThread; //上一个线程
+  public JoinDemo(Thread previousThread,int i){
+    this.previousThread=previousThread;
+    this.i=i;
+  }
+  @Override
+  public void run() {
+    try {
+      previousThread.join();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
     }
-    @Override
-    public void run() {
-        try {
-            previousThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("num:"+i);
+    System.out.println("num:"+i);
+  }
+  public static void main(String[] args) {
+    Thread previousThread=Thread.currentThread();
+    for(int i=0;i<10;i++){
+      JoinDemo joinDemo=new JoinDemo(previousThread,i);
+      joinDemo.start();
+      previousThread=joinDemo;
     }
-    public static void main(String[] args) {
-        Thread previousThread=Thread.currentThread();
-        for(int i=0;i<10;i++){
-            JoinDemo joinDemo=new JoinDemo(previousThread,i);
-            joinDemo.start();
-            previousThread=joinDemo;
-        }
-    }
+  }
 }
 /**
  * join内部其实调用的是对象的wait()方法
@@ -374,9 +376,9 @@ public class JoinDemo extends Thread{
 >
 > 如果threadObj.join()线程对象是存活状态直接调用notify()是不会放行的
 
-# 六、volatile原理与使用
+## 六、volatile原理与使用
 
-## volatile原子可见性
+### volatile原子可见性
 
 ​	**Java内存模型规定在<span style="color:red">多线程情况下</span>，线程操作主内存（类比内存条）变量，需要通过线程独有的工作内存（类比CPU高速缓存）拷贝主内存变量副本来进行。此处的所谓内存模型要区别于通常所说的虚拟机堆模型**
 
@@ -396,7 +398,7 @@ public class JoinDemo extends Thread{
 
 ​	这些操作并不是原子性，也就是在`read load`之后，如果主内存变量发生修改之后，线程工作内存中的值由于已经加载，不会产生对应的变化，所以计算出来的结果会和预期不一样，对于volatile修饰的变量，jvm虚拟机只是保证从主内存加载到线程工作内存的值是最新的。
 
-## volatile的禁止指令重排序
+### volatile的禁止指令重排序
 
 **volatile止指令重排序的实现原理**
 
@@ -404,7 +406,7 @@ public class JoinDemo extends Thread{
 
 > 如果单例模式中的懒汉式变量没有使用volatile仅仅使用synchronized双重检测加锁依旧会因为重排序问题产生线程安全性问题<a href="#lazy-questions">参见</a>。
 
-# 七、原子操作类
+## 七、原子操作类
 
 JDK提供了原子类型操作类，保证原子性，保证线程安全，这些类使用了<a >CAS算法</a>进行无锁运算避免阻塞的发生。
 
@@ -454,30 +456,30 @@ LongAccumulator
 >
 > LongAccumulator相比LongAdder 可以提供累加器初始非0值和指定累加规则【比如乘法】，后者只能默认为0且只能为相加
 
-# 八、Lock&AQS&Condition
+## 八、Lock&AQS&Condition
 
-## Lock接口是JDK锁实现的标准
+### Lock接口是JDK锁实现的标准
 
 ```java
 public interface Lock {
 
-    // 获取锁。如果锁不可用，将禁用当前线程，并且在获得锁之前，该线程将一直处于休眠状态
-    void lock();
-   
-    // 获取锁，等待过程中如果当前线程被中断，则抛出异常，此时加锁还未成功不需要释放资源
-    void lockInterruptibly() throws InterruptedException;
-   
-    // 仅在调用时锁为空闲状态才获取该锁。如果锁可用立即返回值true。如果锁不可用，立即返回值 false
-    boolean tryLock();
-   
-    // 如果锁在给定的等待时间内空闲，并且当前线程未被中断，则获取锁，如果等待期间被中断，则抛出异常
-    boolean tryLock(long time, TimeUnit unit) throws InterruptedException;
-   
-    // 释放锁。锁必须由当前线程持有。调用Condition.await()将在等待前以原子方式释放锁
-    void unlock();
+  // 获取锁。如果锁不可用，将禁用当前线程，并且在获得锁之前，该线程将一直处于休眠状态
+  void lock();
 
-    // 返回绑定到此Lock实例的新Condition实例
-    Condition newCondition();
+  // 获取锁，等待过程中如果当前线程被中断，则抛出异常，此时加锁还未成功不需要释放资源
+  void lockInterruptibly() throws InterruptedException;
+
+  // 仅在调用时锁为空闲状态才获取该锁。如果锁可用立即返回值true。如果锁不可用，立即返回值 false
+  boolean tryLock();
+
+  // 如果锁在给定的等待时间内空闲，并且当前线程未被中断，则获取锁，如果等待期间被中断，则抛出异常
+  boolean tryLock(long time, TimeUnit unit) throws InterruptedException;
+
+  // 释放锁。锁必须由当前线程持有。调用Condition.await()将在等待前以原子方式释放锁
+  void unlock();
+
+  // 返回绑定到此Lock实例的新Condition实例
+  Condition newCondition();
 }
 ```
 
@@ -487,7 +489,7 @@ public interface Lock {
 - ReentrantReadWriteLock        可重入读写锁，非公平状态下，可能会发生饥饿问题
 - StampedLock                             JDK8对ReentrantReadWriteLock的升级<a href="#StampedLock">[详见]</a>
 
-## AQS抽象类
+### AQS抽象类
 
 `AbstractQueuedSynchronizer`是`ReadWriteLock`、`ReentrantLock`、`StampedLock`、`Semaphore`、`ReentrantReadWriteLock`、`SynchronousQueue`、`FutureTask`等同步类的内部工具帮助类。
 
@@ -526,9 +528,9 @@ static final class Node {
 
 ```java
 public class ReentrantLock implements Lock, java.io.Serializable {
- 
+
   public void lock() {
-        sync.lock(); //非公平锁的lock实现是NonfairSync
+    sync.lock(); //非公平锁的lock实现是NonfairSync
   }
 }
 ```
@@ -537,7 +539,7 @@ public class ReentrantLock implements Lock, java.io.Serializable {
 
 ```java
 static final class NonfairSync extends Sync {
-	
+
   final void lock() {
     // 尝试运行cas算法尝试对state进行修改，预期值为0，更新值为1，如果成功即为当前线程独占
     if (compareAndSetState(0, 1))
@@ -552,8 +554,8 @@ static final class NonfairSync extends Sync {
 
 ```java
 public abstract class AbstractQueuedSynchronizer extends AbstractOwnableSynchronizer
-    implements Serializable {
-	
+  implements Serializable {
+
   public final void acquire(int arg) {
     // tryAcquire(arg)调用了NonfairSync的tryAcquire(arg)
     if (!tryAcquire(arg) && acquireQueued(addWaiter(Node.EXCLUSIVE), arg))  
@@ -564,7 +566,7 @@ public abstract class AbstractQueuedSynchronizer extends AbstractOwnableSynchron
 
 //=============================tryAcquire(arg)的调用过程=============================
 static final class NonfairSync extends Sync {
-	
+
   protected final boolean tryAcquire(int acquires) {
     // 调用父类方法
     return nonfairTryAcquire(acquires);
@@ -572,7 +574,7 @@ static final class NonfairSync extends Sync {
 }
 
 abstract static class Sync extends AbstractQueuedSynchronizer {
-  
+
   final boolean nonfairTryAcquire(int acquires) {
     final Thread current = Thread.currentThread();
     int c = getState();
@@ -667,41 +669,41 @@ private final boolean parkAndCheckInterrupt() {
 }
 ```
 
-## Condition
+### Condition
 
 ​	condition对象是依赖于lock对象的，即condition对象需要通过lock对象进行创建出来(调用Lock对象的newCondition()方法)，condition是用于替代`wait()/notify()/notifyAll()`的接口标准。**condition调用时必须和lock、unlock联用，如果没被独占会被抛出异常**
 
 ```java
 public interface Condition {
 
-    // 一直等待可能抛出中断异常
-    void await() throws InterruptedException;
+  // 一直等待可能抛出中断异常
+  void await() throws InterruptedException;
 
-    // 一直等待不会被中断异常打扰
-    void awaitUninterruptibly();
+  // 一直等待不会被中断异常打扰
+  void awaitUninterruptibly();
 
-    // 等待指定纳秒，期间可能抛出中断异常
-    long awaitNanos(long nanosTimeout) throws InterruptedException;
+  // 等待指定纳秒，期间可能抛出中断异常
+  long awaitNanos(long nanosTimeout) throws InterruptedException;
 
-    // 等待指定时间，期间可能抛出中断异常
-    boolean await(long time, TimeUnit unit) throws InterruptedException;
+  // 等待指定时间，期间可能抛出中断异常
+  boolean await(long time, TimeUnit unit) throws InterruptedException;
 
-    // 等待到指定时间，期间可能抛出中断异常
-    boolean awaitUntil(Date deadline) throws InterruptedException;
-   
-    // 发送信号，解除任意一个等待
-    void signal();
-  
-		// 发送信号，解除所有等待
-    void signalAll();
+  // 等待到指定时间，期间可能抛出中断异常
+  boolean awaitUntil(Date deadline) throws InterruptedException;
+
+  // 发送信号，解除任意一个等待
+  void signal();
+
+  // 发送信号，解除所有等待
+  void signalAll();
 }
 ```
 
 `ConditionObject`是`Condition`的实现类是一个`AQS`的内部类，`condition`可以实现各种队列【有界队列、阻塞队列等】，`ConditionObject`实现了一个FIFO的等待队列`await`方法在队列后面添加一个元素，`signal`释放一个元素【有序释放】。
 
-# 九、线程工具类
+## 九、线程工具类
 
-## ThreadLocal
+### ThreadLocal
 
 ThreadLoal变量，线程局部变量，同一个 ThreadLocal 所包含的对象，在不同的 Thread 中有不同的副本。
 
@@ -723,22 +725,22 @@ ThreadLoal变量，线程局部变量，同一个 ThreadLocal 所包含的对象
 
 ```java
 public class ThreadLocalDemo implements Runnable {
-    private static ThreadLocal<Integer> threadLocal = new ThreadLocal<Integer>() {
-        @Override
-        protected Integer initialValue() {
-           return 0;
-        }
-    };
-
-
+  private static ThreadLocal<Integer> threadLocal = new ThreadLocal<Integer>() {
     @Override
-    public void run() {
-        threadLocal.set(threadLocal.get()+1);
+    protected Integer initialValue() {
+      return 0;
     }
+  };
+
+
+  @Override
+  public void run() {
+    threadLocal.set(threadLocal.get()+1);
+  }
 }
 ```
 
-## CountDownLatch
+### CountDownLatch
 
 ​	CountDownLatch是一个同步类工具，不涉及锁定，当count的值为零时当前线程继续运行。在不涉及同步，只涉及线程通信的时候，使用它较为合适。
 
@@ -746,51 +748,50 @@ public class ThreadLocalDemo implements Runnable {
 // 计算多行数字合
 public class CountDownLatchDemo {
 
-    private  CountDownLatch countDownLatch;
+  private  CountDownLatch countDownLatch;
 
-    private int storeNum[];
+  private int storeNum[];
 
-    public CountDownLatchDemo(final int numsLines) {
-        this.countDownLatch = new CountDownLatch(numsLines);
-        this.storeNum = new int[numsLines];
+  public CountDownLatchDemo(final int numsLines) {
+    this.countDownLatch = new CountDownLatch(numsLines);
+    this.storeNum = new int[numsLines];
+  }
+
+  //计算每行数字合
+  private void calc(int index, int calcNums[]){
+    storeNum[index] = 0;
+    for (int i = 0; i < calcNums.length; i++) {
+      storeNum[index] += calcNums[i];
     }
+    countDownLatch.countDown();
+  }
 
-    //计算每行数字合
-    private void calc(int index, int calcNums[]){
-        storeNum[index] = 0;
-        for (int i = 0; i < calcNums.length; i++) {
-            storeNum[index] += calcNums[i];
+  //总计
+  private int calcSum() throws InterruptedException {
+    countDownLatch.await();
+    int result = 0;
+
+    for (int i = 0; i < storeNum.length; i++) {
+      result+= storeNum[i];
+    }
+    return result;
+  }
+
+  public static void main(String[] args) throws InterruptedException {
+
+    CountDownLatchDemo countDownLatchDemo = new CountDownLatchDemo(nums.length);
+    for (int i = 0; i < nums.length; i++) {
+      int finalI = i;
+      new Thread(new Runnable() {
+        @Override
+        public void run() {
+          countDownLatchDemo.calc(finalI, nums[finalI]);
         }
-        countDownLatch.countDown();
+      }).start();
     }
-
-    //总计
-    private int calcSum() throws InterruptedException {
-        countDownLatch.await();
-        int result = 0;
-
-        for (int i = 0; i < storeNum.length; i++) {
-            result+= storeNum[i];
-        }
-        return result;
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        
-        CountDownLatchDemo countDownLatchDemo = new CountDownLatchDemo(nums.length);
-        for (int i = 0; i < nums.length; i++) {
-            int finalI = i;
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    countDownLatchDemo.calc(finalI, nums[finalI]);
-                }
-            }).start();
-        }
-        int sum = countDownLatchDemo.calcSum();
-        System.out.println(sum);
-
-    }
+    int sum = countDownLatchDemo.calcSum();
+    System.out.println(sum);
+  }
 }
 ```
 
@@ -800,8 +801,8 @@ public class CountDownLatchDemo {
 
 ```java
 public CountDownLatch(int count) {
-    if (count < 0) throw new IllegalArgumentException("count < 0");
-    this.sync = new Sync(count);
+  if (count < 0) throw new IllegalArgumentException("count < 0");
+  this.sync = new Sync(count);
 }
 
 Sync(int count) {
@@ -813,83 +814,83 @@ Sync(int count) {
 
 ```java
 public void await() throws InterruptedException {
-    sync.acquireSharedInterruptibly(1);
+  sync.acquireSharedInterruptibly(1);
 }
 
 public final void acquireSharedInterruptibly(int arg) throws InterruptedException {
-    if (Thread.interrupted())
-      throw new InterruptedException();
-    // tryAcquireShared(arg) ==》return (getState() == 0) ? 1 : -1;
-    // 即当state不为0时进入，为0直接运行不阻塞
-    if (tryAcquireShared(arg) < 0)
-      doAcquireSharedInterruptibly(arg);
+  if (Thread.interrupted())
+    throw new InterruptedException();
+  // tryAcquireShared(arg) ==》return (getState() == 0) ? 1 : -1;
+  // 即当state不为0时进入，为0直接运行不阻塞
+  if (tryAcquireShared(arg) < 0)
+    doAcquireSharedInterruptibly(arg);
 }
 
 private void doAcquireSharedInterruptibly(int arg) throws InterruptedException {
-    // 加入一个共享队列元素
-    final Node node = addWaiter(Node.SHARED);
-    boolean failed = true;
-    try {
-        for (;;) {
-           final Node p = node.predecessor();
-               if (p == head) {
-                   // tryAcquireShared(arg) ==》(getState() == 0) ? 1 : -1
-                   // 即如果是队列首元素就等待释放
-                   int r = tryAcquireShared(arg);
-                if (r >= 0) {
-                    setHeadAndPropagate(node, r);
-                    p.next = null; // help GC
-                    failed = false;
-                    return;
-                 }
+  // 加入一个共享队列元素
+  final Node node = addWaiter(Node.SHARED);
+  boolean failed = true;
+  try {
+    for (;;) {
+      final Node p = node.predecessor();
+      if (p == head) {
+        // tryAcquireShared(arg) ==》(getState() == 0) ? 1 : -1
+        // 即如果是队列首元素就等待释放
+        int r = tryAcquireShared(arg);
+        if (r >= 0) {
+          setHeadAndPropagate(node, r);
+          p.next = null; // help GC
+          failed = false;
+          return;
         }
-        if (shouldParkAfterFailedAcquire(p, node) &&
-            parkAndCheckInterrupt())
-            throw new InterruptedException();
-        }
-        } finally {
-            if (failed)
-                cancelAcquire(node);
-        }
+      }
+      if (shouldParkAfterFailedAcquire(p, node) &&
+          parkAndCheckInterrupt())
+        throw new InterruptedException();
     }
+  } finally {
+    if (failed)
+      cancelAcquire(node);
+  }
+}
 }
 ```
 
-## CyclicBarrier
+### CyclicBarrier
 
 ​	CyclicBarrier可以使一定数量的线程反复地在栅栏位置处汇集。当线程到达栅栏位置时将调用await方法，这个方法将阻塞直到指定数量的线程到达栅栏位置。如果指定数量的线程到达栅栏位置，那么栅栏将打开，然后栅栏将被重置以便下次使用。
 
 ```java
 public class CyclicBarrierDemo {
 
-    public void meet(CyclicBarrier cyclicBarrier){
-        String threadName = Thread.currentThread().getName();
-        System.out.println(threadName + " 到场 ");
-        try {
-            Thread.sleep(1000);
-            cyclicBarrier.await();
-        } catch (InterruptedException e) {
-            // 当前线程被中断
-            e.printStackTrace();
-        } catch (BrokenBarrierException e) {
-            // 不是被中断的线程，但是其它相关线程await()时发生中断
-            e.printStackTrace();
-        }
-        System.out.println(threadName + " 准备开会发言");
+  public void meet(CyclicBarrier cyclicBarrier){
+    String threadName = Thread.currentThread().getName();
+    System.out.println(threadName + " 到场 ");
+    try {
+      Thread.sleep(1000);
+      cyclicBarrier.await();
+    } catch (InterruptedException e) {
+      // 当前线程被中断
+      e.printStackTrace();
+    } catch (BrokenBarrierException e) {
+      // 不是被中断的线程，但是其它相关线程await()时发生中断
+      e.printStackTrace();
     }
+    System.out.println(threadName + " 准备开会发言");
+  }
 
-    public static void main(String[] args) {
-        CyclicBarrierDemo cyclicBarrierDemo = new CyclicBarrierDemo();
-        CyclicBarrier cyclicBarrier = new CyclicBarrier(5);
-        for (int i = 0; i < 5; i++) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    cyclicBarrierDemo.meet(cyclicBarrier);
-                }
-            }).start();
+  public static void main(String[] args) {
+    CyclicBarrierDemo cyclicBarrierDemo = new CyclicBarrierDemo();
+    CyclicBarrier cyclicBarrier = new CyclicBarrier(5);
+    for (int i = 0; i < 5; i++) {
+      new Thread(new Runnable() {
+        @Override
+        public void run() {
+          cyclicBarrierDemo.meet(cyclicBarrier);
         }
+      }).start();
     }
+  }
 }
 ```
 
@@ -897,42 +898,42 @@ public class CyclicBarrierDemo {
 
 ​	CyclicBarrier内部使用了`ReentrantLock`和`Condition`完成栅栏操作
 
-## Semaphore
+### Semaphore
 
 ​	Semaphore控制了最多同时执行的线程个数，但不控制线程创建的个数，线程创建之后会阻塞不是不创建线程。Semaphore可以灵活控制释放和需要解锁资源的个数。
 
 ```java
 public class SemaphoreDemo {
 
-    private Semaphore semaphore = new Semaphore(5);
+  private Semaphore semaphore = new Semaphore(5);
 
-    public void doSomething() {
-        try {
-            /**
-             * 在 semaphore.acquire() 和 semaphore.release()之间的代码，同一时刻只允许制定个数的线程进入，
-             * 因为semaphore的构造方法是5，则同一时刻只允许5个线程进入，其他线程只能等待。
-             * */
-            semaphore.acquire();
-            System.out.println(Thread.currentThread().getName() + ":doSomething start-" + new Date());
-            Thread.sleep(2000);
-            System.out.println(Thread.currentThread().getName() + ":doSomething end-" + new Date());
-            semaphore.release();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+  public void doSomething() {
+    try {
+      /**
+        * 在 semaphore.acquire() 和 semaphore.release()之间的代码，同一时刻只允许制定个数的线程进入，
+        * 因为semaphore的构造方法是5，则同一时刻只允许5个线程进入，其他线程只能等待。
+        **/
+      semaphore.acquire();
+      System.out.println(Thread.currentThread().getName() + ":doSomething start-" + new Date());
+      Thread.sleep(2000);
+      System.out.println(Thread.currentThread().getName() + ":doSomething end-" + new Date());
+      semaphore.release();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
     }
+  }
 
-    public static void main(String[] args) {
-        SemaphoreDemo service = new SemaphoreDemo();
-        for (int i = 0; i < 20; i++) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    service.doSomething();
-                }
-            }).start();
+  public static void main(String[] args) {
+    SemaphoreDemo service = new SemaphoreDemo();
+    for (int i = 0; i < 20; i++) {
+      new Thread(new Runnable() {
+        @Override
+        public void run() {
+          service.doSomething();
         }
+      }).start();
     }
+  }
 }
 ```
 
@@ -940,115 +941,115 @@ public class SemaphoreDemo {
 
 ​	Semaphore内部使用了AQS来完成等待队列和计数。
 
-## Exchanger
+### Exchanger
 
 ​	一个线程在完成一定的事务后想与另一个线程交换数据，则第一个先拿出数据的线程会一直等待第二个线程，直到第二个线程拿着数据到来时才能彼此交换对应数据。
 
 ```java
 // 每次计算完成交换结果
 public class ExchangerTest {
-    static class Producer extends Thread {
-        private Exchanger<Integer> exchanger;
-        private static int data = 0;
-        Producer(Exchanger<Integer> exchanger) {
-            super("Producer");
-            this.exchanger = exchanger;
-        }
-
-        @Override
-        public void run() {
-            for (int i=1; i<5; i++) {
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                    data = i;
-                    System.out.println(getName()+" 交换前:" + data);
-                    data = exchanger.exchange(data);
-                    System.out.println(getName()+" 交换后:" + data);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+  static class Producer extends Thread {
+    private Exchanger<Integer> exchanger;
+    private static int data = 0;
+    Producer(Exchanger<Integer> exchanger) {
+      super("Producer");
+      this.exchanger = exchanger;
     }
 
-    static class Consumer extends Thread {
-        private Exchanger<Integer> exchanger;
-        private static int data = 0;
-        Consumer(Exchanger<Integer> exchanger) {
-            super("Consumer");
-            this.exchanger = exchanger;
+    @Override
+    public void run() {
+      for (int i=1; i<5; i++) {
+        try {
+          TimeUnit.SECONDS.sleep(1);
+          data = i;
+          System.out.println(getName()+" 交换前:" + data);
+          data = exchanger.exchange(data);
+          System.out.println(getName()+" 交换后:" + data);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
         }
+      }
+    }
+  }
 
-        @Override
-        public void run() {
-            while (true) {
-                data = 0;
-                System.out.println(getName()+" 交换前:" + data);
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                    data = exchanger.exchange(data);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                System.out.println(getName()+" 交换后:" + data);
-            }
-        }
+  static class Consumer extends Thread {
+    private Exchanger<Integer> exchanger;
+    private static int data = 0;
+    Consumer(Exchanger<Integer> exchanger) {
+      super("Consumer");
+      this.exchanger = exchanger;
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        Exchanger<Integer> exchanger = new Exchanger<Integer>();
-        new Producer(exchanger).start();
-        new Consumer(exchanger).start();
+    @Override
+    public void run() {
+      while (true) {
+        data = 0;
+        System.out.println(getName()+" 交换前:" + data);
+        try {
+          TimeUnit.SECONDS.sleep(1);
+          data = exchanger.exchange(data);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        System.out.println(getName()+" 交换后:" + data);
+      }
     }
+  }
+
+  public static void main(String[] args) throws InterruptedException {
+    Exchanger<Integer> exchanger = new Exchanger<Integer>();
+    new Producer(exchanger).start();
+    new Consumer(exchanger).start();
+  }
 }
 ```
 
-# 十、Future模式
+## 十、Future模式
 
 ​	从JDK5开始提供了Callable和Future，通过它们可以在任务执行完毕之后得到任务执行结果。Future模式的核心思想是能够让执行线程在原来需要同步等待的这段时间用来做其他的事情。（因为可以异步获得执行结果，所以不用一直同步等待去获得执行结果）
 
 ```java
 public class FutureDemo {
 
-    private static class Product implements Callable<Product> {
-        @Override
-        public Product call() throws Exception {
-            System.out.println("生成产品中...");
-            Thread.sleep(5000);
-            System.out.println("生成产品结束...");
-            return new Product();
-        }
+  private static class Product implements Callable<Product> {
+    @Override
+    public Product call() throws Exception {
+      System.out.println("生成产品中...");
+      Thread.sleep(5000);
+      System.out.println("生成产品结束...");
+      return new Product();
     }
+  }
 
-    public static void main(String[] args) {
-        FutureTask<Product> futureTask = new FutureTask<>(new Product());
-        // 使用FutureTask创建一个thread，FutureTask实现了Runnable接口
-        Thread thread = new Thread(futureTask);
-        // 启动线程任务
-        thread.start();
-        // 此时FutureTask任务在其它线程中执行，主线程不受影响
-        System.out.println("干点其他事...");
-        try {
-            // 此时需要FutureTask任务执行的结果，会在此一直等候
-            Product product = futureTask.get();
-        } catch (InterruptedException e) {
-            System.out.println("发生中断");
-        } catch (ExecutionException e) {
-            System.out.println("执行过程中发生异常 " + e.getMessage());
-        }
+  public static void main(String[] args) {
+    FutureTask<Product> futureTask = new FutureTask<>(new Product());
+    // 使用FutureTask创建一个thread，FutureTask实现了Runnable接口
+    Thread thread = new Thread(futureTask);
+    // 启动线程任务
+    thread.start();
+    // 此时FutureTask任务在其它线程中执行，主线程不受影响
+    System.out.println("干点其他事...");
+    try {
+      // 此时需要FutureTask任务执行的结果，会在此一直等候
+      Product product = futureTask.get();
+    } catch (InterruptedException e) {
+      System.out.println("发生中断");
+    } catch (ExecutionException e) {
+      System.out.println("执行过程中发生异常 " + e.getMessage());
     }
+  }
 }
 ```
 
 FutureTask实现了Runnable接口，其实Callable接口会在FutureTask的run方法被调用时执行`call()`方法，在调用`get()`方法是等待`call()`方法执行完成，获取执行结果。
 
-# 十一、Fork/Join框架
+## 十一、Fork/Join框架
 
 ​	Fork/Join 框架：就是在必要的情况下，将一个大任务，进行拆分(fork)成若干个小任务（拆到不可再拆时），再将一个个的小任务运算的结果进行join 汇总。详细参见<a href="https://mynamelancelot.github.io/java/java8.html#forkjoin">Fork/Join框架</a>
 
-# 十二、并发容器
+## 十二、并发容器
 
-## CopyOnWrite容器
+### CopyOnWrite容器
 
 【`CopyOnWriteArrayList`、`CopyOnWriteArraySet`】
 
@@ -1073,13 +1074,13 @@ public boolean add(E e) {
 }
 ```
 
-## 并发Map
+### 并发Map
 
 【`ConcurrentHashMap`、`ConcurrentSkipListMap（支持排序）`】
 
 ​	`ConcurrentHashMap`内部使用段（Segment）来表示这些不同的部分，每个段其实就是一个小的HashTable，它们有自己的锁。只要多个修改操作发生在不同的段上，它们就可以并发进行。把一个整体分成了16个段。也就是说最高支持16个线程的并发修改操作。而且大量使用volatile关键字，第一时间获取修改的内容。
 
-## 非阻塞Queue
+### 非阻塞Queue
 
 【`ConcurrentLinkedQueue`、`ConcurrentLinkedDeque`】
 
@@ -1089,7 +1090,7 @@ public boolean add(E e) {
 
 - poll()和peek()都是取头元素节点，前者会删除元素，后者不会
 
-## 阻塞Queue
+### 阻塞Queue
 
 【`ArrayBlockingQueue`、`LinkedBlockingQueue`、`LinkedBlockingDeque`、`PriorityBlockingQueue`】
 
@@ -1097,21 +1098,21 @@ public boolean add(E e) {
 - `LinkedBlockingQueue`：基于链表的阻塞队列，同ArrayBlockingQueue类似，其内部也维持着一个数据缓存队列。LinkedBlockingQueue内部采用分离锁（读写分离两个锁），从而实现生产者和消费者操作的完全并行运行。他是一个<span style="color:red">无界队列（如果初始化指定长度则为有界队列）</span>。
 - `PriorityBlockingQueue`：基于优先级的阻塞队列（队列中的对象必须实现Comparable接口），内部控制线程同步的锁采用公平锁，也是<span style="color:red">无界队列</span>。
 
-## 特殊Queue
+### 特殊Queue
 
 `DelayQueue`：带有延迟时间的Queue，其中的元素只有当其指定的延迟时间到了，才能够从队列中获取到该元素。DelayQueue中的元素必须实现Delayed接口，DelayQueue是一个没有大小限制的队列。DelayQueue支持阻塞和非阻塞两种模式。
 
 `SynchronousQueue`：一种没有缓冲的队列，生存者生产的数据直接会被消费者获取并消费。每个put操作必须等待一个take，反之亦然。同步队列没有任何内部容量，甚至连一个队列的容量都没有。 
 
-# 十三、线程池
+## 十三、线程池
 
-## 线程池的优势
+### 线程池的优势
 
 * 降低资源消耗。通过重复利用已创建的线程降低线程创建和销毁造成的消耗。
 * 提高响应速度。当任务到达时，任务可以不需要的等到线程创建就能立即执行。
 * 提高线程的可管理性。线程是稀缺资源，如果无限制的创建，不仅会消耗系统资源，还会降低系统的稳定性，使用线程池可以进行统一的分配，调优和监控。
 
-## 使用原始API创建线程池
+### 使用原始API创建线程池
 
 ```java
 /**
@@ -1156,95 +1157,95 @@ public ThreadPoolExecutor(int corePoolSize,
 
 ```java
 public class ThreadPoolExecutor extends AbstractExecutorService {
-  
+
   public void execute(Runnable command) {
     if (command == null)
-        throw new NullPointerException();
+      throw new NullPointerException();
     // 获取线程池控制状态
     int c = ctl.get();
     if (workerCountOf(c) < corePoolSize) { // worker数量小于corePoolSize
-        if (addWorker(command, true)) // 添加worker
-            return;
-        // 不成功则再次获取线程池控制状态
-        c = ctl.get();
+      if (addWorker(command, true)) // 添加worker
+        return;
+      // 不成功则再次获取线程池控制状态
+      c = ctl.get();
     }
     // 线程池处于RUNNING状态，将用户自定义的Runnable对象添加进workQueue队列
     if (isRunning(c) && workQueue.offer(command)) { 
-        // 再次检查，获取线程池控制状态
-        int recheck = ctl.get();
-        // 线程池不处于RUNNING状态，将自定义任务从workQueue队列中移除
-        if (! isRunning(recheck) && remove(command)) 
-            // 拒绝执行命令
-            reject(command);
-        else if (workerCountOf(recheck) == 0) // worker数量等于0
-            // 添加worker
-            addWorker(null, false);
-    }
-    else if (!addWorker(command, false)) // 添加worker失败
+      // 再次检查，获取线程池控制状态
+      int recheck = ctl.get();
+      // 线程池不处于RUNNING状态，将自定义任务从workQueue队列中移除
+      if (! isRunning(recheck) && remove(command)) 
         // 拒绝执行命令
         reject(command);
-		}
-	}
-	private boolean addWorker(Runnable firstTask, boolean core) {
-  	//...
-    if (workerAdded) { // worker被添加
-      // 开始执行worker的run方法，调用线程start启动线程
-      t.start();  
-      // 设置worker已开始标识
-      workerStarted = true;
+      else if (workerCountOf(recheck) == 0) // worker数量等于0
+        // 添加worker
+        addWorker(null, false);
     }
-    //...
-    return workerStarted;
-	}
-   
- 	private final class Worker extends AbstractQueuedSynchronizer implements Runnable{
-    public void run() {
-        runWorker(this);
-    } 
-    final void runWorker(Worker w) {
-        Thread wt = Thread.currentThread();
-        Runnable task = w.firstTask;
-        w.firstTask = null;
-        w.unlock(); // allow interrupts
-        boolean completedAbruptly = true;
+    else if (!addWorker(command, false)) // 添加worker失败
+      // 拒绝执行命令
+      reject(command);
+  }
+}
+private boolean addWorker(Runnable firstTask, boolean core) {
+  //...
+  if (workerAdded) { // worker被添加
+    // 开始执行worker的run方法，调用线程start启动线程
+    t.start();  
+    // 设置worker已开始标识
+    workerStarted = true;
+  }
+  //...
+  return workerStarted;
+}
+
+private final class Worker extends AbstractQueuedSynchronizer implements Runnable{
+  public void run() {
+    runWorker(this);
+  } 
+  final void runWorker(Worker w) {
+    Thread wt = Thread.currentThread();
+    Runnable task = w.firstTask;
+    w.firstTask = null;
+    w.unlock(); // allow interrupts
+    boolean completedAbruptly = true;
+    try {
+      while (task != null || (task = getTask()) != null) {
+        w.lock();
+        if ((runStateAtLeast(ctl.get(), STOP) ||
+             (Thread.interrupted() &&
+              runStateAtLeast(ctl.get(), STOP))) &&
+            !wt.isInterrupted())
+          wt.interrupt();
         try {
-            while (task != null || (task = getTask()) != null) {
-                w.lock();
-                if ((runStateAtLeast(ctl.get(), STOP) ||
-                     (Thread.interrupted() &&
-                      runStateAtLeast(ctl.get(), STOP))) &&
-                    !wt.isInterrupted())
-                    wt.interrupt();
-                try {
-                    beforeExecute(wt, task);
-                    Throwable thrown = null;
-                    try {
-                        // 执行run方法
-                        task.run();
-                    } catch (RuntimeException x) {
-                        thrown = x; throw x;
-                    } catch (Error x) {
-                        thrown = x; throw x;
-                    } catch (Throwable x) {
-                        thrown = x; throw new Error(x);
-                    } finally {
-                        afterExecute(task, thrown);
-                    }
-                } finally {
-                    task = null;
-                    w.completedTasks++;
-                    w.unlock();
-                }
-            }
-            completedAbruptly = false;
+          beforeExecute(wt, task);
+          Throwable thrown = null;
+          try {
+            // 执行run方法
+            task.run();
+          } catch (RuntimeException x) {
+            thrown = x; throw x;
+          } catch (Error x) {
+            thrown = x; throw x;
+          } catch (Throwable x) {
+            thrown = x; throw new Error(x);
+          } finally {
+            afterExecute(task, thrown);
+          }
         } finally {
-            processWorkerExit(w, completedAbruptly);
+          task = null;
+          w.completedTasks++;
+          w.unlock();
         }
+      }
+      completedAbruptly = false;
+    } finally {
+      processWorkerExit(w, completedAbruptly);
     }
+  }
 }
 ```
 
-## Executors创建线程池
+### Executors创建线程池
 
 ```java
 public class Executors {
@@ -1289,9 +1290,9 @@ public class Executors {
 }
 ```
 
-# 附录
+## 附录
 
-## 线程中断
+### 线程中断
 
 ​	interrupted()是Java提供的一种中断机制，Thread.stop, Thread.suspend, Thread.resume都已经被废弃了，所以在Java中没有办法立即停止一条线程。因此，Java提供了一种用于停止线程的机制`中断`。
 
@@ -1316,44 +1317,44 @@ public static boolean interrupted() { return currentThread().isInterrupted(true)
 ```java
 public class InterruptTest{
 
-    private static ReentrantLock reentrantLock = new ReentrantLock();
+  private static ReentrantLock reentrantLock = new ReentrantLock();
 
-    private static class InterruptRunnable implements Runnable {
-        @Override
-        public void run() {
-            String currentThreadName =  Thread.currentThread().getName();
-            reentrantLock.lock();
-            while (!Thread.interrupted()) {
-                System.out.println(currentThreadName + " do business logic");
-                for (int i = 0; i < 2000000000; i++) {
+  private static class InterruptRunnable implements Runnable {
+    @Override
+    public void run() {
+      String currentThreadName =  Thread.currentThread().getName();
+      reentrantLock.lock();
+      while (!Thread.interrupted()) {
+        System.out.println(currentThreadName + " do business logic");
+        for (int i = 0; i < 2000000000; i++) {
 
-                }
-                System.out.println(currentThreadName + " do business logic over");
-            }
-            // 线程发生中断
-            System.out.println(currentThreadName + " happen interrupt do something");
-            // 必须释放资源否则“T-2”线程一直阻塞
-            reentrantLock.unlock();
-            // 释放资源
-            System.out.println(currentThreadName + " release resources");
         }
+        System.out.println(currentThreadName + " do business logic over");
+      }
+      // 线程发生中断
+      System.out.println(currentThreadName + " happen interrupt do something");
+      // 必须释放资源否则“T-2”线程一直阻塞
+      reentrantLock.unlock();
+      // 释放资源
+      System.out.println(currentThreadName + " release resources");
     }
+  }
 
-    public static void main(String[] args) throws InterruptedException {
-        Thread thread = new Thread(new InterruptRunnable(),"T-1");
-        thread.start();
-        TimeUnit.SECONDS.sleep(1);
-        Thread thread2 = new Thread(new InterruptRunnable(), "T-2");
-        thread2.start();
-        thread.interrupt();
-				// 如果调用的是thread.stop()可以释放synchronized资源但是不会释放Lock实现类的资源
-    }
+  public static void main(String[] args) throws InterruptedException {
+    Thread thread = new Thread(new InterruptRunnable(),"T-1");
+    thread.start();
+    TimeUnit.SECONDS.sleep(1);
+    Thread thread2 = new Thread(new InterruptRunnable(), "T-2");
+    thread2.start();
+    thread.interrupt();
+    // 如果调用的是thread.stop()可以释放synchronized资源但是不会释放Lock实现类的资源
+  }
 }
 ```
 
 ​	Java类库中提供的一些可能会发生阻塞的方法都会抛InterruptedException异常，当在某一条线程中调用这些方法时，这个方法可能会被阻塞很长时间，就可以在别的线程中调用当前线程对象的interrupt方法触发这些函数抛出InterruptedException异常，这时候需要自己处理中断了。
 
-## CAS算法
+### CAS算法
 
 ​	CAS算法【Compare-And-Swap】是<span style="color:red">硬件</span>对于并发操作共享数据的支持。CAS是一种无锁算法，CAS有3个操作数①内存值V；②旧的预期值A；③要修改为的新值B；
 
@@ -1371,7 +1372,7 @@ public class InterruptTest{
 
 ​	可以通过加一个标记位来解决这个问题。即：如果在用到该引用时，都对该引用标记位进行推进，进行比较时除了要对比内存值外，还要对比标记位的值是否一样，这样就解决了ABA问题。
 
-## 指令重排序
+### 指令重排序
 
 ​	Java编译器为了优化程序的性能，会重新对字节码指令排序，虽然会重排序，但是指令重排序运行的结果一定是正常的。在程序运行过程中（多核CPU环境下）也可能处理器会对执行的指令进行重排序。
 
@@ -1422,23 +1423,23 @@ ObjectVarilabe obj = new ObjectVarilabe()
 
     ```java
     public class FinalExample {
-    	  int i = 0;
-        final int f;
-        static FinalExample obj;
+      int i = 0;
+      final int f;
+      static FinalExample obj;
     
-        public FinalExample() { // 构造函数
-            i = 1;              // 写普通域
-            f = 2;              // 写final域
-        }
+      public FinalExample() { // 构造函数
+        i = 1;              // 写普通域
+        f = 2;              // 写final域
+      }
     
     
-    		public static void writer() { 
-          	/**
+      public static void writer() { 
+        /**
           	 * 此代码执行之时，另一线程读取obj不为null那么obj.f一定初始化完成
           	 * 另一线程读取obj不为null，但是i不一定初始化完成
           	 */
-            obj = new FinalExample();	
-    		}
+        obj = new FinalExample();	
+      }
     }
     ```
 
@@ -1447,13 +1448,13 @@ ObjectVarilabe obj = new ObjectVarilabe()
     ```java
     // ①一定发生在③之前，但是①不一定发生在②之前
     public static void reader() { 
-      	FinalExample example = obj;    // ①读对象引用
-      	System.out.println(example.i); // ②读普通域
-      	System.out.println(example.f); // ③读final域
+      FinalExample example = obj;    // ①读对象引用
+      System.out.println(example.i); // ②读普通域
+      System.out.println(example.f); // ③读final域
     }
     ```
 
-## happen-before
+### happen-before
 
 ​	JMM(java memory model)可以通过happens-before关系向提供跨线程的内存可见性保证（如果A线程的写操作a与B线程的读操作b之间存在happens-before关系，尽管a操作和b操作在不同的线程中执行，但JMM向程序员保证a操作将对b操作可见）**<span style="color:red">happen-before是可见性保证，不是发生性保证</span>**
 
@@ -1474,7 +1475,7 @@ ObjectVarilabe obj = new ObjectVarilabe()
     - 程序中断规则：对线程interrupted()方法的调用先行于被中断线程的代码检测到中断时间的发生。
     - 对象finalize规则：一个对象的初始化完成（构造函数执行结束）先行于发生它的finalize()方法的开始
 
-## <span id="false-sharing">伪共享</span>
+### <span id="false-sharing">伪共享</span>
 
 **缓存行**
 
@@ -1488,25 +1489,25 @@ ObjectVarilabe obj = new ObjectVarilabe()
 
 ​	在JDK8以前，我们一般是在属性间填充长整型变量来分隔每一组属性。JDK8之后加入`@Contended`注解方式【JVM需要添加参数-XX:-RestrictContended才能开启此功能 】
 
-## <span id="lazy-questions">懒汉式指令重排序问题</span>
+### <span id="lazy-questions">懒汉式指令重排序问题</span>
 
 ```java
 public class Singleton {
 
   private static volatile Singleton instance;
-  
+
   private Singleton() {
   }
 
   public static Singleton getInstance() {
-      if(instance==null){                    
-          synchronized (Singleton.class){    
-              if(instance==null){           
-                  instance=new Singleton();
-              }
-          }
+    if(instance==null){                    
+      synchronized (Singleton.class){    
+        if(instance==null){           
+          instance=new Singleton();
+        }
       }
-      return instance;
+    }
+    return instance;
   }
 }
 ```
@@ -1520,21 +1521,21 @@ public class Singleton {
 
 在发生重排序时其它线程如果进入`getInstance()`方法会在第一次判断是否为null时通过，导致拿到一个还未完全初始化完成的地址空间，此时如果进行操作很可能发生线程安全性问题
 
-## <span id="StampedLock">StampedLock</span>
+### <span id="StampedLock">StampedLock</span>
 
 StampedLock是Java 8新增的一个读写锁，它是对ReentrantReadWriteLock的改进。
 
 ```java
 public class Demo {
-	
-	private int balance;
-	
-	private StampedLock lock = new StampedLock();
-	
+
+  private int balance;
+
+  private StampedLock lock = new StampedLock();
+
   //===================================读写锁转化====================================
-	public void conditionReadWrite (int value) {
-		// 首先加独占读锁判断balance的值是否符合更新的条件
-		long stamp = lock.readLock();
+  public void conditionReadWrite (int value) {
+    // 首先加独占读锁判断balance的值是否符合更新的条件
+    long stamp = lock.readLock();
     try{
       while (balance > 0) {
         // 下面需要进行写操作，所以转化为写锁
@@ -1555,38 +1556,38 @@ public class Demo {
         }
       }
     }finally{
-       lock.unlock(stamp); 
+      lock.unlock(stamp); 
     }
-	}
+  }
 
   //====================================乐观读操作===================================
-	public void optimisticRead() {
+  public void optimisticRead() {
     // 获取乐观读锁
-		long stamp = lock.tryOptimisticRead();
-		int c = balance;
-		// 这里其它可能会出现了写操作，因此要进行判断读锁获取的是否有问题
-		if(!lock.validate(stamp)) {
-			// 要从新读取
-			long readStamp = lock.readLock();
-			c = balance;
-			stamp = readStamp;
-		}
-		lock.unlockRead(stamp);
-	}
-	
+    long stamp = lock.tryOptimisticRead();
+    int c = balance;
+    // 这里其它可能会出现了写操作，因此要进行判断读锁获取的是否有问题
+    if(!lock.validate(stamp)) {
+      // 要从新读取
+      long readStamp = lock.readLock();
+      c = balance;
+      stamp = readStamp;
+    }
+    lock.unlockRead(stamp);
+  }
+
   //==============以下read/write操作和ReentrantReadWriteLock效果完全一样==============
-	public void read () {
-		long stamp = lock.readLock();
-		lock.tryOptimisticRead();
-		int c = balance;
-		// ...
-		lock.unlockRead(stamp);
-	}
-	
-	public void write(int value) {
-		long stamp = lock.writeLock();
-		balance += value;
-		lock.unlockWrite(stamp);
-	}
+  public void read () {
+    long stamp = lock.readLock();
+    lock.tryOptimisticRead();
+    int c = balance;
+    // ...
+    lock.unlockRead(stamp);
+  }
+
+  public void write(int value) {
+    long stamp = lock.writeLock();
+    balance += value;
+    lock.unlockWrite(stamp);
+  }
 }
 ```
