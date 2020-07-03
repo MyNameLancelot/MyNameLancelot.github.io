@@ -216,7 +216,7 @@ class ExecutorDemo implements Runnable {
 
 - 消息头锁标志位01
 
-- 是否是偏向锁【0|1】
+- 是否是偏向锁【0或1】
 
 - 偏向线程ID
 
