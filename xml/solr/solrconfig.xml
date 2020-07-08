@@ -82,17 +82,22 @@
       <int name="numVersionBuckets">${solr.ulog.numVersionBuckets:65536}</int>
     </updateLog>
 
-    <!-- 自动硬提交设置（提交并刷盘）
+    <!-- 
+	     自动硬提交设置（提交并刷盘）
 		 maxDocs：触发硬提交的最大文档数量  
 		 maxTime：触发硬提交的最长提交时间
-		 openSearcher：是否打开索引触发硬提交
-      -->
+		 openSearcher：是否打开索引触发硬提交，如果值设为true,则可以去掉softCommit
+    -->
      <autoCommit>
        <maxTime>${solr.autoCommit.maxTime:15000}</maxTime>
        <openSearcher>false</openSearcher>
      </autoCommit>
 
-    <!-- 软提交（提交不刷盘，可见更改，对实时搜索较好）-->
+    <!-- 
+	     软提交（提交不刷盘，可见更改，对实时搜索较好）
+	     这种提交不会立即把数据写到磁盘，但它可以使你能立即查询到它,软提交的方式可以把较多的一批数据同时插入到solr中,效率较快。
+	     以下是软提交什么时候触发写入磁盘，故障时会使用日志恢复，不必担心数据丢失
+	-->
      <autoSoftCommit>
        <maxTime>${solr.autoSoftCommit.maxTime:-1}</maxTime>
      </autoSoftCommit>
