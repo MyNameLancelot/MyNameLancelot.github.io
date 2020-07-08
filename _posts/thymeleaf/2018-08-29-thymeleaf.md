@@ -5,7 +5,7 @@ date: 2018-08-29 13:03:42
 categories: thymeleaf
 ---
 
-# 一、简介
+## 一、简介
 
 Thymeleaf是一个适用于Web和独立环境的现代服务器端Java模板引擎，能够处理HTML，XML，JavaScript，CSS甚至纯文本。
 
@@ -29,9 +29,9 @@ Thymeleaf具有以下几种模版模式
 
 **RAW**模式将不处理模板。它用于将未经处理的资源（文件，URL响应等）插入到正在处理的模板中
 
-# 二、使用文本
+## 二、使用文本
 
-## 多语言
+### 多语言
 
 Thymeleaf国际化文本位置是可配置的，它取决于`IMessageResolver`的具体实现。通常使用`.properties`文件实现。如果要从数据库获取消息，我们可以创建自己的实现。
 
@@ -45,16 +45,16 @@ Thymeleaf国际化文本位置是可配置的，它取决于`IMessageResolver`�
 
 使用`#{..}`从properties文件中取值
 
-## 上下文
+### 上下文
 
 Thymeleaf上下文是实现`org.thymeleaf.context.IContext`接口的对象。上下文应包含变量映射中执行模板引擎所需的所有数据，并且还引用国际化消息的语言环境。
 
 ```java
 public interface IContext {
-    public Locale getLocale();
-    public boolean containsVariable(final String name);
-    public Set<String> getVariableNames();
-    public Object getVariable(final String name);
+  public Locale getLocale();
+  public boolean containsVariable(final String name);
+  public Set<String> getVariableNames();
+  public Object getVariable(final String name);
 }
 ```
 
@@ -62,10 +62,10 @@ public interface IContext {
 
 ```java
 public interface IWebContext extends IContext {
-    public HttpServletRequest getRequest();
-    public HttpServletResponse getResponse();
-    public HttpSession getSession();
-    public ServletContext getServletContext();
+  public HttpServletRequest getRequest();
+  public HttpServletResponse getResponse();
+  public HttpSession getSession();
+  public ServletContext getServletContext();
 }
 ```
 
@@ -76,12 +76,12 @@ public interface IWebContext extends IContext {
 - `${session.x}`将返回Session会话属性`x`，例如**${session.user.name}**取出session中存放的用户名
 - `${application.x}`将返回Application属性`x`，例如**${application['javax.servlet.context.tempdir']}**
 
-## 文字转义
+### 文字转义
 
 - th:utext：不转义，使用原样输出
 - th:text：转义
 
-# 三、标准表达式语法
+## 三、标准表达式语法
 
 以下这些功能都可以组合和嵌套
 
@@ -116,7 +116,7 @@ public interface IWebContext extends IContext {
 - 特殊操作
   - 不操作：_
 
-## 消息
+### 消息
 
 利用[`java.text.MessageFormat`](https://docs.oracle.com/javase/10/docs/api/java/text/MessageFormat.html)标准语法进行格式化输出
 
@@ -138,7 +138,7 @@ home.welcome=Welcome to our grocery store, {0} (from default messages)!
 </p>
 ```
 
-## 变量
+### 变量
 
 ${...}实际上是OGNL表达式
 
@@ -164,7 +164,7 @@ ctx.getVariable("today");
 ((User) ctx.getVariable("session").get("user")).getName();
 ```
 
-## 表达式内置基本对象
+### 表达式内置基本对象
 
 - `#ctx`：上下文对象
 - `#vars:` 上下文变量
@@ -176,7 +176,7 @@ ctx.getVariable("today");
 
 使用`${#基本对象}`取出值，例如${#locale`}
 
-## 表达式内置工具对象
+### 表达式内置工具对象
 
 - `#execInfo`：有关正在处理的模板的信息
 - `#messages`：在变量表达式中获取外化消息的方法，与使用`＃{...}`语法获取的方法相同
@@ -204,7 +204,7 @@ ctx.getVariable("today");
 </p>
 ```
 
-## 选择表达式
+### 选择表达式
 
 `*{..}`相当于从上层的`th:object="${..}"`取值
 
@@ -226,7 +226,7 @@ ctx.getVariable("today");
 </div>
 ```
 
-## 链接表达式
+### 链接表达式
 
 使用`@{...}`处理链接
 
@@ -257,13 +257,13 @@ RESTFULL风格写法：`http://localhost/thymeleaf/order/15/details`
 
 注意RESTFULL风格的`@{...}`可变orderId不加`$`
 
-## 段表达式
+### 段表达式
 
 [详见模版布局](#templateLayout)
 
-## 字面值
+### 字面值
 
-### 文本
+**文本**
 
 ```html
 <p>
@@ -272,14 +272,14 @@ RESTFULL风格写法：`http://localhost/thymeleaf/order/15/details`
 </p>
 ```
 
-### 数字
+**数字**
 
 ```html
 <p>The year is <span th:text="2013">1492</span>.</p>
 <p>In two years, it will be <span th:text="2013 + 2">1494</span>.</p>
 ```
 
-### 布尔值判断
+**布尔值判断**
 
 ==false在大括号后面有thymeleaf处理
 
@@ -293,13 +293,13 @@ RESTFULL风格写法：`http://localhost/thymeleaf/order/15/details`
 <div th:if="${user.isAdmin() == false}"> ...
 ```
 
-### null值判断
+**null值判断**
 
 ```html
 <div th:if="${variable.something} == null">
 ```
 
-### 文字替代
+**文字替代**
 
 ```html
 <div th:class="content">...</div>
@@ -307,7 +307,7 @@ RESTFULL风格写法：`http://localhost/thymeleaf/order/15/details`
 <div th:class="'content'">...</div>
 ```
 
-## 拼接文本
+### 拼接文本
 
 使用`+`拼接
 
@@ -321,7 +321,7 @@ RESTFULL风格写法：`http://localhost/thymeleaf/order/15/details`
 <span th:text="|Welcome to our application, ${user.name}!|"></span>
 ```
 
-## 算数运算
+### 算数运算
 
 可以使用`+`， `-`，`*`， `/` ， `%`进行运算
 
@@ -337,7 +337,7 @@ RESTFULL风格写法：`http://localhost/thymeleaf/order/15/details`
 <div th:with="isEven=${prodStat.count % 2 == 0}">
 ```
 
-## 等于和大小判断
+### 等于和大小判断
 
 可以使用`>`，`<`，`>=`和`<=`符号，以及`==`和`!=`进行比较运算
 
@@ -350,7 +350,7 @@ RESTFULL风格写法：`http://localhost/thymeleaf/order/15/details`
 
 或者使用别名`gt` (`>`), `lt` (`<`), `ge` (`>=`), `le` (`<=`)
 
-## 条件表达式
+### 条件表达式
 
 使用`？:`进行三元运算
 
@@ -372,7 +372,7 @@ RESTFULL风格写法：`http://localhost/thymeleaf/order/15/details`
 <span th:text="${row.even}? :'alt'"></span>
 ```
 
-## 默认表达式（Elvis运算符）
+### 默认表达式（Elvis运算符）
 
 ```html
 <div th:object="${session.user}">
@@ -386,7 +386,7 @@ RESTFULL风格写法：`http://localhost/thymeleaf/order/15/details`
 <p>Age: <span th:text="*{age != null}? *{age} : '(no age specified)'">27</span>.</p>
 ```
 
-## 无操作表达式
+### 无操作表达式
 
 ```html
 <span th:text="${user.name} ?: 'no user authenticated'">...</span>
@@ -398,7 +398,7 @@ RESTFULL风格写法：`http://localhost/thymeleaf/order/15/details`
 <span th:text="${user.name} ?: _">no user authenticated</span>
 ```
 
-## 数据转换/格式化服务
+### 数据转换/格式化服务
 
 见更多配置部分
 
@@ -412,7 +412,7 @@ RESTFULL风格写法：`http://localhost/thymeleaf/order/15/details`
 
 > thymeleaf-spring3和thymeleaf-spring4集成软件包的集成了Spring与Thymeleaf的转换服务机制，所以在Spring配置宣称，转换服务和格式化将进行自动获得`${{...}}`和`*{{...}}`表达
 
-##  预处理
+###  预处理
 
 预处理表达式与普通表达式完全相同，但显示为双下划线符号（如`__${expression}__`、`__#{expression}__`...）
 
@@ -444,9 +444,9 @@ article.text=@myapp.translator.Translator@translateToEnglish({0})
 <p th:text="${@myapp.translator.Translator@translateToEnglish(textVar)}"></p>
 ```
 
-# 四、设置属性值
+## 四、设置属性值
 
-## 设置任何属性的值
+### 设置任何属性的值
 
 使用`th:attr`设置任何属性
 
@@ -463,7 +463,7 @@ article.text=@myapp.translator.Translator@translateToEnglish({0})
      alt="Logo de Good Thymes" />
 ```
 
-## 为指定属性设置值
+### 为指定属性设置值
 
 ```html
 <img src="/images/gtvglogo.png" 
@@ -479,7 +479,7 @@ article.text=@myapp.translator.Translator@translateToEnglish({0})
      th:alt="#{logo}" />
 ```
 
-## 一次设置多个值
+### 一次设置多个值
 
 有两个比较特殊的属性`th:alt-title`和`th:lang-xmllang`可用于同时设置两个属性相同的值：
 
@@ -500,7 +500,7 @@ article.text=@myapp.translator.Translator@translateToEnglish({0})
      th:src="@{/images/gtvglogo.png}" th:alt-title="#{logo}" />
 ```
 
-## 前后添加属性
+### 前后添加属性
 
 ```html
 <p class="blockfont" th:attrappend="class=${' ' + cssStyle}">Hello</p>
@@ -524,7 +524,7 @@ article.text=@myapp.translator.Translator@translateToEnglish({0})
 
 标准方言中还有两个属性：`th:classappend`和`th:styleappend`，用于向元素添加CSS类或Style片段而不覆盖现有元素
 
-## 固定值布尔属性
+### 固定值布尔属性
 
 标准方言将计算表达式的值，如果为true，则将属性设置为其固定值，如果计算为false，则不会设置该属性
 
@@ -532,7 +532,7 @@ article.text=@myapp.translator.Translator@translateToEnglish({0})
 <input type="checkbox" name="active" th:checked="${user.active}" />
 ```
 
-## 设置任何属性的值
+### 设置任何属性的值
 
 Thymeleaf提供了一个默认属性处理器，允许设置任何属性的值，即使`th:*`，在标准方言中没有为它定义特定的处理器
 
@@ -546,15 +546,15 @@ Thymeleaf提供了一个默认属性处理器，允许设置任何属性的值�
 <span whatever="John Apricot">...</span>
 ```
 
-## HTML5友好的属性和元素名称
+### HTML5友好的属性和元素名称
 
 也可以使用HTML5规定的用户自定义属性写法`data-{prefix}-{name}`,此做法无需开使用任何命名空间的名称
 
 例如`<span data-th-text="${user.login}">...</span>`
 
-# 五、循环
+## 五、循环
 
-## 基础
+### 基础
 
 使用`th:each`实现遍历
 
@@ -574,7 +574,7 @@ Thymeleaf提供了一个默认属性处理器，允许设置任何属性的值�
   </ul>
   ```
 
-## 迭代状态
+### 迭代状态
 
 状态变量在`th:each`属性中定义，包含以下属性：
 
@@ -620,7 +620,7 @@ Thymeleaf提供了一个默认属性处理器，允许设置任何属性的值�
 </ul>
 ```
 
-## 懒加载
+### 懒加载
 
 设置变量时`public void setVariable(final String name, final Object value)`,被放入上下文环境中的类实现`LazyContextVariable`接口即可实现懒加载，如果加载的条件不满足，则不会触发`loadValue`方法。注意**每次加载都会触发loadValue**
 
@@ -635,7 +635,7 @@ Thymeleaf提供了一个默认属性处理器，允许设置任何属性的值�
     })
 ```
 
-# 六、条件评估
+## 六、条件评估
 
 `th:if`属性按照true以下规则评估指定的表达式：
 
@@ -661,9 +661,9 @@ Thymeleaf提供了一个默认属性处理器，允许设置任何属性的值�
 </div>
 ```
 
-# <span name="templateLayout">七、模版布局</span>
+## <span name="templateLayout">七、模版布局</span>
 
-## 定义模版片段
+### 定义模版片段
 
 使用`th:fragment`定义片段，例如：
 
@@ -678,7 +678,7 @@ Thymeleaf提供了一个默认属性处理器，允许设置任何属性的值�
 </html>
 ```
 
-## 引用片段
+### 引用片段
 
 - 使用`th:insert`插入引用片段
 
@@ -719,13 +719,13 @@ Thymeleaf提供了一个默认属性处理器，允许设置任何属性的值�
   ```
 
 
-## 片段规范语法
+### 片段规范语法
 
 - 使用`th:insert="~{文件名::片段名}"`或者`th:insert="文件名::片段名"`
 - `"~{templatename}"`包含名为`templatename`的完整模板，会将把指定元素替换为`templatename`整个网页
 - `~{::selector}"`或`"~{this::selector}"`插入来自当前模板的片段，进行匹配`selector`。如果在表达式出现的模板上找不到，则模板调用（插入）的堆栈将遍历最初处理的模板（根），直到`selector`在某个级别匹配
 
-## 不标记th:fragment
+### 不标记th:fragment
 
 ```html
 <div id="copy-section">
@@ -741,7 +741,7 @@ Thymeleaf提供了一个默认属性处理器，允许设置任何属性的值�
 </body>
 ```
 
-## 可参数化的片段签名
+### 可参数化的片段签名
 
 声明片段
 
@@ -758,7 +758,7 @@ Thymeleaf提供了一个默认属性处理器，允许设置任何属性的值�
 <div th:replace="::frag (onevar=${value1},twovar=${value2})">...</div
 ```
 
-## 灵活布局
+### 灵活布局
 
 ```html
 <head th:fragment="common_header(title,links)">
@@ -857,7 +857,7 @@ Thymeleaf提供了一个默认属性处理器，允许设置任何属性的值�
 </head>
 ```
 
-## 删除模板片段
+### 删除模板片段
 
 模拟数据的时候会模拟很多行，那么循环遍历是就需要删除不需要的数据例如
 
@@ -921,7 +921,7 @@ Thymeleaf提供了一个默认属性处理器，允许设置任何属性的值�
 - `all-but-first`：除第一个子项外，删除包含标记的所有子项。
 - `none`： 没做什么。
 
-# 八、局部变量
+## 八、局部变量
 
 hymeleaf提供了一种使用`th:with`属性声明局部变量方法，可以使用`,`定义多个，其语法类似于属性值赋值：
 
@@ -965,7 +965,7 @@ date.format=yyyy-MM-dd
 </p>
 ```
 
-# 九、属性优先级
+## 九、属性优先级
 
 | 优先级别 |     描述     |      属性      |
 | :------: | :----------: | :------------: |
@@ -990,7 +990,7 @@ date.format=yyyy-MM-dd
 |    8     |   片段定义   |  th:fragment   |
 |    9     |   片段删除   |   th:remove    |
 
-# 十、注释和块
+## 十、注释和块
 
 - 标准HTML/XML注释
 
@@ -1031,9 +1031,9 @@ date.format=yyyy-MM-dd
   </table>
   ```
 
-# 十一、内联
+## 十一、内联
 
-## 内联表达式
+### 内联表达式
 
 内联表达式`th:inline="text"`默认是开启的，`th:inline="javascript"`和`th:inline="css"`需要显示开启
 
@@ -1052,15 +1052,15 @@ date.format=yyyy-MM-dd
   <p>A double array looks like this: [[1, 2, 3], [4, 5]]!</p>
   ```
 
-## 文字内联
+### 文字内联
 
 [详见文本模版](#textTemplate)
 
-## JavaScript内联
+### JavaScript内联
 
 [详见文本模版](#textTemplate)
 
-## Css内联
+### Css内联
 
 ```html
 <style th:inline="css">
@@ -1111,11 +1111,11 @@ date.format=yyyy-MM-dd
 </style>
 ```
 
-# <span name="textTemplate">十二、文本模板模式</span>
+## <span name="textTemplate">十二、文本模板模式</span>
 
 `TEXT`，`JAVASCRIPT`和`CSS`均属于文本模板，`HTML`和`XML`属于标记模板。
 
-## 文本语法
+### 文本语法
 
 文本模板模式与标记模式之间的关键区别在于，文本模板中没有**标签**可以以属性的形式插入逻辑，因此我们必须依赖其他机制。
 
@@ -1156,7 +1156,7 @@ date.format=yyyy-MM-dd
   [/]
   ```
 
-## 原型注代码块
+### 原型注代码块
 
 在`JAVASCRIPT`和`CSS`模板模式（不适用于`TEXT`），允许包括一个特殊的注释语法之间的代码`/*[+...+]*/`，这样Thymeleaf处理模板时会自动取消注释，将其输出
 
@@ -1178,7 +1178,7 @@ var x = 23;
 var msg  = "Hello,小明";
 ```
 
-## 原型注释块
+### 原型注释块
 
 ```text
 var x = 23;
@@ -1191,7 +1191,7 @@ var msg  = "Hello, " + [[${session.user.name}]];
 +]*/
 ```
 
-## JavaScript和CSS自然模版
+### JavaScript和CSS自然模版
 
 JavaScript和CSS内联提供了在JavaScript / CSS注释中包含内联表达式的方式
 
@@ -1209,9 +1209,9 @@ var username = /*[[${session.user.name}]]*/ "Sebastian Lychee";
 
 上述方式javascript可以正常打开
 
-# 十三、有关配置信息 
+## 十三、有关配置信息 
 
-## 模板解析器
+### 模板解析器
 
 Thymeleaf 自身模板解析器
 
@@ -1288,7 +1288,7 @@ servletContextTemplateResolver.setOrder(Integer.valueOf(2));
 
 如果未指定这些Pattern，我们将依赖于`ITemplateResolver`每个实现的特定功能【可能不是我们想要的结果】
 
-## 消息解析器
+### 消息解析器
 
 `StandardMessageResolver`在定位当解析资源时，会在同级目录下寻找properties文件
 
@@ -1311,7 +1311,7 @@ templateEngine.addMessageResolver(messageResolver);
 ...
 ```
 
-## 转换服务
+### 转换服务
 
 使用`${{...}}`调用转换服务，配置转换服务的方法：
 
@@ -1324,7 +1324,7 @@ dialect.setConversionService(customConversionService);
 templateEngine.setDialect(dialect);
 ```
 
-## 日志
+### 日志
 
 Thymeleaf使用的日志门面是`slf4j`，配置示例：
 
@@ -1335,7 +1335,7 @@ log4j.logger.org.thymeleaf.TemplateEngine.TIMER=TRACE
 log4j.logger.org.thymeleaf.TemplateEngine.cache.TEMPLATE_CACHE=TRACE
 ```
 
-# 十四、模板缓存
+## 十四、模板缓存
 
 启用缓存代码
 
@@ -1350,9 +1350,9 @@ cacheManager.setTemplateCacheMaxSize(100);
 
 缓存管理器接口`ICacheManager`,默认实现类`StandardCacheManager`
 
-# 十五、模版逻辑解耦
+## 十五、模版逻辑解耦
 
-## 配置解耦模版
+### 配置解耦模版
 
 Thymeleaf可以彻底与模板逻辑脱钩，将逻辑创建在XML文件当中。
 
@@ -1410,7 +1410,7 @@ Thymeleaf可以彻底与模板逻辑脱钩，将逻辑创建在XML文件当中�
 </html>
 ```
 
-## 启动解耦模版
+### 启动解耦模版
 
 ```java
 ServletContextTemplateResolver templateResolver = 
@@ -1418,13 +1418,13 @@ ServletContextTemplateResolver templateResolver =
 templateResolver.setUseDecoupledLogic(true);
 ```
 
-## th：ref属性
+### th：ref属性
 
 `th:ref`只是一个标记属性，避免将HTML中加入大量id（锚点作用）污染文件
 
 `th:ref`属性的适用性**不仅适用于解耦的逻辑模板文件**，它还可以用于片段表达式（`~{...}`）。
 
-## IDecoupledTemplateLogicResolver接口
+### IDecoupledTemplateLogicResolver接口
 
 `org.thymeleaf.templateparser.markup.decoupled.IDecoupledTemplateLogicResolver`的默认实现是`StandardDecoupledTemplateLogicResolver`,它具有以下默认标准
 
@@ -1439,11 +1439,11 @@ decoupledResolver.setPrefix("../viewlogic/");
 templateEngine.setDecoupledTemplateLogicResolver(decoupledResolver);
 ```
 
-# 附录
+## 附录
 
-## 表达式基本对象
+### 表达式基本对象
 
-### 基础对象
+**基础对象**
 
 ```java
 //vars并且#root是同一对象的同义词，但#ctx建议使用
@@ -1461,7 +1461,7 @@ ${#ctx.servletContext}
 ${#locale}
 ```
 
-### 请求/会话属性
+**请求/会话属性**
 
 ```java
 /*
@@ -1493,7 +1493,7 @@ ${application.isEmpty()}
 ${application.containsKey('foo')}
 ```
 
-### Web上下文对象
+**Web上下文对象**
 
 ```java
 /*
@@ -1525,9 +1525,9 @@ ${#servletContext.contextPath}
 ...
 ```
 
-## 表达式内置对象 
+### 表达式内置对象 
 
-### 执行信息
+**执行信息**
 
 **#execInfo**：表达式对象，提供有关在Thymeleaf标准表达式中处理的模板的有用信息
 
@@ -1548,7 +1548,7 @@ ${#execInfo.templateModes}
 ${#execInfo.templateStack}
 ```
 
-### 消息
+**消息**
 
 **#messages**：用于在变量表达式中获取国际化消息，与使用`#{...}`语法获取它们的方式相同
 
@@ -1581,7 +1581,7 @@ ${#messages.listMsgOrNull(messageKeyList)}
 ${#messages.setMsgOrNull(messageKeySet)}
 ```
 
-### URI
+**URI**
 
 **#uris**：用于在Thymeleaf标准表达式中执行URI / URL操作的对象
 
@@ -1611,7 +1611,7 @@ ${#uris.unescapeQueryParam(uri)}
 ${#uris.unescapeQueryParam(uri, encoding)}
 ```
 
-### 转换
+**转换**
 
 ```html
 //转换对象为java.util.TimeZone
@@ -1619,7 +1619,7 @@ ${#conversions.convert(object, 'java.util.TimeZone')}
 ${#conversions.convert(object, targetClass)}
 ```
 
-### 日期
+**日期**
 
 **#dates**：`java.util.Date`对象
 
@@ -1667,7 +1667,7 @@ ${#dates.createToday()}			 //time设置为00:00
 ${#dates.createTodayForTimeZone()}
 ```
 
-### 日历
+**日历**
 
 **#calendars**：`java.util.Calendar`对象：
 
@@ -1719,7 +1719,7 @@ ${#calendars.createToday()}
 ${#calendars.createTodayForTimeZone()}
 ```
 
-### 数字
+**数字**
 
 ```html
 //设置数值的整数部分允许的最小位数,例如33 =》 033
@@ -1769,7 +1769,7 @@ ${#numbers.sequence(from,to)}
 ${#numbers.sequence(from,to,step)}
 ```
 
-### 字符串
+**字符串**
 
 ```html
 //NULL值安全
@@ -1854,7 +1854,7 @@ ${#strings.concatReplaceNulls(nullValue, values...)}
 ${#strings.randomAlphanumeric(count)}
 ```
 
-### 对象
+**对象**
 
 ```html
 //如果对象是null返回default
@@ -1864,7 +1864,7 @@ ${#objects.listNullSafe(objList,default)}
 ${#objects.setNullSafe(objSet,default)}
 ```
 
-### 布尔
+**布尔**
 
 ```html
 //像th:if一样判断是否为true
@@ -1890,7 +1890,7 @@ ${#bools.listOr(condList)}
 ${#bools.setOr(condSet)}
 ```
 
-### 数组
+**数组**
 
 ```html
 //转换为数组
@@ -1915,7 +1915,7 @@ ${#arrays.contains(array, element)}
 ${#arrays.containsAll(array, elements)}
 ```
 
-### list
+**list**
 
 ```html
 //转换为list
@@ -1936,7 +1936,7 @@ ${#lists.sort(list)}
 ${#lists.sort(list, comparator)}
 ```
 
-### set
+**set**
 
 ```html
 //转换为set
@@ -1953,7 +1953,7 @@ ${#sets.contains(set, element)}
 ${#sets.containsAll(set, elements)}
 ```
 
-### Map
+**Map**
 
 ```html
 //返回map大小
@@ -1969,7 +1969,7 @@ ${#maps.containsValue(map, value)}
 ${#maps.containsAllValues(map, value)}
 ```
 
-### Aggregates
+**Aggregates**
 
 ```html
 //对集合求和
@@ -1981,7 +1981,7 @@ ${#aggregates.avg(array)}
 ${#aggregates.avg(collection)}
 ```
 
-### IDs
+**IDs**
 
 用于处理`id`可能重复的方法
 
