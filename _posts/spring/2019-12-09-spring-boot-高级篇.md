@@ -607,14 +607,12 @@ management.endpoint.info.enabled=true
 ```yaml
 management: 
   endpoints: 
-   	# jmx暴露断点控制
     jmx:
       exposure:
         include:
           health,info
-     # web暴露断点控制
-     web:				
-       exposure: 
+     web:
+     	 exposure: 
          include: "*"
        exposure:
          exclude: env,beans
