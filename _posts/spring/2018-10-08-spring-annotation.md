@@ -5,11 +5,11 @@ date: 2019-01-12 15:25:32
 categories: spring
 ---
 
-# 一、组件注册
+## 一、组件注册
 
 ​	Spring注解驱动上下文环境类为`AnnotationConfigApplicationContext`，避免使用`application.xml`进行配置。`AnnotationConfigApplicationContext(Class<?>... annotatedClasses)`传入配置类即可，相比XML配置更加便捷 。
 
-## @Configuration注解
+### @Configuration注解
 
 `Configuration`配置类，替代`application.xml`加载配置内容
 
@@ -18,14 +18,14 @@ categories: spring
 @Configuration
 public class MainConfig {
 
-    @Bean
-    public Person person() {
-        return new Person("小牛", 19);
-    }	
+  @Bean
+  public Person person() {
+    return new Person("小牛", 19);
+  }	
 }
 ```
 
-## @ComponentScan注解
+### @ComponentScan注解
 
 `@ComponentScan`包扫描类，加载指定包下的内容，为可重复注解，如果jdk小于1.7则可使用`@ComponentScans`配置多个`@ComponentScan`
 
@@ -33,7 +33,7 @@ public class MainConfig {
 @Configuration
 //配置包扫描，去除Controller的加载
 @ComponentScan(basePackages="com.kun.componentscan",
-    excludeFilters= {@Filter(type=FilterType.ANNOTATION,classes=Controller.class)})
+               excludeFilters= {@Filter(type=FilterType.ANNOTATION,classes=Controller.class)})
 public class MainConfig {
 
 }
@@ -42,8 +42,9 @@ public class MainConfig {
 ```java
 @Configuration
 //配置包扫描，只加载Controlle，注意要设置useDefaultFilters=false
-@ComponentScan(basePackages="com.kun.componentscan",useDefaultFilters=false,
-    includeFilters= {@Filter(type=FilterType.ANNOTATION,classes=Controller.class)})
+@ComponentScan(basePackages="com.kun.componentscan",
+               useDefaultFilters=false,
+               includeFilters= {@Filter(type=FilterType.ANNOTATION,classes=Controller.class)})
 public class MainConfig {
 
 }
@@ -69,28 +70,28 @@ FilterType的种类
      */
     @Override
     public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
-        //获得当前扫描类的注解信息
-        AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
+      //获得当前扫描类的注解信息
+      AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
   
-        //获取当前扫描类的资源信息（类路径等）
-        Resource resource = metadataReader.getResource();
-        //获得当前扫描类的类信息
-        ClassMetadata classMetadata = metadataReader.getClassMetadata();
-        //获取类名
-        String className = classMetadata.getClassName();
-        return true;
+      //获取当前扫描类的资源信息（类路径等）
+      Resource resource = metadataReader.getResource();
+      //获得当前扫描类的类信息
+      ClassMetadata classMetadata = metadataReader.getClassMetadata();
+      //获取类名
+      String className = classMetadata.getClassName();
+      return true;
     }
   }
   ```
 
-## @Scope注解
+### @Scope注解
 
 `@Scope`生命周期配置类
 
 > @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)	//原型，每次从容器获取均创建
 > @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON) 	//单实例，每次从容器获取的都是同一个
 
-## @Lazy注解
+### @Lazy注解
 
 `@Lazy`懒加载，只对单实例Bean有效。容器启动时并不创建对象，在第一次获取时才创建对象
 
@@ -98,49 +99,49 @@ FilterType的种类
 @Bean
 @Lazy
 public Person person() {
-    return new Person("小牛", 19);
+  return new Person("小牛", 19);
 }
 ```
 
-## @Condition注解
+### @Condition注解
 
 `@Condition`按照条件进行动态创建，可标注在方法和类上。ConditionContext可以得到BeanFactory、getEnvironment、Registry等重要信息。
 
 ```java
 public class LinuxSystemCondition implements Condition{
-    @Override
-    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-        String osName = context.getEnvironment().getProperty("os.name");
-        return !osName.contains("Windows");
-    }
+  @Override
+  public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+    String osName = context.getEnvironment().getProperty("os.name");
+    return !osName.contains("Windows");
+  }
 }
 
 public class WindowsSystemCondition implements Condition{
-    @Override
-    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-        String osName = context.getEnvironment().getProperty("os.name");
-        return osName.contains("Windows");
-    }
+  @Override
+  public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+    String osName = context.getEnvironment().getProperty("os.name");
+    return osName.contains("Windows");
+  }
 }
 
 @Configuration
 public class MainConfig {
 
-    @Bean
-    @Conditional(WindowsSystemCondition.class)
-    public Person personWindows() {
-        return new Person("Bill Gates", 60);
-    }
+  @Bean
+  @Conditional(WindowsSystemCondition.class)
+  public Person personWindows() {
+    return new Person("Bill Gates", 60);
+  }
 
-    @Bean
-    @Conditional(LinuxSystemCondition.class)
-    public Person personLinux() {
-        return new Person("linus",48);
-    }
+  @Bean
+  @Conditional(LinuxSystemCondition.class)
+  public Person personLinux() {
+    return new Person("linus",48);
+  }
 }
 ```
 
-## @Import注解
+### @Import注解
 
 `@Import`容器会自动注册这个组件，id为全类名。`@Improt`的value[]可配置以下类型：
 
@@ -156,44 +157,45 @@ public class MainConfig {
 }
 
 public class MyImportBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar{
-    @Override
-    public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-        boolean registerRed = registry.containsBeanDefinition("com.kun.model.Red");
-        boolean registerBlue = registry.containsBeanDefinition("com.kun.model.Blue");
-        if(registerRed && registerBlue) {
-            registry.registerBeanDefinition("yellow", new RootBeanDefinition(Yellow.class));
-        }
+  @Override
+  public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
+                                      BeanDefinitionRegistry registry) {
+    boolean registerRed = registry.containsBeanDefinition("com.kun.model.Red");
+    boolean registerBlue = registry.containsBeanDefinition("com.kun.model.Blue");
+    if(registerRed && registerBlue) {
+      registry.registerBeanDefinition("yellow", new RootBeanDefinition(Yellow.class));
     }
+  }
 }
 
 public class MyImportSelector implements ImportSelector{
-    @Override
-    public String[] selectImports(AnnotationMetadata importingClassMetadata) {
-        return new String[]{"com.kun.model.Blue","com.kun.model.Pink"};
-    }
+  @Override
+  public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+    return new String[]{"com.kun.model.Blue","com.kun.model.Pink"};
+  }
 }
 ```
 
-## FactoryBean创建实例
+### FactoryBean创建实例
 
 ```java
 public class ColorFactoryBean implements FactoryBean<Color>{
-    @Override
-    public Color getObject() throws Exception {
-        return new Color();
-    }
-    @Override
-    public Class<?> getObjectType() {
-        return Color.class;
-    }
+  @Override
+  public Color getObject() throws Exception {
+    return new Color();
+  }
+  @Override
+  public Class<?> getObjectType() {
+    return Color.class;
+  }
 }
 
 public class MainTest {
-    public static void main(String[] args) {
-        ApplicationContext applicationContext = new AnnotationConfigApplicationContext(MainConfig.class);
-        //拿到ColorFactoryBean,FACTORY_BEAN_PREFIX为前缀‘&’
-        Object bean = applicationContext.getBean(BeanFactory.FACTORY_BEAN_PREFIX+"color");
-    }
+  public static void main(String[] args) {
+    ApplicationContext applicationContext = new AnnotationConfigApplicationContext(MainConfig.class);
+    //拿到ColorFactoryBean,FACTORY_BEAN_PREFIX为前缀‘&’
+    Object bean = applicationContext.getBean(BeanFactory.FACTORY_BEAN_PREFIX+"color");
+  }
 }
 ```
 
@@ -215,9 +217,9 @@ public class MainTest {
 
   ​	2）、要获取工厂Bean本身，我们需要给id前面加一个&
 
-# 二、生命周期
+## 二、生命周期
 
-## @Bean设置初始化和销毁方法
+### @Bean设置初始化和销毁方法
 
 单例对象时：在对象创建之后调用initMethod方法、在容器销毁时调用destroyMethod
 
@@ -225,102 +227,102 @@ public class MainTest {
 
 ```java
 public class Car {
-    public Car() {
-        System.out.println("Car.Car()");
-    }
-    public void init() {
-        System.out.println("Car.init()");
-    }
-    public void destory() {
-        System.out.println("Car.destory()");
-    }
+  public Car() {
+    System.out.println("Car.Car()");
+  }
+  public void init() {
+    System.out.println("Car.init()");
+  }
+  public void destory() {
+    System.out.println("Car.destory()");
+  }
 }
 
 @Configuration
 public class MainConfig {
-    @Bean(initMethod="init",destroyMethod="destory")
-    public Car car() {
-        return new Car();
-    }
+  @Bean(initMethod="init",destroyMethod="destory")
+  public Car car() {
+    return new Car();
+  }
 }
 ```
 
-## InitializingBean和DisposableBean
+### InitializingBean和DisposableBean
 
 作用和在`@Bean`中设置initMethod、destroyMethod一样
 
 ```java
 public class Bus implements InitializingBean, DisposableBean {
-    @Override
-    public void destroy() throws Exception {
-        System.out.println("Bus.destroy()");
-    }
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        System.out.println("Bus.afterPropertiesSet()");
-    }
+  @Override
+  public void destroy() throws Exception {
+    System.out.println("Bus.destroy()");
+  }
+  @Override
+  public void afterPropertiesSet() throws Exception {
+    System.out.println("Bus.afterPropertiesSet()");
+  }
 }
 
 @Configuration
 public class MainConfig {
-    @Bean
-    public Bus bus() {
-        return new Bus();
-    }
+  @Bean
+  public Bus bus() {
+    return new Bus();
+  }
 }
 ```
 
-## JSR-250规范实现初始化和销毁方法
+### JSR-250规范实现初始化和销毁方法
 
 `@PostConstruct`、`@PreDestroy`实现设置初始化和销毁
 
 ```java
 public class Dog {
-    @PostConstruct
-    public void init() {
-        System.out.println("Dog.init()");
-    }
-    
-    @PreDestroy
-    public void destory() {
-        System.out.println("Dog.destory()");
-    }
+  @PostConstruct
+  public void init() {
+    System.out.println("Dog.init()");
+  }
+
+  @PreDestroy
+  public void destory() {
+    System.out.println("Dog.destory()");
+  }
 }
 
 @Configuration
 public class MainConfig {	
-    @Bean
-    public Dog dog() {
-        return new Dog();
-    }
+  @Bean
+  public Dog dog() {
+    return new Dog();
+  }
 }
 ```
 
-## BeanPostProcesser后置处理器控制初始化
+### BeanPostProcesser后置处理器控制初始化
 
 ```java
 @Component
 public class MyBeanPostProcesser implements BeanPostProcessor {
-    //在Bean创建之后执行init方法之前调用
-    @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        if(beanName.equals("car")) {
-            System.out.println("car before initialization do something");
-        }
-        return bean;
+  //在Bean创建之后执行init方法之前调用
+  @Override
+  public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+    if(beanName.equals("car")) {
+      System.out.println("car before initialization do something");
     }
-    //在Bean创建之后执行init方法之后调用
-    @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if(beanName.equals("car")) {
-            System.out.println("car after initialization do something");
-        }
-        return bean;
+    return bean;
+  }
+  //在Bean创建之后执行init方法之后调用
+  @Override
+  public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+    if(beanName.equals("car")) {
+      System.out.println("car after initialization do something");
     }
+    return bean;
+  }
 }
 ```
 
-# 三、属性赋值
+## 三、属性赋值
 
 方式一：类比@Value("值")，将值直接注入
 
@@ -330,9 +332,9 @@ public class MyBeanPostProcesser implements BeanPostProcessor {
 
 @Value实现属性
 
-# 四、自动装配
+## 四、自动装配
 
-## `@Autowired`自动装配：
+### `@Autowired`自动装配：
 
 - 默认按照类型优先的方式去容器中找对应的组件
 - 如果找到多个类型相同的组件，再使用属性名称取匹配（使用`@Qualifier`可以指定查找的对象ID名称）
@@ -340,7 +342,7 @@ public class MyBeanPostProcesser implements BeanPostProcessor {
 - 再首选Bean上指定`@Primary`使之成为首选对象，如果此时找到多个类型相同的组件，使用首选Bean注入，`@Primary`优先级在`@Qualifier`之下
 - 标注在有参构造器上，如果此类只有一个有参构造器会使用自动装配实例化此类
 
-## `@Resource`和`@Inject`自动装配：
+### `@Resource`和`@Inject`自动装配：
 
 @Resource（JSR250）：
  * 可以和@Autowired一样实现自动装配功能，默认是按照组件名称进行装配的（可以使用name属性限定），匹配不到不会报错
@@ -351,7 +353,7 @@ public class MyBeanPostProcesser implements BeanPostProcessor {
 * 需要导入javax.inject的包，和Autowired的功能一样，必须匹配到Bean
 * 不能支持`@Primary`、`@Qualifier`组合
 
-## @Bean方法参数：
+### @Bean方法参数：
 
 - 在@Bean标注的方法中，创建对象时入参是通过Spring注入的
 
@@ -359,13 +361,13 @@ public class MyBeanPostProcesser implements BeanPostProcessor {
 //此person由Spring注入
 @Bean
 public Car car(Person person) {
-    Car car = new Car();
-    car.setPerson(person);
-    return car;
+  Car car = new Car();
+  car.setPerson(person);
+  return car;
 }
 ```
 
-## 使用Aware接口
+### 使用Aware接口
 
 - 自定义组件如果要使用Spring底层的一些组件（ApplicationContext，BeanFactory等等）自定义组件可以实现对应的Aware接口，在创建对象时，Spring会传入相关组件。
 
@@ -401,7 +403,7 @@ Aware
  +- ServletContextAware
 ```
 
-## @Profile环境感知
+### @Profile环境感知
 
 @Profile可以根据当前环境，动态的激活和切换一系列组件的功能
 
@@ -419,47 +421,47 @@ Aware
  */
 @Configuration
 public class MainConfig3 {
-    //默认激活
-    @Profile("default")
-    @Bean(initMethod="init",destroyMethod="close")
-    public DataSource dataSourceDev() {
-        DruidDataSource dataSource = new DruidDataSource();
-        dataSource.setUsername("root");
-        dataSource.setPassword("123");
-        dataSource.setUrl("jdbc:mysql://localhost:3306/dev");
-        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        return dataSource;
-    }
-    
-    @Profile("test")
-    @Bean(initMethod="init",destroyMethod="close")
-    public DataSource dataSourceTest() {
-        DruidDataSource dataSource = new DruidDataSource();
-        dataSource.setUsername("root");
-        dataSource.setPassword("123");
-        dataSource.setUrl("jdbc:mysql://localhost:3306/test");
-        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        return dataSource;
-    }
+  //默认激活
+  @Profile("default")
+  @Bean(initMethod="init",destroyMethod="close")
+  public DataSource dataSourceDev() {
+    DruidDataSource dataSource = new DruidDataSource();
+    dataSource.setUsername("root");
+    dataSource.setPassword("123");
+    dataSource.setUrl("jdbc:mysql://localhost:3306/dev");
+    dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+    return dataSource;
+  }
 
-    @Profile("produ")
-    @Bean(initMethod="init",destroyMethod="close")
-    public DataSource dataSourceProdu() {
-        DruidDataSource dataSource = new DruidDataSource();
-        dataSource.setUsername("root");
-        dataSource.setPassword("123");
-        dataSource.setUrl("jdbc:mysql://localhost:3306/produ");
-        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        return dataSource;
-    }
+  @Profile("test")
+  @Bean(initMethod="init",destroyMethod="close")
+  public DataSource dataSourceTest() {
+    DruidDataSource dataSource = new DruidDataSource();
+    dataSource.setUsername("root");
+    dataSource.setPassword("123");
+    dataSource.setUrl("jdbc:mysql://localhost:3306/test");
+    dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+    return dataSource;
+  }
+
+  @Profile("produ")
+  @Bean(initMethod="init",destroyMethod="close")
+  public DataSource dataSourceProdu() {
+    DruidDataSource dataSource = new DruidDataSource();
+    dataSource.setUsername("root");
+    dataSource.setPassword("123");
+    dataSource.setUrl("jdbc:mysql://localhost:3306/produ");
+    dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+    return dataSource;
+  }
 }
 ```
 
-# 五、AOP
+## 五、AOP
 
 AOP【动态代理】：指在程序运行期间动态的将某段代码切入到指定方法指定位置进行运行的编程方式
 
-## AOP的使用方法
+### AOP的使用方法
 
 - 导入aop模块【Spring AOP：(spring-aspects)】
 - 定义一个业务逻辑类
@@ -476,69 +478,69 @@ AOP【动态代理】：指在程序运行期间动态的将某段代码切入�
 ```java
 //业务逻辑类
 public class MathCalculator {
-    public int div(int i, int j) {
-        return i / j;
-    }
+  public int div(int i, int j) {
+    return i / j;
+  }
 }
 
 //切面类，@Aspect标志自己是配置类
 @Aspect
 public class LogAspects {
 
-    //定义切面，本类引用直接写方法名，引用外部类的需要加上类全限定名
-    @Pointcut("execution(* com.kun.aop.MathCalculator.*(..))")
-    public void pointCut() {}
-    
-    @Before("pointCut()")
-    public void logStart(JoinPoint joinPoint) {
-        String methodName = joinPoint.getSignature().getName();
-        Object[] args = joinPoint.getArgs();
-        System.out.println("方法名"+methodName);
-        System.out.println("参数"+Arrays.toString(args));
-    }
-    
-    @After("pointCut()")
-    public void logEnd(JoinPoint joinPoint) {
-        System.out.println(joinPoint.getSignature().getName()+"调用结束");
-    }
-    
-    @AfterReturning(pointcut="pointCut()",returning="result")
-    public void logReturn(JoinPoint joinPoint, Object result) {
-        System.out.println(joinPoint.getSignature().getName()+"正常返回，运行结果："+result);
-    }
+  //定义切面，本类引用直接写方法名，引用外部类的需要加上类全限定名
+  @Pointcut("execution(* com.kun.aop.MathCalculator.*(..))")
+  public void pointCut() {}
 
-    @AfterThrowing(pointcut="pointCut()",throwing="exception")
-    public void logException(JoinPoint joinPoint,Exception exception){
-        System.out.println(joinPoint.getSignature().getName()+"异常，异常信息："+exception);
-    }
+  @Before("pointCut()")
+  public void logStart(JoinPoint joinPoint) {
+    String methodName = joinPoint.getSignature().getName();
+    Object[] args = joinPoint.getArgs();
+    System.out.println("方法名"+methodName);
+    System.out.println("参数"+Arrays.toString(args));
+  }
+
+  @After("pointCut()")
+  public void logEnd(JoinPoint joinPoint) {
+    System.out.println(joinPoint.getSignature().getName()+"调用结束");
+  }
+
+  @AfterReturning(pointcut="pointCut()",returning="result")
+  public void logReturn(JoinPoint joinPoint, Object result) {
+    System.out.println(joinPoint.getSignature().getName()+"正常返回，运行结果："+result);
+  }
+
+  @AfterThrowing(pointcut="pointCut()",throwing="exception")
+  public void logException(JoinPoint joinPoint,Exception exception){
+    System.out.println(joinPoint.getSignature().getName()+"异常，异常信息："+exception);
+  }
 }
 
 //配置类
 @Configuration
 @EnableAspectJAutoProxy		//开启AOP自动配置
 public class MainConfig4 {
-    //业务逻辑类加入容器中
-    @Bean
-    public MathCalculator calculator(){
-        return new MathCalculator();
-    }
-    //切面类加入到容器中
-    @Bean
-    public LogAspects logAspects(){
-        return new LogAspects();
-    }
+  //业务逻辑类加入容器中
+  @Bean
+  public MathCalculator calculator(){
+    return new MathCalculator();
+  }
+  //切面类加入到容器中
+  @Bean
+  public LogAspects logAspects(){
+    return new LogAspects();
+  }
 }
 ```
 
-## AOP源码分析
+### AOP源码分析
 
 **1、EnableAspectJAutoProxy实际上导入了AspectJAutoProxyRegistrar.class**
 
 ```java
 @Import(AspectJAutoProxyRegistrar.class)
 public @interface EnableAspectJAutoProxy {
-    boolean proxyTargetClass() default false;
-    boolean exposeProxy() default false;
+  boolean proxyTargetClass() default false;
+  boolean exposeProxy() default false;
 }
 ```
 
@@ -547,24 +549,25 @@ public @interface EnableAspectJAutoProxy {
 ```java
 class AspectJAutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 
-    @Override
-    public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-//注册了ID为org.springframework.aop.config.internalAutoProxyCreator的AnnotationAwareAspectJAutoProxyCreator.class组件信息
-         AopConfigUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(registry);
+  @Override
+  public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
+                                      BeanDefinitionRegistry registry) {
+    //注册了ID为org.springframework.aop.config.internalAutoProxyCreator的AnnotationAwareAspectJAutoProxyCreator.class组件信息
+    AopConfigUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(registry);
 
-        //修改AnnotationAwareAspectJAutoProxyCreator的信息
-        AnnotationAttributes enableAspectJAutoProxy =
+    //修改AnnotationAwareAspectJAutoProxyCreator的信息
+    AnnotationAttributes enableAspectJAutoProxy =
 
-        AnnotationConfigUtils.attributesFor(importingClassMetadata, EnableAspectJAutoProxy.class);
-        if (enableAspectJAutoProxy != null) {
-            if (enableAspectJAutoProxy.getBoolean("proxyTargetClass")) {
-                AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
-            }
-            if (enableAspectJAutoProxy.getBoolean("exposeProxy")) {
-                AopConfigUtils.forceAutoProxyCreatorToExposeProxy(registry);
-            }
-        }
+      AnnotationConfigUtils.attributesFor(importingClassMetadata, EnableAspectJAutoProxy.class);
+    if (enableAspectJAutoProxy != null) {
+      if (enableAspectJAutoProxy.getBoolean("proxyTargetClass")) {
+        AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
+      }
+      if (enableAspectJAutoProxy.getBoolean("exposeProxy")) {
+        AopConfigUtils.forceAutoProxyCreatorToExposeProxy(registry);
+      }
     }
+  }
 }
 ```
 
@@ -598,28 +601,28 @@ class AspectJAutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 ```java
 //识别保存@Aspects注解类，保存相关注解信息和切面、切入点表达式
 public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
-    Object cacheKey = getCacheKey(beanClass, beanName);
-    if (!StringUtils.hasLength(beanName) || !this.targetSourcedBeans.contains(beanName)) {
-        if (this.advisedBeans.containsKey(cacheKey)) {
-            return null;
-        }
-        if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) {
-            this.advisedBeans.put(cacheKey, Boolean.FALSE);
-            return null;
-        }
+  Object cacheKey = getCacheKey(beanClass, beanName);
+  if (!StringUtils.hasLength(beanName) || !this.targetSourcedBeans.contains(beanName)) {
+    if (this.advisedBeans.containsKey(cacheKey)) {
+      return null;
     }
+    if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) {
+      this.advisedBeans.put(cacheKey, Boolean.FALSE);
+      return null;
+    }
+  }
 
-    TargetSource targetSource = getCustomTargetSource(beanClass, beanName);
-    if (targetSource != null) {
-        if (StringUtils.hasLength(beanName)) {
-            this.targetSourcedBeans.add(beanName);
-        }
-        Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(beanClass, beanName, targetSource);
-        Object proxy = createProxy(beanClass, beanName, specificInterceptors, targetSource);
-        this.proxyTypes.put(cacheKey, proxy.getClass());
-        return proxy;
+  TargetSource targetSource = getCustomTargetSource(beanClass, beanName);
+  if (targetSource != null) {
+    if (StringUtils.hasLength(beanName)) {
+      this.targetSourcedBeans.add(beanName);
     }
-    return null;
+    Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(beanClass, beanName, targetSource);
+    Object proxy = createProxy(beanClass, beanName, specificInterceptors, targetSource);
+    this.proxyTypes.put(cacheKey, proxy.getClass());
+    return proxy;
+  }
+  return null;
 }
 ```
 
@@ -627,14 +630,14 @@ public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName
 
 ```java
 public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) {
-    if (bean != null) {
-        Object cacheKey = getCacheKey(bean.getClass(), beanName);
-        if (!this.earlyProxyReferences.contains(cacheKey)) {
-            //包装生成动态代理类，
-            return wrapIfNecessary(bean, beanName, cacheKey);
-        }
+  if (bean != null) {
+    Object cacheKey = getCacheKey(bean.getClass(), beanName);
+    if (!this.earlyProxyReferences.contains(cacheKey)) {
+      //包装生成动态代理类，
+      return wrapIfNecessary(bean, beanName, cacheKey);
     }
-    return bean;
+  }
+  return bean;
 }
 /**
 wrapIfNecessary(bean, beanName, cacheKey);
@@ -662,11 +665,11 @@ wrapIfNecessary(bean, beanName, cacheKey);
    Object retVal;
    //如果链为空，直接执行目标方法
    if (chain.isEmpty() && Modifier.isPublic(method.getModifiers())) {
-       Object[] argsToUse = AopProxyUtils.adaptArgumentsIfNecessary(method, args);
-       retVal = methodProxy.invoke(target, argsToUse);
+     Object[] argsToUse = AopProxyUtils.adaptArgumentsIfNecessary(method, args);
+     retVal = methodProxy.invoke(target, argsToUse);
    }
    else {
-       retVal = new CglibMethodInvocation(proxy, target, method, args, targetClass, chain, methodProxy).proceed();
+     retVal = new CglibMethodInvocation(proxy, target, method, args, targetClass, chain, methodProxy).proceed();
    }
    ```
 
@@ -677,9 +680,9 @@ wrapIfNecessary(bean, beanName, cacheKey);
    1. 如果没有拦截器执行执行目标方法，或者拦截器的索引和拦截器数组-1大小一样（指定到了最后一个拦截器）执行目标方法
    2. 链式获取每一个拦截器，拦截器执行invoke方法，每一个拦截器等待下一个拦截器执行完成返回以后再来执行；拦截器链的机制，保证通知方法与目标方法的执行顺序
 
-# 六、声明式事务
+## 六、声明式事务
 
-## 声明式事务使用方式
+### 声明式事务使用方式
 
 - 配置数据源和事务管理器
 - @EnableTransactionManagement 开启基于注解的事务管理功能
@@ -691,55 +694,55 @@ wrapIfNecessary(bean, beanName, cacheKey);
 @Configuration
 public class MainConfig {
 
-    //配置事务管理器
-    @Bean
-    public DataSourceTransactionManager transactionManagement() {
-        return new DataSourceTransactionManager(dataSource());
-    }
+  //配置事务管理器
+  @Bean
+  public DataSourceTransactionManager transactionManagement() {
+    return new DataSourceTransactionManager(dataSource());
+  }
 
-    //配置数据源
-    @Bean(initMethod="init",destroyMethod="close")
-    public DataSource dataSource() {
-        DruidDataSource dataSource = new DruidDataSource();
-        dataSource.setUrl("jdbc:mysql://localhost:3306/mapper");
-        dataSource.setUsername("root");
-        dataSource.setPassword("123456");
-        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        return dataSource;
-    }
+  //配置数据源
+  @Bean(initMethod="init",destroyMethod="close")
+  public DataSource dataSource() {
+    DruidDataSource dataSource = new DruidDataSource();
+    dataSource.setUrl("jdbc:mysql://localhost:3306/mapper");
+    dataSource.setUsername("root");
+    dataSource.setPassword("123456");
+    dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+    return dataSource;
+  }
 
-    //配置JdbcTemplate
-    @Bean
-    public JdbcTemplate jdbcTemplate() {
-        return new JdbcTemplate(dataSource());
-    }
+  //配置JdbcTemplate
+  @Bean
+  public JdbcTemplate jdbcTemplate() {
+    return new JdbcTemplate(dataSource());
+  }
 }
 
 @Repository
 public class TestDao {
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-    public void insert() {
-        jdbcTemplate.update("insert into person(name) values(?)","kun");
-    }
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
+  public void insert() {
+    jdbcTemplate.update("insert into person(name) values(?)","kun");
+  }
 }
 
 @Service
 public class TestService {
 
-    @Autowired
-    private TestDao testDao;
+  @Autowired
+  private TestDao testDao;
 
-    //声明事务
-    @Transactional
-    public void insert() {
-        testDao.insert();
-        int i = 1/0;
-    }
+  //声明事务
+  @Transactional
+  public void insert() {
+    testDao.insert();
+    int i = 1/0;
+  }
 }
 ```
 
-## 声明式事务源码分析
+### 声明式事务源码分析
 
 - `@EnableTransactionManagement`注解导入了`TransactionManagementConfigurationSelector.class`
 
@@ -747,15 +750,15 @@ public class TestService {
 //TransactionManagementConfigurationSelector实现了ImportSelector接口
 //使用默认配置会导入AutoProxyRegistrar和ProxyTransactionManagementConfiguration
 protected String[] selectImports(AdviceMode adviceMode) {
-    switch (adviceMode) {
-        case PROXY:
-            return new String[] {AutoProxyRegistrar.class.getName(),
-                                 ProxyTransactionManagementConfiguration.class.getName()};
-        case ASPECTJ:
-            return new String[] {determineTransactionAspectClass()};
-        default:
-            return null;
-    }
+  switch (adviceMode) {
+    case PROXY:
+      return new String[] {AutoProxyRegistrar.class.getName(),
+                           ProxyTransactionManagementConfiguration.class.getName()};
+    case ASPECTJ:
+      return new String[] {determineTransactionAspectClass()};
+    default:
+      return null;
+  }
 }
 ```
 
@@ -766,59 +769,59 @@ protected String[] selectImports(AdviceMode adviceMode) {
 ```java
 @Configuration
 public class ProxyTransactionManagementConfiguration extends AbstractTransactionManagementConfiguration {
-    //实现切入点
-    @Bean(name = TransactionManagementConfigUtils.TRANSACTION_ADVISOR_BEAN_NAME)
-    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-    public BeanFactoryTransactionAttributeSourceAdvisor transactionAdvisor() {
-        BeanFactoryTransactionAttributeSourceAdvisor advisor = new BeanFactoryTransactionAttributeSourceAdvisor();
-        advisor.setTransactionAttributeSource(transactionAttributeSource());
-        advisor.setAdvice(transactionInterceptor());
-        if (this.enableTx != null) {
-            advisor.setOrder(this.enableTx.<Integer>getNumber("order"));
-        }
-        return advisor;
+  //实现切入点
+  @Bean(name = TransactionManagementConfigUtils.TRANSACTION_ADVISOR_BEAN_NAME)
+  @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+  public BeanFactoryTransactionAttributeSourceAdvisor transactionAdvisor() {
+    BeanFactoryTransactionAttributeSourceAdvisor advisor = new BeanFactoryTransactionAttributeSourceAdvisor();
+    advisor.setTransactionAttributeSource(transactionAttributeSource());
+    advisor.setAdvice(transactionInterceptor());
+    if (this.enableTx != null) {
+      advisor.setOrder(this.enableTx.<Integer>getNumber("order"));
     }
-    
-    @Bean
-    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-    public TransactionAttributeSource transactionAttributeSource() {
-        return new AnnotationTransactionAttributeSource();
-    }
+    return advisor;
+  }
 
-    //拦截器链
-    @Bean
-    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-    public TransactionInterceptor transactionInterceptor() {
-        TransactionInterceptor interceptor = new TransactionInterceptor();
-        interceptor.setTransactionAttributeSource(transactionAttributeSource());
-        if (this.txManager != null) {
-            interceptor.setTransactionManager(this.txManager);
-        }
-        return interceptor;
+  @Bean
+  @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+  public TransactionAttributeSource transactionAttributeSource() {
+    return new AnnotationTransactionAttributeSource();
+  }
+
+  //拦截器链
+  @Bean
+  @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+  public TransactionInterceptor transactionInterceptor() {
+    TransactionInterceptor interceptor = new TransactionInterceptor();
+    interceptor.setTransactionAttributeSource(transactionAttributeSource());
+    if (this.txManager != null) {
+      interceptor.setTransactionManager(this.txManager);
     }
+    return interceptor;
+  }
 }
 ```
 
-# 七、扩展原理
+## 七、扩展原理
 
-## Bean后置处理器
+### Bean后置处理器
 
 **BeanPostProcessor**接口在容器内对象创建完成之后属性赋值前后调用
 
 ```java
 public interface BeanPostProcessor {
 
-    //对象创建完成，在afterPropertiesSet或自定义init方法执行之前
-    @Nullable
-    default Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        return bean;
-    }
+  //对象创建完成，在afterPropertiesSet或自定义init方法执行之前
+  @Nullable
+  default Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+    return bean;
+  }
 
-    //对象创建完成，在afterPropertiesSet或自定义init方法执行之后
-    @Nullable
-    default Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        return bean;
-    }
+  //对象创建完成，在afterPropertiesSet或自定义init方法执行之后
+  @Nullable
+  default Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+    return bean;
+  }
 
 }
 ```
@@ -828,23 +831,23 @@ public interface BeanPostProcessor {
 ```java
 public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 
-    //对象实例化之前调用
-    @Nullable
-    default Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
-        return null;
-    }
+  //对象实例化之前调用
+  @Nullable
+  default Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
+    return null;
+  }
 
-    //对象实例化之后调用
-    default boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
-        return true;
-    }
+  //对象实例化之后调用
+  default boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
+    return true;
+  }
 
-    //对象实例化之后属性赋值之前，@Autowired、@Resource等就是根据这个回调来实现最终注入依赖的
-    @Nullable
-    default PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName)
-            throws BeansException {
-        return null;
-    }
+  //对象实例化之后属性赋值之前，@Autowired、@Resource等就是根据这个回调来实现最终注入依赖的
+  @Nullable
+  default PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName)
+    throws BeansException {
+    return null;
+  }
 }
 ```
 
@@ -853,13 +856,13 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 ```java
 public interface DestructionAwareBeanPostProcessor extends BeanPostProcessor {
 
-    //对象销毁之前调用
-    void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException;
+  //对象销毁之前调用
+  void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException;
 
-    //判断是否需要处理这个对象的销毁
-    default boolean requiresDestruction(Object bean) {
-        return true;
-    }
+  //判断是否需要处理这个对象的销毁
+  default boolean requiresDestruction(Object bean) {
+    return true;
+  }
 }
 ```
 
@@ -868,11 +871,13 @@ public interface DestructionAwareBeanPostProcessor extends BeanPostProcessor {
 ```java
 public interface MergedBeanDefinitionPostProcessor extends BeanPostProcessor {
 
-    //合并bean定义后进行的处理
-    void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName);
+  //合并bean定义后进行的处理
+  void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition,
+                                       Class<?> beanType,
+                                       String beanName);
 
-    //通知指定名称的bean定义已被重置，这个后处理器应该清除受影响bean的任何元数据
-    default void resetBeanDefinition(String beanName) {}
+  //通知指定名称的bean定义已被重置，这个后处理器应该清除受影响bean的任何元数据
+  default void resetBeanDefinition(String beanName) {}
 }
 ```
 
@@ -888,14 +893,14 @@ public interface MergedBeanDefinitionPostProcessor extends BeanPostProcessor {
 8. BeanPostProcessor.postProcessAfterInitialization(result, beanName)在bean初始化（自定义init或者是实现了InitializingBean.afterPropertiesSet())之后执行
 9. 其中DestructionAwareBeanPostProcessor方法的postProcessBeforeDestruction(Object bean, String beanName)会在销毁对象前执行
 
-## BeanFactory后置处理器
+### BeanFactory后置处理器
 
 **BeanFactoryPostProcessor**在BeanFactory标准初始化之后调用，来定制和修改BeanFactory的内容,此时所有的bean定义已经保存加载到beanFactory，但是bean的实例还未创建
 
 ```java
 public interface BeanFactoryPostProcessor {
-    //已有Bean的定义
-    void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException;
+  //已有Bean的定义
+  void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException;
 }
 ```
 
@@ -903,13 +908,13 @@ public interface BeanFactoryPostProcessor {
 
 ```java
 public interface BeanDefinitionRegistryPostProcessor extends BeanFactoryPostProcessor {
-   
-    void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException;
+
+  void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException;
 
 }
 ```
 
-## 监听器
+### 监听器
 
 **监听器的使用**
 
@@ -919,7 +924,7 @@ public interface BeanDefinitionRegistryPostProcessor extends BeanFactoryPostProc
 //Event的类型有
 public interface ApplicationListener<E extends ApplicationEvent> extends EventListener {
 
-    void onApplicationEvent(E event);
+  void onApplicationEvent(E event);
 }
 ```
 
@@ -929,14 +934,14 @@ public interface ApplicationListener<E extends ApplicationEvent> extends EventLi
 @Service
 public class EventService {
 
-    @EventListener
-    public void playEvent(ApplicationEvent event) {
-        System.out.println(event);
-    }
+  @EventListener
+  public void playEvent(ApplicationEvent event) {
+    System.out.println(event);
+  }
 }
 ```
 
-# 八、源码分析
+## 八、源码分析
 
 Spring容器的refresh()【创建刷新过程】
 
@@ -1089,9 +1094,9 @@ Spring容器的refresh()【创建刷新过程】
     2. getLifecycleProcessor().onRefresh()【拿到前面定义的生命周期处理器回调onRefresh()】
     3. publishEvent(new ContextRefreshedEvent(this));发布容器刷新完成事件
 
-# 九、Spring MVC纯注解
+## 九、Spring MVC纯注解
 
-## Servlet3.0相关
+### Servlet3.0相关
 
 前提：Servlet3.0需要Tomcat7以上版本
 
@@ -1099,18 +1104,18 @@ Spring容器的refresh()【创建刷新过程】
 
 ```java
 /**
-* 实现ServletContainerInitializer的接口需要在src目录下创建
-* META-INF/services/javax.servlet.ServletContainerInitializer文件
-* 文件内容是实现其接口的实现类
-*/
+  * 实现ServletContainerInitializer的接口需要在src目录下创建
+  * META-INF/services/javax.servlet.ServletContainerInitializer文件
+  * 文件内容是实现其接口的实现类
+  */
 @HandlesTypes(value= {IService.class})
 public class MyServletContainerInitializer implements ServletContainerInitializer{
 
-    //Set<Class<?>> c传入的是@HandlesTypes配置的类及其子类
-    @Override
-    public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
-        //ServletContext可以添加Servlet、Fileter、Listener、initParam等
-    }
+  //Set<Class<?>> c传入的是@HandlesTypes配置的类及其子类
+  @Override
+  public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
+    //ServletContext可以添加Servlet、Fileter、Listener、initParam等
+  }
 }
 ```
 
@@ -1129,41 +1134,41 @@ public class MyServletContainerInitializer implements ServletContainerInitialize
 @WebServlet(value="/async",asyncSupported=true)
 public class HelloAsyncServlet extends HttpServlet {
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        //1、支持异步处理asyncSupported=true
-        //2、开启异步模式
-        System.out.println("主线程开始。。。"+Thread.currentThread()+"==>"+System.currentTimeMillis());
-        AsyncContext startAsync = req.startAsync();
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    //1、支持异步处理asyncSupported=true
+    //2、开启异步模式
+    System.out.println("主线程开始。。。"+Thread.currentThread()+"==>"+System.currentTimeMillis());
+    AsyncContext startAsync = req.startAsync();
 
-        //3、业务逻辑进行异步处理;开始异步处理
-        startAsync.start(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    System.out.println("副线程开始。。。"+Thread.currentThread()+"==>"+System.currentTimeMillis());
-                    sayHello();
-                    //获取到异步上下文
-                    AsyncContext asyncContext = req.getAsyncContext();
-                    //4、获取响应
-                    ServletResponse response = asyncContext.getResponse();
-                    response.getWriter().write("hello async...");
-                    System.out.println("副线程结束。。。"+Thread.currentThread()+"==>"+System.currentTimeMillis());
-                } catch (Exception e) {
-                }
-            }
-        });		
-        System.out.println("主线程结束。。。"+Thread.currentThread()+"==>"+System.currentTimeMillis());
-    }
+    //3、业务逻辑进行异步处理;开始异步处理
+    startAsync.start(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          System.out.println("副线程开始。。。"+Thread.currentThread()+"==>"+System.currentTimeMillis());
+          sayHello();
+          //获取到异步上下文
+          AsyncContext asyncContext = req.getAsyncContext();
+          //4、获取响应
+          ServletResponse response = asyncContext.getResponse();
+          response.getWriter().write("hello async...");
+          System.out.println("副线程结束。。。"+Thread.currentThread()+"==>"+System.currentTimeMillis());
+        } catch (Exception e) {
+        }
+      }
+    });		
+    System.out.println("主线程结束。。。"+Thread.currentThread()+"==>"+System.currentTimeMillis());
+  }
 
-    public void sayHello() throws Exception{
-        System.out.println(Thread.currentThread()+" processing...");
-        Thread.sleep(3000);
-    }
+  public void sayHello() throws Exception{
+    System.out.println(Thread.currentThread()+" processing...");
+    Thread.sleep(3000);
+  }
 }
 ```
 
-## Spring MVC纯注解
+### Spring MVC纯注解
 
 **整合原理**
 
@@ -1174,37 +1179,40 @@ public class HelloAsyncServlet extends HttpServlet {
 @HandlesTypes(WebApplicationInitializer.class)
 public class SpringServletContainerInitializer implements ServletContainerInitializer {
 
-    @Override
-    public void onStartup(@Nullable Set<Class<?>> webAppInitializerClasses, ServletContext servletContext) throws ServletException {
+  @Override
+  public void onStartup(@Nullable Set<Class<?>> webAppInitializerClasses, 
+                        ServletContext servletContext) throws ServletException {
 
-        List<WebApplicationInitializer> initializers = new LinkedList<>();
+    List<WebApplicationInitializer> initializers = new LinkedList<>();
 
-        if (webAppInitializerClasses != null) {
-            for (Class<?> waiClass : webAppInitializerClasses) {
-                //如果不是接口和抽象类会被实例化
-                if (!waiClass.isInterface() && !Modifier.isAbstract(waiClass.getModifiers()) &&
-WebApplicationInitializer.class.isAssignableFrom(waiClass)) {
-                    try {
-                        initializers.add((WebApplicationInitializer)ReflectionUtils.accessibleConstructor(waiClass).newInstance());
-                    }
-                    catch (Throwable ex) {
-                        throw new ServletException("Failed to instantiate WebApplicationInitializer class", ex);
-                    }
-                }
-            }
+    if (webAppInitializerClasses != null) {
+      for (Class<?> waiClass : webAppInitializerClasses) {
+        //如果不是接口和抽象类会被实例化
+        if (!waiClass.isInterface() && !Modifier.isAbstract(waiClass.getModifiers()) &&
+            WebApplicationInitializer.class.isAssignableFrom(waiClass)) {
+          try {
+            initializers.add(
+              (WebApplicationInitializer)ReflectionUtils.accessibleConstructor(waiClass).newInstance());
+          }
+          catch (Throwable ex) {
+            throw new ServletException("Failed to instantiate WebApplicationInitializer class", ex);
+          }
         }
-
-        if (initializers.isEmpty()) {
-            servletContext.log("No Spring WebApplicationInitializer types detected on classpath");
-            return;
-        }
-
-        servletContext.log(initializers.size() + " Spring WebApplicationInitializers detected on classpath");
-        AnnotationAwareOrderComparator.sort(initializers);
-        for (WebApplicationInitializer initializer : initializers) {
-            initializer.onStartup(servletContext);
-        }
+      }
     }
+
+    if (initializers.isEmpty()) {
+      servletContext.log("No Spring WebApplicationInitializer types detected on classpath");
+      return;
+    }
+
+    servletContext.log(initializers.size() + 
+                       " Spring WebApplicationInitializers detected on classpath");
+    AnnotationAwareOrderComparator.sort(initializers);
+    for (WebApplicationInitializer initializer : initializers) {
+      initializer.onStartup(servletContext);
+    }
+  }
 }
 ```
 
@@ -1231,34 +1239,34 @@ WebApplicationInitializer
 ```java
 public class MyWebInitializer extends AbstractAnnotationConfigDispatcherServletInitializer{
 
-    //获取根容器的配置类
-    @Override
-    protected Class<?>[] getRootConfigClasses() {
-        return new Class<?>[] {RootConfig.class};
-    }
+  //获取根容器的配置类
+  @Override
+  protected Class<?>[] getRootConfigClasses() {
+    return new Class<?>[] {RootConfig.class};
+  }
 
-    //获取web容器的配置类
-    @Override
-    protected Class<?>[] getServletConfigClasses() {
-        return new Class<?>[] {ServletConfig.class};
-    }
+  //获取web容器的配置类
+  @Override
+  protected Class<?>[] getServletConfigClasses() {
+    return new Class<?>[] {ServletConfig.class};
+  }
 
-    /**
+  /**
      *  获取DispatcherServlet的映射信息
      * /：拦截所有请求（包括静态资源（xx.js,xx.png）），但是不包括*.jsp； 
      * /*：拦截所有请求；连*.jsp页面都拦截；jsp页面是tomcat的jsp引擎解析的；
      */
-    @Override
-    protected String[] getServletMappings() {
-        return new String[] {"/"};
-    }
-    
-    //配置过滤器
-    Override
+  @Override
+  protected String[] getServletMappings() {
+    return new String[] {"/"};
+  }
+
+  //配置过滤器
+  Override
     protected Filter[] getServletFilters() {
-           return new Filter[] {
-                   new HiddenHttpMethodFilter(), new CharacterEncodingFilter() };
-    }
+    return new Filter[] {
+      new HiddenHttpMethodFilter(), new CharacterEncodingFilter() };
+  }
 }
 
 @Configuration
@@ -1269,7 +1277,7 @@ public class RootConfig {
 
 @Configuration
 @ComponentScan(basePackages= {"com.kun"},useDefaultFilters=false,
-includeFilters= {@Filter(type=FilterType.ANNOTATION,classes=Controller.class)})
+               includeFilters= {@Filter(type=FilterType.ANNOTATION,classes=Controller.class)})
 public class ServletConfig {
 
 }
@@ -1280,19 +1288,19 @@ public class ServletConfig {
 ```java
 @Configuration
 @ComponentScan(basePackages= {"com.kun"},useDefaultFilters=false,
-includeFilters= {@Filter(type=FilterType.ANNOTATION,classes=Controller.class)})
+               includeFilters= {@Filter(type=FilterType.ANNOTATION,classes=Controller.class)})
 @EnableWebMvc	//定制spring mvc配置
 public class ServletConfig implements WebMvcConfigurer{
 
-    @Override
-    public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
-        configurer.enable();
-    }
+  @Override
+  public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+    configurer.enable();
+  }
 
-    @Override
-    public void configureViewResolvers(ViewResolverRegistry registry) {
-        registry.jsp("/WEB-INF/jsp", ".jsp");
-    }
+  @Override
+  public void configureViewResolvers(ViewResolverRegistry registry) {
+    registry.jsp("/WEB-INF/jsp", ".jsp");
+  }
 }
 ```
 
@@ -1307,24 +1315,24 @@ public class ServletConfig implements WebMvcConfigurer{
 ```java
 @Controller
 public class AsyncController {
-    @ResponseBody
-    @RequestMapping("/async")
-    public Callable<String> async(){
-        System.out.println("主线程开始..."+Thread.currentThread()+"==>"+System.currentTimeMillis());
+  @ResponseBody
+  @RequestMapping("/async")
+  public Callable<String> async(){
+    System.out.println("主线程开始..."+Thread.currentThread()+"==>"+System.currentTimeMillis());
 
-        Callable<String> callable = new Callable<String>() {
-            @Override
-            public String call() throws Exception {
-                System.out.println("副线程开始..."+Thread.currentThread()+"==>"+System.currentTimeMillis());
-                Thread.sleep(2000);
-                System.out.println("副线程开始..."+Thread.currentThread()+"==>"+System.currentTimeMillis());
-                return "Callable<String> async()";
-            }
-        };
+    Callable<String> callable = new Callable<String>() {
+      @Override
+      public String call() throws Exception {
+        System.out.println("副线程开始..."+Thread.currentThread()+"==>"+System.currentTimeMillis());
+        Thread.sleep(2000);
+        System.out.println("副线程开始..."+Thread.currentThread()+"==>"+System.currentTimeMillis());
+        return "Callable<String> async()";
+      }
+    };
 
-        System.out.println("主线程结束..."+Thread.currentThread()+"==>"+System.currentTimeMillis());
-        return callable;
-    }
+    System.out.println("主线程结束..."+Thread.currentThread()+"==>"+System.currentTimeMillis());
+    return callable;
+  }
 }
 ```
 

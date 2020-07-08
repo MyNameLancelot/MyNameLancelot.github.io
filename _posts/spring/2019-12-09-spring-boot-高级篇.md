@@ -5,9 +5,9 @@ date: 2019-12-09 15:37:10
 categories: spring
 ---
 
-# 一、Spring Boot与缓存
+## 一、Spring Boot与缓存
 
-## JSR107中JCache简介
+### JSR107中JCache简介
 
 JCache定义了5个核心接口，分别是**CachingProvider**, **CacheManager**, **Cache**, **Entry** 和 **Expiry**
 
@@ -21,7 +21,7 @@ JCache定义了5个核心接口，分别是**CachingProvider**, **CacheManager**
 
 ![jsr107-cache](/img/spring/jsr107-cache.png)
 
-## Spring缓存抽象
+### Spring缓存抽象
 
 Spring定义了org.springframework.cache.Cache和org.springframework.cache.CacheManager接口来统一不同的缓存技术，并支持使用JCache（JSR-107）注解简化我们开发，但并没有按照JCache实现缓存管理
 
@@ -43,7 +43,7 @@ Spring定义了org.springframework.cache.Cache和org.springframework.cache.Cache
 
 Cache实现有：RedisCache、EhCacheCache、ConcurrentMapCache等
 
-## Spring Boot缓存使用
+### Spring Boot缓存使用
 
 前置条件：引入`spring-boot-starter-cache`并在配置类上加入`@EnableCaching`
 
@@ -70,7 +70,7 @@ Cache实现有：RedisCache、EhCacheCache、ConcurrentMapCache等
  */
 @Cacheable(cacheNames="employee")
 public Employee getEmp(Integer id) {
-    return employeeMapper.getEmpById(id);
+  return employeeMapper.getEmpById(id);
 }
 ```
 
@@ -83,7 +83,7 @@ public Employee getEmp(Integer id) {
  */
 @CacheEvict(cacheNames="employee", key="#id")
 public void deleteEmp(Integer id) {
-    employeeMapper.deleteEmpById(id);
+  employeeMapper.deleteEmpById(id);
 }
 ```
 
@@ -95,8 +95,8 @@ public void deleteEmp(Integer id) {
  */
 @CachePut(cacheNames="employee", key="#employee.id")
 public Employee updateEmp(Employee employee) {
-    employeeMapper.updateEmp(employee);
-    return employee;
+  employeeMapper.updateEmp(employee);
+  return employee;
 }
 ```
 
@@ -104,9 +104,9 @@ public Employee updateEmp(Employee employee) {
 
 ```java
 public @interface Caching {
-	Cacheable[] cacheable() default {};
-	CachePut[] put() default {};
-	CacheEvict[] evict() default {};
+  Cacheable[] cacheable() default {};
+  CachePut[] put() default {};
+  CacheEvict[] evict() default {};
 }
 ```
 
@@ -115,7 +115,7 @@ public @interface Caching {
 ```java
 @CacheConfig(cacheNames="employee")
 public class EmployeeService {
-	//......
+  //......
 }
 ```
 
@@ -132,7 +132,7 @@ public class EmployeeService {
 | argument name | 方法参数的名字. 可以直接 #参数名 ，也可以使用#p0或#a0 的形式，0代表参数的索引 | #参数名 、 #a0 、  #p0 |
 | result        | 方法执行后的返回值（仅当方法执行之后的判断有效，如‘unless’，’cache put’的表达式 ’cache evict’的表达式beforeInvocation=false） | #result                |
 
-## Spring Boot缓存整合原理
+### Spring Boot缓存整合原理
 
 Spring Boot初始化时会通过spring-boot-autoconfigure.jar的META-INF下的spring.factories导入CacheAutoConfiguration
 
@@ -160,17 +160,17 @@ Spring Boot会根据当前环境上下文使用对应的CacheConfiguration默认
 @ConditionalOnMissingBean(CacheManager.class)
 @Conditional(CacheCondition.class)
 class SimpleCacheConfiguration {
-    
-    //提供了CacheManager
-    @Bean
-	public ConcurrentMapCacheManager cacheManager() {
-		ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager();
-		List<String> cacheNames = this.cacheProperties.getCacheNames();
-		if (!cacheNames.isEmpty()) {
-			cacheManager.setCacheNames(cacheNames);
-		}
-		return this.customizerInvoker.customize(cacheManager);
-	}
+
+  //提供了CacheManager
+  @Bean
+  public ConcurrentMapCacheManager cacheManager() {
+    ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager();
+    List<String> cacheNames = this.cacheProperties.getCacheNames();
+    if (!cacheNames.isEmpty()) {
+      cacheManager.setCacheNames(cacheNames);
+    }
+    return this.customizerInvoker.customize(cacheManager);
+  }
 }  
 ```
 
@@ -178,33 +178,35 @@ class SimpleCacheConfiguration {
 
 ```java
 public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderAware {
-    //根据key获得Cache的方法
-	public Cache getCache(String name) {
-		Cache cache = this.cacheMap.get(name);
-		if (cache == null && this.dynamic) {
-			synchronized (this.cacheMap) {
-				cache = this.cacheMap.get(name);
-				if (cache == null) {
-					cache = createConcurrentMapCache(name);
-					this.cacheMap.put(name, cache);
-				}
-			}
-		}
-		return cache;
-	}
-    
-    //创建Cache
-    protected Cache createConcurrentMapCache(String name) {
-		SerializationDelegate actualSerialization = (isStoreByValue() ? this.serialization : null);
-		return new ConcurrentMapCache(name, new ConcurrentHashMap<>(256),
-				isAllowNullValues(), actualSerialization);
-	}
+  //根据key获得Cache的方法
+  public Cache getCache(String name) {
+    Cache cache = this.cacheMap.get(name);
+    if (cache == null && this.dynamic) {
+      synchronized (this.cacheMap) {
+        cache = this.cacheMap.get(name);
+        if (cache == null) {
+          cache = createConcurrentMapCache(name);
+          this.cacheMap.put(name, cache);
+        }
+      }
+    }
+    return cache;
+  }
+
+  //创建Cache
+  protected Cache createConcurrentMapCache(String name) {
+    SerializationDelegate actualSerialization = (isStoreByValue() ? this.serialization : null);
+    return new ConcurrentMapCache(name,
+                                  new ConcurrentHashMap<>(256),
+                                  isAllowNullValues(), 
+                                  actualSerialization);
+  }
 }
 ```
 
 **@EnableCaching导入了CachingConfigurationSelector，CachingConfigurationSelector使用动态代理切入使用Cache相关注解的方法**
 
-## Spring Boot与Redis整合
+### Spring Boot与Redis整合
 
 前置条件：引入`spring-boot-starter-data-redis`
 
@@ -233,14 +235,14 @@ spring:
 ```java
 @Bean
 public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-    Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<Object>(Object.class);
-    RedisTemplate<Object, Object> template = new RedisTemplate<Object, Object>();
-    template.setConnectionFactory(redisConnectionFactory);
-    template.setKeySerializer(jackson2JsonRedisSerializer);
-    template.setValueSerializer(jackson2JsonRedisSerializer);
-    template.setHashKeySerializer(jackson2JsonRedisSerializer);
-    template.setHashValueSerializer(jackson2JsonRedisSerializer);
-    return template;
+  Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<Object>(Object.class);
+  RedisTemplate<Object, Object> template = new RedisTemplate<Object, Object>();
+  template.setConnectionFactory(redisConnectionFactory);
+  template.setKeySerializer(jackson2JsonRedisSerializer);
+  template.setValueSerializer(jackson2JsonRedisSerializer);
+  template.setHashKeySerializer(jackson2JsonRedisSerializer);
+  template.setHashValueSerializer(jackson2JsonRedisSerializer);
+  return template;
 }
 ```
 
@@ -251,66 +253,66 @@ public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory redisC
 ```java
 @Bean
 public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-    RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-        .entryTtl(Duration.ZERO)		//设置缓存过期时间
-        .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(keySerializer()))
-        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(valueSerializer()))
-        .disableCachingNullValues();
+  RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
+    .entryTtl(Duration.ZERO)		//设置缓存过期时间
+    .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(keySerializer()))
+    .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(valueSerializer()))
+    .disableCachingNullValues();
 
-    RedisCacheManager redisCacheManager = RedisCacheManager.builder(connectionFactory)
-        .cacheDefaults(config)
-        .transactionAware()
-        .build();
+  RedisCacheManager redisCacheManager = RedisCacheManager.builder(connectionFactory)
+    .cacheDefaults(config)
+    .transactionAware()
+    .build();
 
-    return redisCacheManager;
+  return redisCacheManager;
 }
 
 private RedisSerializer<String> keySerializer() {
-    return new StringRedisSerializer();
+  return new StringRedisSerializer();
 }
 
 
 private RedisSerializer<Object> valueSerializer() {
-    return new GenericJackson2JsonRedisSerializer();
+  return new GenericJackson2JsonRedisSerializer();
 }
 ```
 
-## 取出CacheManager对象
+### 取出CacheManager对象
 
 cacheManager.getCacheNames()只能拿到曾经访问过的CacheName，没访问过的无法得到
 
 ```java
 public class EmployeeService {
-	public void printCache(){
-        Collection<String> cacheNames = cacheManager.getCacheNames();
-        System.out.println(cacheNames);
-    }
+  public void printCache(){
+    Collection<String> cacheNames = cacheManager.getCacheNames();
+    System.out.println(cacheNames);
+  }
 }
 ```
 
-# 二、Spring Boot与消息
+## 二、Spring Boot与消息
 
 引入消息中间件解决：模块耦合、异步问题、流量削峰。
 
 参见[Spring Boot整合](https://mynamelancelot.github.io/mq/RabbitMQ.html#spring-boot整合)
 
-# 三、Spring Boot与检索
+## 三、Spring Boot与检索
 **导入依赖**
 
 ```xml
- <dependency>
-     <groupId>org.springframework.boot</groupId>
-     <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
 </dependency>
 
 <!-- 使用jest时导入 -->
 <dependency>
-    <groupId>io.searchbox</groupId>
-    <artifactId>jest</artifactId>
+  <groupId>io.searchbox</groupId>
+  <artifactId>jest</artifactId>
 </dependency>
 ```
 
-## 使用Jest整合ElasticSearch
+### 使用Jest整合ElasticSearch
 
 **配置链接**
 
@@ -327,49 +329,49 @@ spring:
 ```java
 //实体类
 public class Book {
-	@JestId
-    private String id;
-    private Date postDate;
-    private String title;
-    private String content;
-    private Long authorId;
-    //==============Getter/Setter==============
+  @JestId
+  private String id;
+  private Date postDate;
+  private String title;
+  private String content;
+  private Long authorId;
+  //==============Getter/Setter==============
 }
 
 //创建数据
 @Test
 public void testCreate() throws IOException {
-    Book book = new Book();
-    book.setId("100");
-    book.setAuthorId(1001L);
-    book.setContent("好看的书");
-    book.setPostDate(new Date());
-    book.setTitle("jest系列");
+  Book book = new Book();
+  book.setId("100");
+  book.setAuthorId(1001L);
+  book.setContent("好看的书");
+  book.setPostDate(new Date());
+  book.setTitle("jest系列");
 
-    Index.Builder builder = new Index.Builder(book);
-    Index index = builder.index("book").type("book_type").build();
-    DocumentResult documentResult = jestClient.execute(index);
-    System.out.println(documentResult.getJsonString());
+  Index.Builder builder = new Index.Builder(book);
+  Index index = builder.index("book").type("book_type").build();
+  DocumentResult documentResult = jestClient.execute(index);
+  System.out.println(documentResult.getJsonString());
 }
 
 //查询数据
 @Test
 public void testQuery() throws IOException {
-    XContentBuilder queryBuilder = XContentFactory.jsonBuilder()
-        .startObject()
-            .startObject("query")
-                .startObject("match_all")
-                .endObject()
-            .endObject()
-        .endObject();
-    Search search= new Search.Builder( Strings.toString(queryBuilder))
-        .addIndex("book").addType("book_type").build();
-    SearchResult documentResult = jestClient.execute(search);
-    System.out.println(documentResult.getSourceAsString());
+  XContentBuilder queryBuilder = XContentFactory.jsonBuilder()
+    .startObject()
+    .startObject("query")
+    .startObject("match_all")
+    .endObject()
+    .endObject()
+    .endObject();
+  Search search= new Search.Builder( Strings.toString(queryBuilder))
+    .addIndex("book").addType("book_type").build();
+  SearchResult documentResult = jestClient.execute(search);
+  System.out.println(documentResult.getSourceAsString());
 }
 ```
 
-## 使用Spring Data整合ElasticSearch
+### 使用Spring Data整合ElasticSearch
 
 **注意**
 
@@ -400,32 +402,32 @@ spring:
 //创建数据
 @Test
 public void testCreate() throws IOException {
-    Book book = new Book();
-    book.setId("100");
-    book.setAuthorId(1001L);
-    book.setContent("好看的书");
-    book.setPostDate(new Date());
-    book.setTitle("jest系列");
+  Book book = new Book();
+  book.setId("100");
+  book.setAuthorId(1001L);
+  book.setContent("好看的书");
+  book.setPostDate(new Date());
+  book.setTitle("jest系列");
 
-    IndexQuery indexQuery = new IndexQuery();
-    indexQuery.setObject(book);
-    indexQuery.setIndexName("book");
-    indexQuery.setType("book_type");
-    template.index(indexQuery);
+  IndexQuery indexQuery = new IndexQuery();
+  indexQuery.setObject(book);
+  indexQuery.setIndexName("book");
+  indexQuery.setType("book_type");
+  template.index(indexQuery);
 }
 
 //查询数据
 @Test
 public void testQuery() throws IOException {
-    NativeSearchQueryBuilder nativeSearchQuery = new NativeSearchQueryBuilder().withQuery(new MatchAllQueryBuilder());
-    List<Book> books = template.queryForList(nativeSearchQuery.build(), Book.class);
-    System.out.println(books);
+  NativeSearchQueryBuilder nativeSearchQuery = new NativeSearchQueryBuilder().withQuery(new MatchAllQueryBuilder());
+  List<Book> books = template.queryForList(nativeSearchQuery.build(), Book.class);
+  System.out.println(books);
 }
 ```
 
-# 四、Spring Boot与任务
+## 四、Spring Boot与任务
 
-## 异步任务
+### 异步任务
 
 - 在主配置类上使用`@EnableAsync`开启异步注解功能
 - 在需要异步支持的方法上标注`@Async`
@@ -433,11 +435,11 @@ public void testQuery() throws IOException {
 ```java
 @Async
 public void asyncMethod() throws InterruptedException{
-    //do something....
+  //do something....
 }
 ```
 
-## 定时任务
+### 定时任务
 
 Spring提供了异步执行任务调度的方式，提供TaskExecutor 、TaskScheduler用户可自扩展
 
@@ -481,7 +483,7 @@ public void scheduled() {
 | C        | 和calendar联系后计算过的值 |
 | #        | 星期，4#2，第2个星期四     |
 
-## 邮件任务
+### 邮件任务
 
 - 引入依赖
 
@@ -508,12 +510,12 @@ spring:
 
   ```java
   public void sendSimpleEmail() {
-      SimpleMailMessage simpleMessage = new SimpleMailMessage();
-      simpleMessage.setFrom("source@qq.com");
-      simpleMessage.setTo("target@qq.com");
-      simpleMessage.setSubject("测试邮件");
-      simpleMessage.setText("测试邮件内容");
-      mailSender.send(simpleMessage);
+    SimpleMailMessage simpleMessage = new SimpleMailMessage();
+    simpleMessage.setFrom("source@qq.com");
+    simpleMessage.setTo("target@qq.com");
+    simpleMessage.setSubject("测试邮件");
+    simpleMessage.setText("测试邮件内容");
+    mailSender.send(simpleMessage);
   }
   ```
 
@@ -521,48 +523,48 @@ spring:
 
   ```java
   public void sendMimeEmail() throws MessagingException {
-  	MimeMessage mimeMessage = mailSender.createMimeMessage();
-  	/**
+    MimeMessage mimeMessage = mailSender.createMimeMessage();
+    /**
   	 * MimeMessageHelper(MimeMessage mimeMessage, boolean multipart)
   	 * 发生附件邮件是multipart要设置为true
   	 */
-  	MimeMessageHelper helper = new MimeMessageHelper(mimeMessage,true);
-  	helper.setFrom("source@qq.com");
-  	helper.setTo("target@qq.com");
-  	helper.setSubject("测试邮件");
-  	helper.setText("<html><body><div style='color:red'>测试内容</div></body></html>",true);
-  	helper.addAttachment("attach.png", new ClassPathResource("attach.png"));
-  	mailSender.send(helper.getMimeMessage());
+    MimeMessageHelper helper = new MimeMessageHelper(mimeMessage,true);
+    helper.setFrom("source@qq.com");
+    helper.setTo("target@qq.com");
+    helper.setSubject("测试邮件");
+    helper.setText("<html><body><div style='color:red'>测试内容</div></body></html>",true);
+    helper.addAttachment("attach.png", new ClassPathResource("attach.png"));
+    mailSender.send(helper.getMimeMessage());
   }
   ```
 
-# 五、Spring Boot与安全
+## 五、Spring Boot与安全
 
 参见[Spring Security使用指南](https://mynamelancelot.github.io/spring/spring-security.html)
 
-# 六、Spring Boot与热部署
+## 六、Spring Boot与热部署
 
 引入Spring Boot官方提供的热部署工具即可拥有热部署能力
 
 ```xml
 <dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-devtools</artifactId>
-    <optional>true</optional>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-devtools</artifactId>
+  <optional>true</optional>
 </dependency>
 ```
 
-# 七、Spring Boot与监管
+## 七、Spring Boot与监管
 
 ​	Spring Boot提供了将应用程序推送到生产环境时监视和管理应用功能，可以使用HTTP端点或JMX来管理和监视应用程序
 
 **第一步：引入`spring-boot-actuator`模块**
 
-```
+```xml
 <dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-actuator</artifactId>
-    <optional>true</optional>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-actuator</artifactId>
+  <optional>true</optional>
 </dependency>
 ```
 
