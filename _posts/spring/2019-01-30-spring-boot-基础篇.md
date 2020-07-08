@@ -171,7 +171,8 @@ public class HelloWorld {
   static class Registrar implements ImportBeanDefinitionRegistrar, DeterminableImports {
   
     @Override
-    public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
+    public void registerBeanDefinitions(AnnotationMetadata metadata, 
+                                        BeanDefinitionRegistry registry) {
       register(registry, new PackageImport(metadata).getPackageName());
     }
   
@@ -223,7 +224,8 @@ public class HelloWorld {
               Properties properties = PropertiesLoaderUtils.loadProperties(resource);
               for (Map.Entry<?, ?> entry : properties.entrySet()) {
                   String factoryClassName = ((String) entry.getKey()).trim();
-                  for (String factoryName : StringUtils.commaDelimitedListToStringArray((String) entry.getValue())) {
+                  for (String factoryName : 
+                       StringUtils.commaDelimitedListToStringArray((String) entry.getValue())) {
                       result.add(factoryClassName, factoryName.trim());
                   }
               }
@@ -396,11 +398,11 @@ public class Person {
 
 ```yml
 person:
-  id: 1					
+  id: 1
   name: 张三
   # 生成随机数
   # ${random.uuid}、${random.int}、${random.long}、${random.10}、${random.[20,50]}
-  age: ${random.uuid}	
+  age: ${random.uuid}
   boss: false
   birth: 2019/01/01
   maps: {k1: v1,k2: v2}
@@ -424,24 +426,24 @@ profile文件编写规则
 - yml多文档块
 
 ```yaml
-  # 指定激活的profile
-  spring:
-    profiles:
-      active:
+# 指定激活的profile
+spring:
+  profiles:
+    active:
       - dev
-  ---
-  server:
-    port: 8081
+---
+server:
+  port: 8081
   # profile环境名称
-  spring:
-    profiles: dev
+spring:
+  profiles: dev
   
-  ---
-  server:
-    port: 8082
+---
+server:
+  port: 8082
   # profile环境名称
-  spring: 
-    profiles: prod  
+spring: 
+  profiles: prod  
 ```
 
 激活指定profile
@@ -572,10 +574,10 @@ public class HelloWorld {
   <springProfile name="dev">
     <!-- 配置 -->
   </springProfile>
-  ```
-  
+```
+
 例如
-  
+
 ```xml
   <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
     <!--
@@ -599,7 +601,7 @@ public class HelloWorld {
       </springProfile>
     </layout>
   </appender>
-  ```
+```
 
 ## 八、Spring Boot与Web开发
 
@@ -901,8 +903,8 @@ public class AppWebMvcConfigurer implements WebMvcConfigurer{
 - 在thymeleaf中使用国际化文件
 
   ```html
-  [[#{login.tip}]]   								<!-- 行外写法 -->
-  <label th:text="#{login.username}"></label>		<!-- 行内写法 -->
+  [[#{login.tip}]]                             <!-- 行外写法 -->
+  <label th:text="#{login.username}"></label>  <!-- 行内写法 -->
   ```
 
 ### 错误处理机制
@@ -1258,7 +1260,8 @@ public class StudentHandler {
   //这里采用Mono模式类似于点对点，也可使用Flux类似于发布、订阅
   public static Mono<ServerResponse> selectStudent(ServerRequest request) {
     Student studentBody = new Student();
-    request.bodyToMono(Student.class).subscribe(student -> BeanUtils.copyProperties(student, studentBody));
+    request.bodyToMono(Student.class).subscribe(
+      student -> BeanUtils.copyProperties(student, studentBody));
     return ok().contentType(APPLICATION_JSON_UTF8).body(fromObject(studentBody));
   }
 
