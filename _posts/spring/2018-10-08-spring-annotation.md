@@ -65,9 +65,9 @@ FilterType的种类
   ```java
   public class MyTypeFilter implements TypeFilter{
     /**
-     * metadataReader：读取当前正在扫描类的信息
-     * metadataReaderFactory：可以获取到其他任何类的信息
-     */
+      * metadataReader：读取当前正在扫描类的信息
+      * metadataReaderFactory：可以获取到其他任何类的信息
+      */
     @Override
     public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
       //获得当前扫描类的注解信息
