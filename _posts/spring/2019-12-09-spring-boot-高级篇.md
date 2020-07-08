@@ -321,7 +321,7 @@ spring:
   elasticsearch:
     jest:
       uris:
-        - "http://192.168.1.155:9200"
+        - "http://192.168.1.155:9300"
 ```
 
 **使用示例**
@@ -393,7 +393,8 @@ spring:
   data:
     elasticsearch:
       cluster-name: docker-cluster
-      clusterNodes: 192.168.1.155:9300		#注意端口默认位9300并非http通讯端口
+      #注意端口默认位9300并非http通讯端口
+      clusterNodes: 192.168.1.155:9300
 ```
 
 **使用示例**
@@ -525,9 +526,9 @@ spring:
   public void sendMimeEmail() throws MessagingException {
     MimeMessage mimeMessage = mailSender.createMimeMessage();
     /**
-  	 * MimeMessageHelper(MimeMessage mimeMessage, boolean multipart)
-  	 * 发生附件邮件是multipart要设置为true
-  	 */
+      * MimeMessageHelper(MimeMessage mimeMessage, boolean multipart)
+      * 发生附件邮件是multipart要设置为true
+      */
     MimeMessageHelper helper = new MimeMessageHelper(mimeMessage,true);
     helper.setFrom("source@qq.com");
     helper.setTo("target@qq.com");
@@ -606,11 +607,13 @@ management.endpoint.info.enabled=true
 ```yaml
 management: 
   endpoints: 
-    jmx: 
-      exposure: 		# jmx暴露断点控制
+   	# jmx暴露断点控制
+    jmx:
+      exposure:
         include:
           health,info
-     web:				# web暴露断点控制
+     # web暴露断点控制
+     web:				
        exposure: 
          include: "*"
        exposure:
