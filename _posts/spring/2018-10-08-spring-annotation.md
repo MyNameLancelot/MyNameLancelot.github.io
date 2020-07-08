@@ -552,12 +552,12 @@ class AspectJAutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
   @Override
   public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
                                       BeanDefinitionRegistry registry) {
-    //注册了ID为org.springframework.aop.config.internalAutoProxyCreator的AnnotationAwareAspectJAutoProxyCreator.class组件信息
+    // 注册了ID为org.springframework.aop.config.internalAutoProxyCreator的
+    // AnnotationAwareAspectJAutoProxyCreator.class组件信息
     AopConfigUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(registry);
 
     //修改AnnotationAwareAspectJAutoProxyCreator的信息
     AnnotationAttributes enableAspectJAutoProxy =
-
       AnnotationConfigUtils.attributesFor(importingClassMetadata, EnableAspectJAutoProxy.class);
     if (enableAspectJAutoProxy != null) {
       if (enableAspectJAutoProxy.getBoolean("proxyTargetClass")) {
@@ -669,7 +669,8 @@ wrapIfNecessary(bean, beanName, cacheKey);
      retVal = methodProxy.invoke(target, argsToUse);
    }
    else {
-     retVal = new CglibMethodInvocation(proxy, target, method, args, targetClass, chain, methodProxy).proceed();
+     retVal = new CglibMethodInvocation(proxy, target, method, args, targetClass, chain, methodProxy)
+       .proceed();
    }
    ```
 
@@ -1135,7 +1136,8 @@ public class MyServletContainerInitializer implements ServletContainerInitialize
 public class HelloAsyncServlet extends HttpServlet {
 
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) 
+    throws ServletException, IOException {
     //1、支持异步处理asyncSupported=true
     //2、开启异步模式
     System.out.println("主线程开始。。。"+Thread.currentThread()+"==>"+System.currentTimeMillis());
