@@ -251,10 +251,10 @@ public class DateFormatter implements Formatter<Date> {
 }
 ```
 
-使用`{{...}}`转换服务
+使用<span style="color:red">{{...}}</span>转换服务
 
 ```html
-<td th:text="${{sb.datePlanted}}">13/01/2011</td>
+<td th:text="${ { sb.datePlanted } }">13/01/2011</td>
 ```
 
 ### th:field标签
