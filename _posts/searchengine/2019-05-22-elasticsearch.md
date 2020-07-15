@@ -2972,10 +2972,10 @@ GET /book_index/_mapping
           },
           "content" : {
             "type" : "text",				
-            "fields" : {			//子字段列表默认为text类型字段提供的子字段名称为keyword
-              "keyword" : {			//不分词的keyword
+            "fields" : {              //子字段列表默认为text类型字段提供的子字段名称为keyword
+              "keyword" : {           //不分词的keyword
                 "type" : "keyword",	
-                "ignore_above" : 256	//最长长度
+                "ignore_above" : 256  //最长长度
               }
             }
           },
