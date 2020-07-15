@@ -314,8 +314,9 @@ su es
 
   - **GET /_mget查询**
 
+    {% raw %}
+    
     ```txt
-    // 查询多个id
     GET /_mget
     {
       "docs" : [
@@ -364,8 +365,9 @@ su es
       "ids":[1,2,3,4]
     }
     ```
+    
+    {% endraw %}
   
-
 - **修改Document**
 
   - **替换Document（全量替换）**
@@ -1779,7 +1781,9 @@ GET cars/_search
       "big": {
         "span_near": {
           "clauses": [
-            {
+            {GET /_mget查询
+
+
               "span_term": {
                 "remark": {
                   "value": "肝疼"
