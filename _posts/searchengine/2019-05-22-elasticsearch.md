@@ -1813,6 +1813,8 @@ GET cars/_search
 
 此方式没太大意义，只能调用一层的template是没有意义的
 
+{% raw %}
+
 ```text
 ===================================方式一【简单参数】===================================
 GET /cars/sales/_search/template
@@ -1856,6 +1858,8 @@ GET /cars/sales/_search/template
   }
 }
 ```
+
+{% endraw %}
 
 **可重复调用的template**
 
