@@ -364,7 +364,7 @@ su es
     GET /test_index/my_type/_mget
     {
       "ids":[1,2,3,4]
-    }    
+    }
     ```
   
 - **修改Document**
