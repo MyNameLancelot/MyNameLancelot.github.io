@@ -1813,18 +1813,18 @@ GET cars/_search
 
 此方式没太大意义，只能调用一层的template是没有意义的
 
-```txt
+```text
 ===================================方式一【简单参数】===================================
 GET /cars/sales/_search/template
 {
   "source": {
     "query": {
       "match": {
-        "remark": "{{kw}}"                    //使用双大括号表示变量
+        "remark": "\{\{kw\}\}"                    //使用双大括号表示变量
       }
     },
-    "from": "{{from}}{{^from}}100{{/from}}",  //默认值设置
-    "size": "{{size}}"
+    "from": "\{\{from\}\}\{\{\^from\}\}100\{\{/from\}\}",  //默认值设置
+    "size": "\{\{size\}\}"
   },
   "params": {                                 //传入变量
     "kw": "大众",
