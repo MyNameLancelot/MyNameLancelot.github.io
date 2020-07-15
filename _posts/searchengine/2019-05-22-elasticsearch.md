@@ -1822,11 +1822,11 @@ GET /cars/sales/_search/template
   "source": {
     "query": {
       "match": {
-        "remark": "{{ kw }}"                    //使用双大括号表示变量
+        "remark": "{{kw}}"                    //使用双大括号表示变量
       }
     },
-    "from": "\{\{from\}\}\{\{\^from\}\}100\{\{/from\}\}",  //默认值设置
-    "size": "\{\{size\}\}"
+    "from": "{{from}}{{\^from}}100{{/from}}",  //默认值设置
+    "size": "{{size}}"
   },
   "params": {                                 //传入变量
     "kw": "大众",
@@ -1863,6 +1863,8 @@ GET /cars/sales/_search/template
 
 **可重复调用的template**
 
+{% raw %}
+
 ```txt
 =====================================创建template=====================================
 POST _scripts/test
@@ -1887,6 +1889,8 @@ GET /cars/sales/_search/template
   }
 }
 ```
+
+{% endraw %}
 
 **查询已定义的template**
 
