@@ -315,6 +315,7 @@ su es
   - **GET /_mget查询**
 
     ```txt
+    // 查询多个id
     GET /_mget
     {
       "docs" : [
