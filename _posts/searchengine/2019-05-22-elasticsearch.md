@@ -316,7 +316,7 @@ su es
 
     {% raw %}
     
-    ```txt
+    ````text
     GET /_mget
     {
       "docs" : [
@@ -364,7 +364,7 @@ su es
     {
       "ids":[1,2,3,4]
     }
-    ```
+    ````
     
     {% endraw %}
   
