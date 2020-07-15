@@ -315,9 +315,53 @@ su es
   - **GET /_mget查询**
 
     ```txt
-    
-    
-    123
+    GET /_mget
+    {
+      "docs" : [
+        {
+          "_index" : "value",
+          "_type" : "value",
+          "_id" : "value"
+        }, {}, {}
+      ]
+    }
+    =====================================示例======================================
+    GET /_mget
+    {
+      "docs":[
+        {
+          "_index":"test_index",
+          "_type":"my_type",
+          "_id":1
+        },
+        {
+          "_index":"test_index",
+          "_type":"my_type",
+          "_id":2
+        },
+        {
+          "_index":"test_index",
+          "_type":"my_type",
+          "_id":3
+        }
+      ]
+    }
+        
+    ------------------------------------------------------------------------------
+    GET /test_index/my_type/_mget
+    {
+      "docs":[
+        {"_id":1},
+        {"_id":2},
+        {"_id":3}
+      ]
+    }
+        
+    ------------------------------------------------------------------------------
+    GET /test_index/my_type/_mget
+    {
+      "ids":[1,2,3,4]
+    }
     ```
   
 
@@ -1013,9 +1057,9 @@ GET student/java/_search
       "query": "joshua developer",
       "fields": ["name", "remark"],
       "type": "cross_fields",
-      "analyzer": "standard", 	//注意要使用分词器
-      "operator" : "and"	//（name必须包含joshua且remark必须包含developer）或者
-    }						//（remark必须包含joshua且name必须包含developer）
+      "analyzer": "standard",   //注意要使用分词器
+      "operator" : "and"        //（name必须包含joshua且remark必须包含developer）或者
+    }                           //（remark必须包含joshua且name必须包含developer）
   }
 }
 ```
@@ -1078,7 +1122,7 @@ GET /es/doc/_search
     "match_phrase": {
       "note": {
         "query": "importance people", //必须满足此短语
-        "slop": 4					  //可以移动4次实现短语匹配，移动次数越少分数越高
+        "slop": 4                     //可以移动4次实现短语匹配，移动次数越少分数越高
       }
     }
   }
