@@ -2184,7 +2184,7 @@ GET /vector/doc/_termvectors
   "term_statistics" : true,
   "field_statistics" : true,
   "per_field_analyzer" : {
-    "text": "english"					/指定分词器
+    "text": "english"					//指定分词器
   }
 }
 ```
@@ -2225,9 +2225,9 @@ GET /vector/doc/_termvectors
 PUT /products_index/phone_type/_mapping
 {
   "properties": {
-    "tags":{				//设置的字段
+    "tags":{              //设置的字段
       "type": "text", 
-      "fielddata": true		//fielddata开启	
+      "fielddata": true   //fielddata开启	
     }
   }
 }
@@ -2240,11 +2240,11 @@ PUT /products_index/phone_type/_mapping
 ```txt
 GET /cars/sales/_search
 {
-  "size": 0,				//返回查询命中记录，如果为0则不返回
+  "size": 0,              //返回查询命中记录，如果为0则不返回
   "aggs": {
-    "group_by_color": {		//聚合返回结果集的标签名
-      "terms": {			//词元统计
-        "field": "color",	//统计color每个词元总数
+    "group_by_color": {   //聚合返回结果集的标签名
+      "terms": {          //词元统计
+        "field": "color", //统计color每个词元总数
         "order": {
           "_count": "asc"
         }
@@ -2259,11 +2259,11 @@ GET /cars/sales/_search
 ```txt
 GET /products_index/phone_type/_search
 {
-  "size": 0,				//返回查询命中记录，如果为0则不返回
+  "size": 0,              //返回查询命中记录，如果为0则不返回
   "aggs": {
-    "avg_price": {			//聚合返回结果集的标签名
-      "avg": {				//计算平均值
-        "field": "price"	//计算的字段
+    "avg_price": {        //聚合返回结果集的标签名
+      "avg": {            //计算平均值
+        "field": "price"  //计算的字段
       }
     }
   }
@@ -2310,11 +2310,11 @@ GET /products_index/phone_type/_search
     }
   },
   "aggs": {
-    "count_term_tags": {	//聚合进行词元统计
+    "count_term_tags": {     //聚合进行词元统计
       "terms": {
         "field": "tags"
       },
-      "aggs": {				//在词元统计的结果之下进行求平均值
+      "aggs": {              //在词元统计的结果之下进行求平均值
         "avg_price": {
           "avg": {
             "field": "price"
@@ -2362,12 +2362,12 @@ GET /cars/sales/_search
         "field": "color"
       },
       "aggs": {
-        "avg_by_price_color": {			//和group_by_brand平级
+        "avg_by_price_color": {    //和group_by_brand平级
           "avg": {
             "field": "price"
           }
         },
-        "group_by_brand": {				//和avg_by_price_color平级
+        "group_by_brand": {        //和avg_by_price_color平级
           "terms": {
             "field": "brand"
           }
@@ -2391,11 +2391,11 @@ GET /products_index/phone_type/_search
       "terms": {
         "field": "tags",
         "order": {
-          "avg_price": "asc" 	//使用子聚合avg_price排序
+          "avg_price": "asc"  //使用子聚合avg_price排序
         }
       },
       "aggs": {
-        "avg_price": {			//子聚合avg_price
+        "avg_price": {        //子聚合avg_price
           "avg": {
             "field": "price"
           }
@@ -2420,9 +2420,9 @@ GET /products_index/phone_type/_search
   "_source": "price",
   "aggs": {
     "rang_price": {				
-      "range": {				//范围分组
-        "field": "price",		//分组字段
-        "ranges": [				//分组区间
+      "range": {            //范围分组
+        "field": "price",   //分组字段
+        "ranges": [         //分组区间
           {
             "from": 500000,
             "to": 700000
@@ -2456,12 +2456,12 @@ GET /cars/_search
   "size": 0, 
   "aggs": {
     "histogarm_by_date": {
-      "date_histogram": {			//时间区间划分
+      "date_histogram": {         //时间区间划分
         "field": "sold_date",
-        "interval": "month",		//划分规则	
+        "interval": "month",      //划分规则	
         "min_doc_count": 1,
-        "format": "yyyy-MM-dd",		//最大、最小时间格式
-        "extended_bounds": {		//时间起始值和终止值
+        "format": "yyyy-MM-dd",   //最大、最小时间格式
+        "extended_bounds": {      //时间起始值和终止值
           "min": "2017-01-01",
           "max": "2018-12-31"
         }
@@ -2477,13 +2477,13 @@ GET /hotel_app/hotels/_search
     "agg_by_pin": {
       "geo_distance": {
         "field": "pin",
-        "distance_type": "arc", 	#sloppy_arc默认算法、arc最高精度、plane最高效率
-        "origin": {					#原点
+        "distance_type": "arc",   #sloppy_arc默认算法、arc最高精度、plane最高效率
+        "origin": {               #原点
           "lat": 52.376,
           "lon": 4.894
         },
-        "unit": "km", 				#距离单位
-        "ranges": [					#距离原点距离
+        "unit": "km",             #距离单位
+        "ranges": [               #距离原点距离
           {
             "to": 100
 
@@ -2518,7 +2518,7 @@ GET /cars/_search
 {
   "size": 0,
   "aggs": {
-    "group_by_brank": {							//先根据brank分组
+    "group_by_brank": {               //先根据brank分组
       "terms": {
         "field": "brand"
       },
@@ -2526,8 +2526,8 @@ GET /cars/_search
         "price_rank_two": {						//计算各分组类价钱最高的2个
           "top_hits": {
             "size": 2,
-            "sort": [{"price": "desc"}],		//排序字段
-            "_source": {						//返回doc的信息
+            "sort": [{"price": "desc"}],  //排序字段
+            "_source": {                  //返回doc的信息
               "includes": ["model", "price"]
             }
           }
@@ -2558,7 +2558,7 @@ GET /cars/_search
       }
     },
     "aggs": {
-      "global": {},						//不使用query搜索条件进行统计
+      "global": {},         //不使用query搜索条件进行统计
       "aggs": {
         "all_avg_by_price": {
           "avg": {
@@ -2581,7 +2581,7 @@ GET /cars/_search
   "size": 0,
   "aggs": {
     "group_by_brand_not_w": {
-      "filter": {					//过滤Query之后的条件
+      "filter": {       //过滤Query之后的条件
         "terms": {
           "brand": ["大众","奥迪"]
         }
@@ -2912,9 +2912,9 @@ GET /book_index/_mapping
 
 =======================================返回信息=======================================
 {
-  "book_index" : {					//索引名称
-    "mappings" : {					//mapping开始
-      "book_type" : {				//类型名称
+  "book_index" : {          //索引名称
+    "mappings" : {          //mapping开始
+      "book_type" : {       //类型名称
         "properties" : {			//具体信息
           "author_id" : {			//字段名
             "type" : "long"			//类型名
