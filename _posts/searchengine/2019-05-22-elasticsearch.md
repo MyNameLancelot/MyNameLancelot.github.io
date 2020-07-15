@@ -1179,7 +1179,7 @@ GET /es/doc/_search
       "note": "importance people"
     }
   },
-  "rescore": {					//开始重计分
+  "rescore": {              //开始重计分
     "query": {
       "rescore_query": {		//重新计分查询
         "match_phrase": {
@@ -1406,12 +1406,12 @@ GET /es/doc/_search
     }
  },
  "highlight": {
-   "pre_tags": "<color='red'>",		//高亮前缀
-   "post_tags": "</color>",			//高亮后缀
+   "pre_tags": "<color='red'>",
+   "post_tags": "</color>",
    "fields": {
      "note": {
-       "fragment_size": 20,			/返回每段的文本长度
-       "number_of_fragments": 2		//最大片段数,影响返回的片段数
+       "fragment_size": 20,       //返回每段的文本长度
+       "number_of_fragments": 2   //最大片段数,影响返回的片段数
      }
    }
  }
@@ -1695,8 +1695,8 @@ GET cars/_search
           }
         }
       ],
-      "slop": 2,						//最大的跨度
-      "in_order": false					//顺序是否绝对
+      "slop": 2,           //最大的跨度
+      "in_order": false    //顺序是否绝对
     }
   }
 }
@@ -1820,13 +1820,13 @@ GET /cars/sales/_search/template
   "source": {
     "query": {
       "match": {
-        "remark": "{{kw}}"						//使用{{tag}}表示变量
+        "remark": "{{kw}}"                    //使用双大括号表示变量
       }
     },
-    "from": "{{from}}{{^from}}100{{/from}}", 	//默认值设置
+    "from": "{{from}}{{^from}}100{{/from}}",  //默认值设置
     "size": "{{size}}"
   },
-  "params": {									//传入变量
+  "params": {                                 //传入变量
     "kw": "大众",
     "size": 2
   }
@@ -2568,7 +2568,7 @@ GET /cars/_search
         "field": "brand"
       },
       "aggs": {
-        "price_rank_two": {						//计算各分组类价钱最高的2个
+        "price_rank_two": {               //计算各分组类价钱最高的2个
           "top_hits": {
             "size": 2,
             "sort": [{"price": "desc"}],  //排序字段
@@ -3029,17 +3029,17 @@ PUT /book_index
     "number_of_shards": 5,
     "number_of_replicas": 1
   },
-  "mappings": {						//定义mapping
-    "book_type": {					//类型名称
-      "properties": {				//mapping信息
-        "author_id": {				//字段名
-          "type": "integer",		//索引类型
-          "index": false			//是否索引，默认true
+  "mappings": {             //定义mapping
+    "book_type": {          //类型名称
+      "properties": {       //mapping信息
+        "author_id": {           //字段名
+          "type": "integer",     //索引类型
+          "index": false         //是否索引，默认true
         },
         "title": {
           "type": "text",
           "analyzer": "standard",
-          "fields": {				//子字段类型
+          "fields": {       //子字段类型
             "keyword": {
               "type": "keyword",
               "ignore_above": 256
@@ -3061,10 +3061,10 @@ PUT /book_index
 PUT /book_index/book_type/_mapping
 {
   "properties": {
-    "new_field": {				//字段名
+    "new_field": {        //字段名
       "type": "text",
       "analyzer": "standard",
-      "store": false			//是否存储，默认true
+      "store": false      //是否存储，默认true
     }
   }
 }
@@ -3287,7 +3287,7 @@ PUT /test_index9
     "number_of_replicas" : 1
   },
   "mappings" : {
-    "test_type" : {				//==============root object开始
+    "test_type" : {      //==============root object开始
       "properties" : {
         "post_date" : { "type" : "date" },
         "title" : { "type" : "text", "index" : false },
@@ -3296,7 +3296,7 @@ PUT /test_index9
       },
       "_all" : { "enabled" : false },
       "_source" : { "enabled" : false }
-    }							//==============root object结束
+    }                    //==============root object结束
   }
 }
 ```
@@ -3329,9 +3329,9 @@ PUT /dynamic_strategy/dynamic_type/1
 {
   "f1": "f1 field",
   "f2": {
-    "f21": "f21 field"			//只会存储不会分词，不能索引
+    "f21": "f21 field"      //只会存储不会分词，不能索引
   },
-  "f3": "f3 field"				//f3字段无法插入，会直接报错
+  "f3": "f3 field"          //f3字段无法插入，会直接报错
 }
 ```
 
@@ -3729,8 +3729,8 @@ ElasticSearch内部存储结构会变为
 GET /user_index/doc/_search
 {
   "query": {
-    "nested": {					//指定nested查询
-      "path": "address",		//指定nested字段
+    "nested": {             //指定nested查询
+      "path": "address",    //指定nested字段
       "query": {
         "bool": {
           "must": [
@@ -3822,7 +3822,7 @@ PUT /code
   "settings": {
     "analysis": {
       "analyzer": {
-        "path_analyzer": {					//创建路径分析器
+        "path_analyzer": {                //创建路径分析器
           "tokenizer": "path_hierarchy"
         }
       }
@@ -3833,7 +3833,7 @@ PUT /code
       "properties": {
         "path": {
           "type": "text",
-          "analyzer": "path_analyzer",		//使用路径分析器
+          "analyzer": "path_analyzer",    //使用路径分析器
           "fields": {
             "stand": {
               "type": "text",
@@ -3858,7 +3858,7 @@ GET /code/doc/_search
 {
   "query": {
     "match": {
-      "path": "/com"			//只能搜索出/com/kun路径开始的doc
+      "path": "/com"             //只能搜索出/com/kun路径开始的doc
     }
   }
 }
@@ -3867,7 +3867,7 @@ GET /code/doc/_search
 {
   "query": {
     "match": {
-      "path.stand": "/com/kun"	//能搜索包含/com/kun的路径
+      "path.stand": "/com/kun"  //能搜索包含/com/kun的路径
     }
   }
 }
@@ -3903,9 +3903,9 @@ PUT /ecommerce_products_index
           "type": "text",
           "analyzer": "ik_max_word"
         },
-        "ecommerce_join_field": {			//描述父子关系
-          "type": "join",					//类型为join
-          "relations": {					//关系描述，父在前，子在后
+        "ecommerce_join_field": {    //描述父子关系
+          "type": "join",            //类型为join
+          "relations": {             //关系描述，父在前，子在后
             "category": "product"
           }
         }
@@ -4223,9 +4223,9 @@ GET _nodes/stats/indices/fielddata?level=indices&fields=*
 ​    如果一次聚合操作时，加载的fielddata超过了总内存容量，则会抛出内存溢出错误（OOM out of memory），这个时候可以增加短路器circuit breaker，circuit breaker会估算本次操作要加载的fielddata大小，如果超出了总内存容量，则请求短路，直接返回错误响应，不会产生OOM错误导致ES所在节点宕机或应用关闭。
 
 ```yaml
-indices.breaker.fielddata.limit : 60% 	# fielddata的内存限制，默认60%
-indices.breaker.request.limit: 40% 		# 执行聚合的一次请求的内存限制，默认40%
-indices.breaker.total.limit: 70% 		# 综合上述两个限制，总计内存限制多少。默认无限制。
+indices.breaker.fielddata.limit : 60%   # fielddata的内存限制，默认60%
+indices.breaker.request.limit: 40%      # 执行聚合的一次请求的内存限制，默认40%
+indices.breaker.total.limit: 70%        # 综合上述两个限制，总计内存限制多少。默认无限制。
 ```
 
 ### fielddata的filter过滤
