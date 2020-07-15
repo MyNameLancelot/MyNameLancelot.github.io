@@ -1181,7 +1181,7 @@ GET /es/doc/_search
   },
   "rescore": {              //开始重计分
     "query": {
-      "rescore_query": {		//重新计分查询
+      "rescore_query": {    //重新计分查询
         "match_phrase": {
             "note": {
               "query": "importance people",
@@ -1190,7 +1190,7 @@ GET /es/doc/_search
           }
       }
     },
-    "window_size": 50			//对match搜索结果的前多少条数据执行rescore操作
+    "window_size": 50       //对match搜索结果的前多少条数据执行rescore操作
   },
   "from": 0,
   "size": 2 
@@ -3471,7 +3471,7 @@ GET /es/doc/_search
 GET /fscore/doc/_search
 {
   "query": {
-    "function_score": {				//
+    "function_score": {			
       "query": {
         "match": {
           "f": "hello spark"
