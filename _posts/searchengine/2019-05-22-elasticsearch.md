@@ -1820,7 +1820,7 @@ GET /cars/sales/_search/template
   "source": {
     "query": {
       "match": {
-        "remark": "\{\{kw\}\}"                    //使用双大括号表示变量
+        "remark": "{{ kw }}"                    //使用双大括号表示变量
       }
     },
     "from": "\{\{from\}\}\{\{\^from\}\}100\{\{/from\}\}",  //默认值设置
