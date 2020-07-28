@@ -71,7 +71,7 @@ description: "elasticsearch的技术"
 
   ElasticSearch中的最小数据单元。一个Document就是一条数据，一般使用JSON数据结构表示。每个Index下的Type中都可以存储多个Document。一个Document中有多个field，field就是数据字段。
 
-  不要在Document中描述java对象的双向关联关系。在转换为JSON字符串的时候会出现无限递归问题。
+  <span style="color:red">不要在Document中描述java对象的双向关联关系。在转换为JSON字符串的时候会出现无限递归问题。</span>
 
 - **Index**
 
@@ -81,7 +81,7 @@ description: "elasticsearch的技术"
 
   类型。每个索引中都可以有若干Type，Type是Index中的一个**逻辑分类**，同一个Type中的Document都有相同的field。
 
-  6.x版本之后，type概念被弱化，一个index中只能有唯一的一个type。在7.x版本之后，会删除type。
+  <span style="color:red">6.x版本之后，type概念被弱化，一个index中只能有唯一的一个type。在7.x版本之后，会删除type。</span>
 
 > 一个index默认10个shard，5个primary shard，5个replica shard
 >
@@ -112,8 +112,8 @@ ElasticSearch
 第一步、ElasticSearch不允许root用户启动，所以需要先创建用户
 
 ```shell
-useradd -U es					#添加用户和用户组为es
-chown -R es:es elasticsearch	#修改elasticsearch所属主所属组
+useradd -U es                 #添加用户和用户组为es
+chown -R es:es elasticsearch  #修改elasticsearch所属主所属组
 ```
 
 第二步、修改文件打开限制。至少需要65536的文件创建权限，修改限制信息`/etc/security/limits.conf`
@@ -126,7 +126,7 @@ es    soft    nofile    65536
 第三步、修改线程开启限制。Linux默认用户进程有开启1024个线程权限，至少需要4096的线程池预备，修改`/etc/security/limits.d/20-nproc.conf`
 
 ```conf
-*          soft    nproc     4096
+es         soft    nproc     4096
 root       soft    nproc     unlimited
 ```
 
@@ -226,7 +226,7 @@ su es
   ```txt
   PUT /test_index/_settings
   {
-     "number_of_replicas" : 1    //指定每个primary shard的replica shard个数
+     "number_of_replicas" : 1    //设置replica shard个数
   }
   ```
 
@@ -291,19 +291,6 @@ su es
     }
     ```
 
-  一个index中的所有type类型的Document是存储在一起的，如果index中的不同的type之间的field差别太大，也会影响到磁盘的存储结构和存储空间的占用
-
-  ```txt
-  test_index:test_type1-->{"_id":"1","f1":"v1","f2":"v2"}
-  test_index:test_type2-->{"_id":"2","f3":"v3","f4":"v4"}
-  
-  实际上存储格式为
-  {"id":"1","f1":"v1","f2":"v2","f3":"","f4":""},
-  {"id":"2","f1":"","f2":"","f3":"v3","f4","v4"}
-  
-  建议，每个index中存储的document结构不要有太大的差别。尽量控制在总计字段数据的10%以内
-  ```
-
 - **查询Document**
 
   - **GET查询**
@@ -315,47 +302,6 @@ su es
   - **GET /_mget查询**
 
     ````txt
-    GET /_mget
-    {
-      "docs" : [
-        {
-          "_index" : "value",
-          "_type" : "value",
-          "_id" : "value"
-        }, {}, {}
-      ]
-    }
-    =====================================示例======================================
-    GET /_mget
-    {
-      "docs":[
-        {
-          "_index":"test_index",
-          "_type":"my_type",
-          "_id":1
-        },
-        {
-          "_index":"test_index",
-          "_type":"my_type",
-          "_id":2
-        },
-        {
-          "_index":"test_index",
-          "_type":"my_type",
-          "_id":3
-        }
-      ]
-    }
-    
-    GET /test_index/my_type/_mget
-    {
-      "docs":[
-        {"_id":1},
-        {"_id":2},
-        {"_id":3}
-      ]
-    }
-    
     GET /test_index/my_type/_mget
     {
       "ids":[1,2,3,4]
@@ -394,11 +340,11 @@ su es
     }
     ```
 
-  - **更新Document（partial update）**
+  - **更新Document（部分更新）**
 
     语法：`POST /index_name/type_name/id/_update{field_name:field_value_for_update}`
 
-    说明：只更新某Document中的部分字段，文档必须存在。对比全量替换而言，只是操作上的方便，在底层执行上几乎没有区别
+    说明：<span style="color:red">只更新某Document中的部分字段，文档必须存在。对比全量替换而言，只是操作上的方便，在底层执行上几乎没有区别</span>
 
     ```txt
     POST /test_index/my_type/1/_update
@@ -496,7 +442,7 @@ su es
 
 ​	4）协调节点得到查询结果后，再将查询结果返回给客户端
 
-## 四、元数据
+## 四、主要元数据
 
 - **_index**
 
@@ -504,19 +450,439 @@ su es
 
 - **_type**
 
-  代表document属于index中的哪个type（类别）。6.x版本中，一个index只能定义一个type。Type命名要求：字符大小写无要求，不能下划线开头，不能包含逗号。
+  代表document属于index中的哪个type（类别）。6.x版本中，一个index只能定义一个type。
 
 - **_id**
 
   代表document的唯一标识。使用index、type和id可以定位唯一的一个document。id可以在新增document时手工指定，也可以由ElasticSearch自动创建。
+
+- **_source元数据**
+
+    一个doc的原生的json数据，不会被索引，用于获取提取字段值 ，启动此字段，索引体积会变大。**_source**可以被关闭。
 
 - **_version**
 
   代表的是document的版本。在ElasticSearch中，为document定义了版本信息，document数据每次变化，代表一次版本的变更。版本变更可以避免数据错误问题（并发问题，乐观锁），同时提供ES的搜索效率。第一次创建Document时，\_version版本号为1，默认情况下，后续每次对Document执行修改或删除操作都会对\_version数据自增1。
 
   删除Document也会使\_version自增。当使用PUT命令再次增加同id的Document，_version会继续之前的版本继续自增。
+  
+- **_seq_no**
 
-## 五、分布式架构分析
+    一个整数，严格递增的，可用于乐观锁
+
+- **_primary_term**
+
+    **_primary_term**也是一个整数，每当Primary Shard发生重新分配时，比如重启，Primary选举等，会自增1。
+
+> 元数据_all是指将一个doc中的所有field全部用空格分割合并成一个field，只能搜索，很少用。默认开启，建议禁用。
+
+## 五、Mapping
+
+​	Mapping决定了一个index中的field使用什么数据格式存储，使用什么分词器解析，是否有子字段，是否需要copy to其他字段等。Mapping决定了index中的field的特征。
+
+### 查询当前索引mapping信息
+
+```txt
+GET /book_index/_mapping
+```
+
+### mapping核心数据类型
+
+| 类型名称                   | 关键字                     |
+| -------------------------- | -------------------------- |
+| 字符串                     | text（string）             |
+| 整数                       | byte、short、integer、long |
+| 浮点型                     | float、double              |
+| 布尔型                     | boolean                    |
+| 日期型                     | date                       |
+| 二进制类型                 | binary                     |
+| 半精度16位浮点数           | half_float                 |
+| 支持固定的缩放因子的浮点数 | scaled_float               |
+
+> 5.x之后新增范围类型：integer_range、float_range、double_range、long_range、date_range
+
+> scale_float：比如12.34，缩放因子（scaling_factor）为100，那么存储为1234。此时是一个整数，这大大有助于节省磁盘空间，因为整数比浮点更容易压缩。创建索引是要使用缩放因子scaling_factor。
+
+{% raw %}
+
+### _all和_source
+
+{% endraw %}
+
+开启和关闭
+
+```text
+PUT /book_index
+{
+  "mappings": {             //定义mapping
+    "book_type": {          //类型名称
+      "properties": {       //mapping信息
+      }
+      "_all" : { "enabled" : false },
+      "_source" : { "enabled" : false }
+    }
+  }
+}
+```
+
+### 字段的index&index_options&store
+
+store：是否存储此字段，<span style="color:red">store设置和_source无关</span>
+
+index：代表字段是否建立倒排索引
+
+index_options：用于控制倒排索引记录的内容
+
+- docs            只记录id
+- freqs           记录id和词频（用于打分）
+- positions    记录id、词频和词位置（第几个词，用于短语匹配）
+- offsets        记录id、词频和词位置、词在文档中的偏移量（用于高亮显示）
+
+> text默认为positions，其它默认为docs
+
+### null值处理
+
+"null_value"可以把null值设置一个默认值，默认处理方式是忽略
+
+```text
+PUT my_index
+{
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "status_code": {
+          "type":"keyword",
+          "null_value": "NULL" 
+        }
+      }
+    }
+  }
+}
+```
+
+### dynamic mapping
+
+**mapping默认创建的数据类型**
+
+| 数据          | 类型                                                      |
+| ------------- | --------------------------------------------------------- |
+| true or false | boolean                                                   |
+| 123           | long                                                      |
+| 123.12        | float                                                     |
+| 2018-01-01    | date                                                      |
+| hello world   | text（string）【默认standard分词器，且会建立keyword字段】 |
+
+**日期的自动识别**
+
+使用`date_detection`开启/关闭日期的自动识别，默认开启。
+
+使用`dynamic_date_format`设置日期格式，默认为`yyyy/MM/dd HH:mm:ss Z|yyyy/MM/dd Z`
+
+```txt
+PUT /test_index
+{
+  "mappings": {
+    "doc": {
+      "date_detection": true,
+      "dynamic_date_formats": ["yyyy-MM-dd"]
+    }
+  }
+}
+```
+
+**字符中数字的自动识别**
+
+使用`numeric_detection`开启/关闭字符中数字的自动识别，默认关闭。
+
+```txt
+PUT /test_index
+{
+  "mappings": {
+    "doc": {
+      "numeric_detection": true
+    }
+  }
+}
+```
+
+### 设置dynamic策略
+
+设置dynamic mapping策略时，可选值有：
+
+- true（默认值）遇到陌生字段自动进行dynamic mapping
+- false 遇到陌生字段，不进行dynamic mapping（会保存数据，但是不做倒排索引，无法实现任何的搜索）
+- strict 遇到陌生字段，直接报错。
+
+```txt
+PUT /dynamic_strategy
+{
+  "mappings": {
+     "dynamic_type": {
+        "dynamic": "strict",
+        "properties": {
+        "f1": {
+          "type": "text",
+          "analyzer": "standard"
+        },
+        "f2": {
+          "type": "object",
+          "dynamic" :false
+        }
+      }
+     }
+  }
+}
+=======================================插入测试=======================================
+PUT /dynamic_strategy/dynamic_type/1
+{
+  "f1": "f1 field",
+  "f2": {
+    "f21": "f21 field"      //只会存储不会分词，不能索引
+  },
+  "f3": "f3 field"          //f3字段无法插入，会直接报错
+}
+```
+
+### dynamic templates
+
+设置默认的字段类型匹配规则，大大减少了索引创建需要的约束
+
+```txt
+PUT /test_index
+{
+  "mappings": {
+    "doc": {
+      "dynamic_templates": [
+        {
+          "string_as_keyword": {
+            "match_mapping_type": "string",
+            "mapping": {
+              "type": "keyword"
+            }
+          }
+        }
+      ],
+      "properties":{
+        "price": {
+          "type":"double"
+        }
+      }
+    }
+  }
+```
+
+### index template
+
+设置`index template`可以根据各模板的优先级匹配字段
+
+```txt
+//==========================================创建模板===================================
+PUT _template/template_1
+{
+  "order": 0,
+  "index_patterns": [
+    "test*"
+  ],
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "name": {
+          "type": "text"
+        }
+      }
+    }
+  }
+}
+
+PUT _template/template_2
+{
+  "order": 1,
+  "index_patterns": [
+    "test*"
+  ],
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "name": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}
+
+//========================================创建索引========================================
+# 如果未明确指定字段类型将根据索引模板的匹配的order优先级决定类型
+POST /test_index/_doc
+{
+  "name": "tom"
+}
+
+//======================================查看/删除索引模板===================================
+DELETE /test_index
+GET _template
+```
+
+### mapping的复杂定义
+
+- **multi field**
+
+  数组类型和普通数据类型没有区别。只是要求字段中的多个数据的类型必须相同。
+
+  ```txt
+  PUT /multi_index/multi_type/1
+  {
+    "tags": ["tagA", "tagB", "tagC"]
+  }
+  =================================手工对应mapping=================================
+  PUT /multi_index
+  {
+    "mappings": {
+      "multi_type": {
+        "properties": {
+          "tags": {
+            "analyzer": "standard",
+            "type": "text"
+          }
+        }
+      }
+    }
+  }
+  ```
+
+- **empty field**
+
+  空数据 ：`null`，`[]`，`[null]`
+
+  空数据如果直接保存到index中，由ES为index自动创建mapping，那么此空数据对应的field将不会创建mapping映射信息。而任意的mapping定义都可以保存空数据
+
+  ```txt
+  PUT /empty_index/empty/1
+  {
+    "filed_1": null,
+    "filed_2": [],
+    "filed_3": [null]
+  }
+  ==================================mapping映射信息==================================
+  GET /empty_index/empty/_mapping
+  
+  //返回结果
+  {
+    "empty_index" : {
+      "mappings" : {
+        "empty" : { }				//无field_1、field_2、field_3信息
+      }
+    }
+  }
+  ```
+
+- **object field**
+
+  ES在底层存储对象数据时实际上使用`对象.属性`方式进行存储
+
+  ```txt
+  PUT /object_index/object_type/1
+  {
+    "name" : "张三" ,
+    "age" : 20,
+    "address" : {
+      "province" : "北京",
+      "city" : "北京",
+      "street" : "永泰庄东路"
+    }
+  }
+  ===============================对应的手动mapping映射===============================
+  PUT /object_index
+  {
+    "mappings": {
+      "object_type": {
+        "properties": {
+          "name": {
+            "type": "text",
+            "analyzer": "ik_max_word"
+          },
+          "age": {
+            "type": "short"
+          },
+          "address": {
+            "properties": {
+              "province": {
+                "type": "text",
+                "analyzer": "ik_max_word"
+              },
+              "city": {
+                "type": "text",
+                "analyzer": "ik_max_word"
+              },
+              "street": {
+                "type": "text",
+                "analyzer": "ik_max_word"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
+
+- **copy_to**
+
+  就是将多个字段，复制到一个字段中，实现一个多字段组合
+
+  ```txt
+  =====================================创建索引======================================
+  PUT /products_index
+  {
+    "mappings": {
+      "doc": {
+        "properties": {
+          "name": {
+            "type": "text",
+            "analyzer": "standard",
+            "copy_to": "search_key"
+          },
+          "remark": {
+            "type": "text",
+            "analyzer": "standard",
+            "copy_to": "search_key"
+          },
+          "price": {
+            "type": "integer"
+          },
+          "producer": {
+            "type": "text",
+            "analyzer": "standard",
+            "copy_to": "search_key"
+          },
+          "tags": {
+            "type": "text",
+            "analyzer": "standard",
+            "copy_to": "search_key"
+          },
+          "search_key": {					//此字段需要和被copy类型分词器相同
+            "type": "text",
+            "analyzer": "standard"
+          }
+        }
+      }
+    }
+  }
+  =======================================搜索=======================================
+  GET /products_index/doc/_search
+  {
+    "query": {
+      "match": {
+        "search_key": "IPHONE"
+      }
+    }
+  }
+  ```
+
+  copy_to字段【上述的search_key】未必存储，但是在逻辑上是一定存在
+
+
+## 五、ES分布式架构分析
 
 ### 分布式机制的透明隐藏特性
 
@@ -534,7 +900,7 @@ su es
 
 ​	master不是请求的唯一接收节点。只是维护元数据的特殊节点。不会导致单点瓶颈。
 
-​	集群在默认配置中，会自动的选举出master节点。元数据是一个收集管理的过程。不是一个必要的不可替代的数据。Master如果宕机，集群会选举出新的master，新的master会在集群的所有节点中重新收集集群元数据并管理。
+​	集群在默认配置中，会自动的选举出master节点。元数据是一个收集管理的过程。不是一个必要的不可替代的数据。master如果宕机，集群会选举出新的master，新的master会在集群的所有节点中重新收集集群元数据并管理。
 
 ### 节点平等的分布式架构
 
@@ -621,21 +987,9 @@ GET /current_index/_search?q=remark:test+AND+name:doc&sort=order_no:desc
 GET _search?timeout=10ms
 ```
 
-### _all元数据搜索
-
-`_all`是一个内置元数据，可是内置变量名。代表全部的含义。【很少使用】
-
-```txt
-GET /_all/_search                             //在所有索引中搜索数据
-
-GET /index_name/type_name/_search?q=key_words	//在指定的索引中搜素包含key_words的信息
-```
-
-> 在ES维护Document的时候，会将Document中的所有字段数据连接作为一个_all元数据
-
 ### 多索引搜索
 
-所谓的multi-index就是指从多个index中搜索数据。相对使用较少，只有在复合数据搜索的时候，可能出现。一般来说，如果真使用复合数据搜索，都会使用_all。
+所谓的multi-index就是指从多个index中搜索数据。相对使用较少，只有在复合数据搜索的时候，可能出现。
 
 如：搜索引擎中的无条件搜索。（现在的应用中都被屏蔽了。使用的是默认搜索条件，或不执行搜索）
 
@@ -647,15 +1001,8 @@ GET /products_*/_search                   //使用通配符匹配
 GET /_all/_search                         //_all代表所有索引
 ```
 
-### 分页搜索与Deep Paging问题
 
-```txt
-GET /_search?from=0&size=10               // from从第几条开始查询，size返回的条数
-```
-
-​		执行搜索时请求发送到协调节点中，协调节点将搜索请求发送给所有的节点，而数据可能分部在多个节点中，所以会造成以下现象：集群有4个节点，每个节点有1个分片（primary shard），发起GET /_search?from=100&size=50时，每个节点会返回150条数据，协调节点一共接收到600条数据，进行排序并取其中第100~150条数据，如果页数过深会造成效率低下问题
-
-### `-`,`+`符号条件**
+### `-`,`+`符号条件
 
 ```txt
 GET /products_index/phone_type/_search?q=+name:plus		//搜索的关键字必须包含plus
@@ -705,7 +1052,7 @@ GET /es/doc/_search
 
 ### 词元搜索
 
-搜索条件`不`分词，使用搜索条件进行精确匹配。如果搜索字段被分词，搜索条件是一段话则无法匹配这种情况下适合匹配不分词字段。
+搜索条件不分词，使用搜索条件进行精确匹配。如果搜索字段被分词，搜索条件是一段话则无法匹配这种情况下适合匹配不分词字段。
 
 ```txt
 GET /es/doc/_search
@@ -1979,6 +2326,14 @@ GET /es/doc/_search
 
 ## 九、搜索相关
 
+### 分页搜索与Deep Paging问题
+
+```txt
+GET /_search?from=0&size=10               // from从第几条开始查询，size返回的条数
+```
+
+​	执行搜索时请求发送到协调节点中，协调节点将搜索请求发送给所有的节点，而数据可能分部在多个节点中，所以会造成以下现象：集群有4个节点，每个节点有1个分片（primary shard），发起上述请求时，每个节点会返回150条数据，协调节点一共接收到600条数据，进行排序并取其中第100~150条数据，如果页数过深会造成效率低下问题
+
 ### match底层转换
 
 ​	ElasticSearch执行match搜索时，通常都会对搜索条件进行底层转换，来实现最终的搜索结果。
@@ -2951,397 +3306,6 @@ GET /_analyze
   "text": ["中国人民共和国国歌"]
 }
 ```
-
-## 十二、Mapping
-
-​	Mapping决定了一个index中的field使用什么数据格式存储，使用什么分词器解析，是否有子字段，是否需要copy to其他字段等。Mapping决定了index中的field的特征。
-
-### 查询当前索引mapping信息
-
-```txt
-GET /book_index/_mapping
-
-=======================================返回信息=======================================
-{
-  "book_index" : {          //索引名称
-    "mappings" : {          //mapping开始
-      "book_type" : {       //类型名称
-        "properties" : {			//具体信息
-          "author_id" : {			//字段名
-            "type" : "long"			//类型名
-          },
-          "content" : {
-            "type" : "text",				
-            "fields" : {              //子字段列表默认为text类型字段提供的子字段名称为keyword
-              "keyword" : {           //不分词的keyword
-                "type" : "keyword",	
-                "ignore_above" : 256  //最长长度
-              }
-            }
-          },
-          "post_date" : {
-            "type" : "date"
-          },
-          "title" : {
-            "type" : "text",
-            "fields" : {
-              "keyword" : {
-                "type" : "keyword",
-                "ignore_above" : 256
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-```
-
-字段类型为text，分词器为standard，一定创建xxx.keyword子字段，类型是keyword类型，长度为256个字符
-
-### mapping核心数据类型
-
-| 类型名称 | 关键字                     |
-| -------- | -------------------------- |
-| 字符串   | text（string）             |
-| 整数     | byte、short、integer、long |
-| 浮点型   | float、double              |
-| 布尔型   | boolean                    |
-| 日期型   | date                       |
-
-### dynamic mapping
-
-​	ES自动建立index，创建type，以及type对应的mapping，mapping中包含了每个field对应的数据类型，以及如何分词等设置
-
-dynamic mapping对字段的类型分配
-
-| 数据          | 类型                                 |
-| ------------- | ------------------------------------ |
-| true or false | boolean                              |
-| 123           | long                                 |
-| 123.123       | double                               |
-| 2018-01-01    | date                                 |
-| hello world   | text（string）【默认standard分词器】 |
-
-### custom mapping
-
-手工创建mapping时，只能新增mapping设置，不能对已有的mapping进行修改
-
-```txt
-PUT /book_index
-{
-  "settings": {						//定义分片信息
-    "number_of_shards": 5,
-    "number_of_replicas": 1
-  },
-  "mappings": {             //定义mapping
-    "book_type": {          //类型名称
-      "properties": {       //mapping信息
-        "author_id": {           //字段名
-          "type": "integer",     //索引类型
-          "index": false         //是否索引，默认true
-        },
-        "title": {
-          "type": "text",
-          "analyzer": "standard",
-          "fields": {       //子字段类型
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 256
-            }
-          }
-        },
-        "content": {
-          "type": "text",
-          "analyzer": "ik_smart"
-        },
-        "post_date": {
-          "type": "date"
-        }
-      }
-    }
-  }
-}
-====================================增加mapping定义====================================
-PUT /book_index/book_type/_mapping
-{
-  "properties": {
-    "new_field": {        //字段名
-      "type": "text",
-      "analyzer": "standard",
-      "store": false      //是否存储，默认true
-    }
-  }
-}
-=====================================测试mapping======================================
-GET /book_index/_analyze
-{
-  "field": "content",
-  "text": ["中国人民共和国国歌"]
-}
-```
-
-### mapping的复杂定义
-
-- **multi field**
-
-  数组类型和普通数据类型没有区别。只是要求字段中的多个数据的类型必须相同。
-
-  ```txt
-  PUT /multi_index/multi_type/1
-  {
-    "tags": ["tagA", "tagB", "tagC"]
-  }
-  =================================手工对应mapping=================================
-  PUT /multi_index
-  {
-    "mappings": {
-      "multi_type": {
-        "properties": {
-          "tags": {
-            "analyzer": "standard",
-            "type": "text"
-          }
-        }
-      }
-    }
-  }
-  ```
-
-- **empty field**
-
-  空数据 ：`null`，`[]`，`[null]`
-
-  空数据如果直接保存到index中，由ES为index自动创建mapping，那么此空数据对应的field将不会创建mapping映射信息。而任意的mapping定义都可以保存空数据
-
-  ```txt
-  PUT /empty_index/empty/1
-  {
-    "filed_1": null,
-    "filed_2": [],
-    "filed_3": [null]
-  }
-  ==================================mapping映射信息==================================
-  GET /empty_index/empty/_mapping
-  
-  //返回结果
-  {
-    "empty_index" : {
-      "mappings" : {
-        "empty" : { }				//无field_1、field_2、field_3信息
-      }
-    }
-  }
-  ```
-
-- **object field**
-
-  ES在底层存储对象数据时实际上使用`对象.属性`方式进行存储
-
-  ```txt
-  PUT /object_index/object_type/1
-  {
-    "name" : "张三" ,
-    "age" : 20,
-    "address" : {
-      "province" : "北京",
-      "city" : "北京",
-      "street" : "永泰庄东路"
-    }
-  }
-  ===============================对应的手动mapping映射===============================
-  PUT /object_index
-  {
-    "mappings": {
-      "object_type": {
-        "properties": {
-          "name": {
-            "type": "text",
-            "analyzer": "ik_max_word"
-          },
-          "age": {
-            "type": "short"
-          },
-          "address": {
-            "properties": {
-              "province": {
-                "type": "text",
-                "analyzer": "ik_max_word"
-              },
-              "city": {
-                "type": "text",
-                "analyzer": "ik_max_word"
-              },
-              "street": {
-                "type": "text",
-                "analyzer": "ik_max_word"
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  ```
-
-- **数组+对象**
-
-  可将包含对象的数组视为对象
-
-  ```txt
-  PUT /arr_object_index/arr_object_type/1
-  {
-    "dept_name" : "销售部", 
-    "emps" : [
-      { "name" : "张三", "age" : 20 },
-      { "name" : "李四", "age" : 21 },
-      { "name" : "王五", "age" : 22 }
-    ]
-  }
-  ===============================对应的手动mapping映射===============================
-  PUT /arr_object_index
-  {
-    "mappings": {
-      "arr_object_type": {
-        "properties": {
-          "dept_name": {
-            "type": "text",
-            "analyzer": "ik_max_word"
-          },
-          "emps": {
-            "properties": {
-              "name": {
-                "type": "text",
-                "analyzer": "ik_max_word"
-              },
-              "age": {
-                "type": "short"
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  ```
-
-- **copy_to**
-
-  就是将多个字段，复制到一个字段中，实现一个多字段组合。
-
-  ```txt
-  =====================================创建索引======================================
-  PUT /products_index
-  {
-    "mappings": {
-      "doc": {
-        "properties": {
-          "name": {
-            "type": "text",
-            "analyzer": "standard",
-            "copy_to": "search_key"
-          },
-          "remark": {
-            "type": "text",
-            "analyzer": "standard",
-            "copy_to": "search_key"
-          },
-          "price": {
-            "type": "integer"
-          },
-          "producer": {
-            "type": "text",
-            "analyzer": "standard",
-            "copy_to": "search_key"
-          },
-          "tags": {
-            "type": "text",
-            "analyzer": "standard",
-            "copy_to": "search_key"
-          },
-          "search_key": {					//此字段需要和被copy类型分词器相同
-            "type": "text",
-            "analyzer": "standard"
-          }
-        }
-      }
-    }
-  }
-  =======================================搜索=======================================
-  GET /products_index/doc/_search
-  {
-    "query": {
-      "match": {
-        "search_key": "IPHONE"
-      }
-    }
-  }
-  ```
-
-  copy_to字段【上述的search_key】未必存储，但是在逻辑上是一定存在
-
-### root object
-
-​	mapping的root object就是指设置index的mapping时，一个type对应的json数据。包括的内容有：properties， metadata（_id, _source, _all）等。
-
-```txt
-PUT /test_index9
-{
-  "settings" : {
-    "number_of_shards" : 2,
-    "number_of_replicas" : 1
-  },
-  "mappings" : {
-    "test_type" : {      //==============root object开始
-      "properties" : {
-        "post_date" : { "type" : "date" },
-        "title" : { "type" : "text", "index" : false },
-        "content" : { "type" : "text" , "analyzer" : "english" },
-        "author_id" : { "type" : "integer" }
-      },
-      "_all" : { "enabled" : false },
-      "_source" : { "enabled" : false }
-    }                    //==============root object结束
-  }
-}
-```
-
-### 定制dynamic策略
-
-​	ES中支持在自定义mapping时，为type定制dynamic mapping策略，让index更加的友好。定制dynamic mapping策略时，可选值有：true（默认值）-遇到陌生字段自动进行dynamic mapping， false-遇到陌生字段，不进行dynamic mapping（会保存数据，但是不做倒排索引，无法实现任何的搜索），strict-遇到陌生字段，直接报错。
-
-```txt
-PUT /dynamic_strategy
-{
-  "mappings": {
-     "dynamic_type": {
-        "dynamic": "strict",
-        "properties": {
-        "f1" :{
-          "type": "text",
-          "analyzer": "standard"
-        },
-        "f2": {
-          "type": "object",
-          "dynamic" :false
-        }
-      }
-     }
-  }
-}
-=======================================插入测试=======================================
-PUT /dynamic_strategy/dynamic_type/1
-{
-  "f1": "f1 field",
-  "f2": {
-    "f21": "f21 field"      //只会存储不会分词，不能索引
-  },
-  "f3": "f3 field"          //f3字段无法插入，会直接报错
-}
-```
-
-定制dynamic mapping，使用较少，因为很难去分析出一套完整的，有扩展能力的结构。如果使用，一般在固定的，几乎不会改变的数据结构中使用。如：身份证信息
 
 ## 十三、Document写入原理
 
