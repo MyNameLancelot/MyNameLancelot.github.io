@@ -3199,8 +3199,8 @@ GET /_analyze
 - 响应收集
 
   在自动请求路由后，接收客户端请求的节点会自动的收集其他节点的处理结果，并统一响应给客户端。
-
-​	![node-equality](/img/searchengine/node-equality.png)
+  
+  <img src="/img/searchengine/node-equality.png" style="zoom:67%;" />
 
 1）客户端请求ElasticSearch集群，搜索“张三”数据。请求发送到节点4。此操作代表节点的平等性。集群中每个节点的功能都是一致的。
 
