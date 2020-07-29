@@ -3256,7 +3256,7 @@ GET /_analyze
   
 ## 十三、Document写入原理
 
-​	ElasticSearch为了实现搜索的近实时，结合了内存buffer、OS cache、disk三种存储，尽可能的提升搜索能力。ElasticSearch的底层使用lucene实现。在lucene中一个index是分为若干个segment（分段）的，每个segment都会存放index中的部分数据。在ElasticSearch中，是将一个index先分解成若干shard，在shard中，使用若干segment来存储具体的数据。
+ElasticSearch为了实现搜索的近实时，结合了内存buffer、OS cache、disk三种存储，尽可能的提升搜索能力。ElasticSearch的底层使用lucene实现。在lucene中一个index是分为若干个segment（分段）的，每个segment都会存放index中的部分数据。在ElasticSearch中，是将一个index先分解成若干shard，在shard中，使用若干segment来存储具体的数据。
 
 <img src="/img/searchengine/document-write-process.png" style="zoom:67%;" />
 
@@ -3268,21 +3268,53 @@ GET /_analyze
 
 3）副本分片接收请求到并创建成功之后返回给主分片，主分片再结合自身情况发送创建成功或失败到协调节点，协调节点将结果返回给客户端
 
+### Document读取的实时性
+
+倒排索引一旦生成是不可以更改的，有如下好处：
+
+- 不用考虑并发写文件问题，避免了加锁的开销
+- 由于文件不能更改，可以充分利用文件系统缓存，只需要载入一次，内容直接从内容中读取
+- 利于生成缓存数据，不用担心数据变化带来的缓存失效问题
+
+ElasticSearch区分新旧文档，查询时汇总新旧文档内容返回查询结果
+
+<img src="/img/searchengine/doc-built.png" style="zoom:67%;" />
+
 ### Document写入细节
 
-3）将请求的document写入到buffer【内存缓冲区】。并默认每秒刷新一次buffer
+<img src="/img/searchengine/refresh.png" style="zoom:67%;" />
 
-4）在将document写入buffer的同时也会将本次操作的具体内容写入到translog中，这个日志文件记录了所有操作过程。其意义在于保证异常宕机尽可能少的丢失数
+**refresh**
 
-4）ElasticSearch每秒中都会刷新buffer，将buffer中的数据保存到index segment中
+`segment`写入磁盘的过程依旧很耗时，可以借助文件系统缓存的特性，先将`segment`在缓存中创建并开放查询来提升实时性，改过程在称之为`refresh`。在`refresh`之前文档先存储在内存Buffer中，此时还不能搜索，`refresh`时将buffer中所有文档都清空并生成`segment`。es默认每秒执行一次`refresh`，所以一秒之后文档即可查询。
 
-5）在index segment创建并写入数据后，ElasticSearch会立刻将其写入到系统缓存（OS cache）中，在写入后index segment立刻被打开，可以为客户端的搜索请求提供服务【不必等待index segment写入到磁盘后再打开】
+**translog**
 
-6）translog记录的是操作过程，ElasticSearch宕机重启后会读取系统磁盘中的数据和translog中的日志，实现数据恢复。默认每5秒钟执行一次translog持久化，如果在持久化的时候刚好有document写操作在执行，那么这次持久化操作会等待写操作彻底完成后才执行。可以通过设置修改translog的持久化为异步。
+es将文档写入buffer时会同时将文档写入到`translog`文件中，默认每个文档都会在`translog`文件中即时落盘（fsync），避免丢失数据。es启动时会检查`translog`文件将文档载入buffer。
 
-7）随着时间的推移，translog文件会不断增大。当其大到一定程度的时候或一定时间后【默认30分钟】，会触发commit操作。commit操作具体内容有：①将buffer中的数据刷新到一个新的index segment中，将index segment写入到OS cache中并打开index segment为搜索提供服务②清空buffer③执行一个commit point操作，将OS cache中所有的index segment标识记录在这个commit point中并持久化到系统磁盘DISK中④commit point中记录的index segment会被持久化到DISK中⑤清空本次持久化的index segment对应的translog文件中的日志内容
+**flush**
 
-8）ElasticSearch会自动的执行segment merge操作。被标记为deleted状态的document会在此时被物理删除。merge的流程是：①选择一些大小相近的segment文件，merge成一个大的segment文件②将merge后的文件持久化到磁盘中③执行一个commit操作，commit point除记录要持久化的OS cache中的index segment外，还记录了merge后的segment文件和要删除的原segment文件④commit操作执行成功后，将merge后的segment打开为搜索提供服务，将旧的segment关闭并删除。
+<img src="/img/searchengine/flush.png" style="zoom:67%;" />
+
+`flush`负责将内存中的`segment`写入磁盘，主要做以下工作
+
+- 将`translog`写入磁盘
+- 将`index buffer`清空，其中的文档生成一个新的`segment`相当于一个`refresh`操作
+- 更新`commit point`并写入磁盘
+- 执行`fsync`操作，将内存中的`segment`写入磁盘
+- 删除旧的`translog`文件
+
+---
+
+<img src="/img/searchengine/all.png" style="zoom:67%;" />
+
+**删除与更新文档**
+
+lucene专门维护一个`.del`的文件，记录所有已删除的文档【`.del`上记录的是lucene内部的id】，查询结果返回前会过滤掉`.del`中的所有文档。更新文档是首先删除文档，然后再创建新文档。
+
+**segment merging**
+
+随着segment的增多，由于一次查询的`segment`数量增多，查询速度会变慢。所以es会定时在后台执行`segment merge`操作，以减少`segment`的数量。通过`froce_merge`也可手动强制执行`segment merge`的操作。
 
 ## 十四、相关度评分算法
 
