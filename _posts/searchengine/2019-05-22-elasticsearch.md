@@ -149,6 +149,18 @@ su es
 ./bin/elasticsearch
 ```
 
+**集群启动**
+
+默认情况下一个网段的ElasticSearch会自动组成集群。只需启动时指定集群名称和自身节点名称即可
+
+```shell
+# 在不同的机器上执行即可自动组成集群
+./bin/elasticsearch -E cluster.name=my_cluster -E node.name=node_1
+
+# 在同一台机器上启动集群测试
+./bin/elasticsearch -E cluster.name=my_cluster -E node.name=node_1 -Epath.data=my_cluster_data_1 -E http.port=5200
+```
+
 ### 安装Kibana
 
 第一步、修改客户端访问控制。修改`config/kibana.yml`
@@ -882,94 +894,6 @@ GET _template
   copy_to字段【上述的search_key】未必存储，但是在逻辑上是一定存在
 
 
-## 五、ES分布式架构分析
-
-### 分布式机制的透明隐藏特性
-
-​	ElasticSearch本身就是一个分布式系统，就是为了处理海量数据的应用。隐藏了复杂的分布式机制，简化了配置和操作的复杂度。ElasticSearch在现在的互联网环境中，盛行的原因，主要的核心就是分布式的简化。
-
-​	ElasticSearch隐藏的分布式内容：分片机制、集群发现、负载均衡、路由请求、集群扩容、shard重分配等。
-
-### 节点变化时的数据重平衡
-
-​	在节点发生变化时，ES的cluster会自动调整每个节点中的数据，也就是shard的重新分配。这个过程叫做rebalance。rebalance目的是为了提高性能，理论上，当数据量达到一定级别的时候，每个shard分片上的数据量是均等的。那么每个节点管理的shard数量是均等的情况，ES集群才能提供最好的服务性能。
-
-### master节点作用
-
-​	维护集群元数据的节点。如：索引的变更（创建和删除）对应的元数据保存在master节点中。
-
-​	master不是请求的唯一接收节点。只是维护元数据的特殊节点。不会导致单点瓶颈。
-
-​	集群在默认配置中，会自动的选举出master节点。元数据是一个收集管理的过程。不是一个必要的不可替代的数据。master如果宕机，集群会选举出新的master，新的master会在集群的所有节点中重新收集集群元数据并管理。
-
-### 节点平等的分布式架构
-
-- 节点平等
-
-  每个节点都能接收客户端请求。不会造成单点压力。
-
-- 自动请求路由
-
-  节点在接收到客户端请求时，会自动的识别应该由哪个节点处理本次请求，并实现请求的转发。
-
-- 响应收集
-
-  在自动请求路由后，接收客户端请求的节点会自动的收集其他节点的处理结果，并统一响应给客户端。
-
-​	![node-equality](/img/searchengine/node-equality.png)
-
-1）客户端请求ElasticSearch集群，搜索“张三”数据。请求发送到节点4。此操作代表节点的平等性。集群中每个节点的功能都是一致的。
-
-2）节点4将请求路由到节点1上。实现数据的搜索。这是自动请求路径的过程。
-
-3）节点1处理结束后，搜索结果会发送给节点4。这是响应收集的过程。
-
-4）节点4将最终结果响应给客户端，这种操作就屏蔽了集群对客户端的影响。
-
-### 并发冲突
-
-- **使用内置_version**【7.x版本以后废弃】
-
-  全量替换（乐观锁）：ElasticSearch会检查请求中的version和存储中的version是否相等。如果不相等报错，如果相等则修改。
-
-  ```txt
-  PUT /test_index/my_type/1?version=4
-  {
-    "name":"doc_new_01"
-  }
-  ```
-
-- **使用external version**
-
-  ElasticSearch提供了一个特性，可以自定义version实现ES内置的\_version元数据版本管理功能。与元数据\_version的区别是：元数据比对必须完全一致，且external version必须比元数据_version数据大。成功后\_version修改为提供的external version数值。
-
-  ```txt
-  PUT /test_index/my_type/1?version=9&version_type=external
-  {
-    "name":"doc_new_new_01"
-  }
-  ```
-
-- **使用partial update乐观锁**
-
-  在ElasticSearch中，使用partial update更新数据时，内部自动使用乐观锁控制数据的并发安全。如果出现版本不一致的时候，ElasticSearch会提示更新失败。可以通过命令中的参数实现手工管理乐观锁。【retry_on_conflict和version参数不能同时使用】
-
-  ```txt
-  POST /test_index/my_type/1/_update?retry_on_conflict=3  #retry_on_conflict尝试次数
-  {
-    "name":"doc_new_post_01"
-  }
-  ```
-
-- **使用`if_seq_no`和`if_primary_term`替代内置_version**
-
-  ```txt
-  PUT /test_index/my_type/1?if_seq_no=6&if_primary_term=3
-  {
-    "name":"doc_new_01"
-  }
-  ```
-
 ## 六、Query String搜索
 
 语法：`GET [/index_name/type_name/]_search[?parameter_name=parameter_value&...]`
@@ -1016,12 +940,12 @@ GET /products_index/phone_type/_search?q=-name:plus		//搜索的关键字必须�
 
 ## 七、Query DSL搜索
 
-query DSL【Domain Specified Language】
+query DSL【Domain Specified Language】，所有查询均可开启`"profile": "true"`查看执行的详细信息
 
 ### 查询所有数据
 
 ```txt
-GET /current_index/_search?timeout=1ms	
+GET /current_index/_search
 {
   "query": {"match_all": {}}
 }
@@ -1037,6 +961,20 @@ GET /es/doc/_search
       "note": "only life" //会根据field对应的analyzer对搜索条件做分词
     }
   }
+}
+
+GET /es/doc/_search
+{
+  "query": {
+    "match": {           
+      "note": {                       //查询的字段
+        "query":  "only life pick",   
+        "operator": "or",             //or,and
+        "minimum_should_match": 2     //必须匹配两个以上
+      }
+    }
+  },
+  "profile": "true"
 }
 
 GET /es/doc/_search
@@ -1075,35 +1013,92 @@ GET /es/doc/_search
   }
 }
 ```
-
-### 排序
-
-当字段类型为text时，使用字符串类型的字段作为排序依据会有问题【ES对字段数据做分词，建立倒排索引。分词后，先使用哪一个单词做排序是不固定的】，此时需要在此字段上建立keyword类型的子字段，或者建立fielddata。
+### 短语搜索
 
 ```txt
-GET /kibana_sample_data_ecommerce/_search
+GET /es/doc/_search
 {
-  "sort": [
-    {
-      "total_quantity": {
-        "order": "desc"
+  "query": {
+    "match_phrase": {
+      "note": {
+        "query": "importance people", //必须满足此短语,即顺序不可变
+        "slop": 4                     //可以移动4次实现短语匹配，移动次数越少分数越高
       }
     }
-  ]
+  }
 }
 ```
 
-### 分页
+​	match phrase原理：在进行短语搜索的时候其实进行了分词操作，将短语进行分词之后在倒排索引中检索数据，检查匹配到的索引在同一个文档中是否连续（利用position判断）。【使用`GET _analyze`可以查看分词信息】
+
+**召回率和精准度平衡**
+
+召回率：搜索结果比例
+
+精准度：搜索结果的准确率
+
+如果在搜索的时候，只使用match phrase语法，会导致召回率底下，因为搜索结果中必须包含短语（包括proximity search）。如果在搜索的时候，只使用match语法，会导致精准度底下，因为搜索结果排序是根据相关度分数算法计算得到。可将两者同时使用，平衡召回率和精准度。
 
 ```txt
-GET /kibana_sample_data_ecommerce/_search
+GET /es/doc/_search
 {
-  "from": 100,
-  "size": 20
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "note": "importance people"
+          }
+        },
+        {
+          "match_phrase": {
+            "note": {
+              "query": "importance people",
+              "slop": 50
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+**搜索的优化**
+
+match一般来说，比match phrase效率高10倍左右，比proximity search高20倍左右
+
+优化的思路是：尽量减少proximity search搜索的document数量。即先用match来搜索出需要的数据，再用proximity search来提高term距离较近的document的相关度分数，从而影响结果排序，这个过程也叫rescore（重计分）。再rescore的时候，尽量使用分页，毕竟用户通常只会查看搜索数据的前几页。
+
+```txt
+GET /es/doc/_search
+{
+  "query": {
+    "match": {
+      "note": "importance people"
+    }
+  },
+  "rescore": {              //开始重计分
+    "query": {
+      "rescore_query": {    //重新计分查询
+        "match_phrase": {
+            "note": {
+              "query": "importance people",
+              "slop": 50
+            }
+          }
+      }
+    },
+    "window_size": 50       //对match搜索结果的前多少条数据执行rescore操作
+  },
+  "from": 0,
+  "size": 2 
 }
 ```
 
 ### 范围搜索
+
+范围查询主要争对数值和日期类型
 
 ```txt
 GET /_search
@@ -1111,7 +1106,8 @@ GET /_search
   "query" : {
     "range" : {
       "emps.age" : {					//数字类型的范围搜索
-        "gt" : 21, "lte" : 45
+        "gt" : 21,
+        "lte" : 45
       }
     }
   }
@@ -1126,15 +1122,6 @@ GET /_search
       }
     }
   }
-}
-```
-
-### 只返回部分字段
-
-```txt
-GET /kibana_sample_data_ecommerce/_search
-{
-  "_source": ["customer_id","customer_first_name","customer_full_name"]
 }
 ```
 
@@ -1216,85 +1203,6 @@ GET /_search/scroll
   "scroll_id" : "【上次搜索返回的scroll_id】"
 }
 ```
-
-### 搜索精度控制
-
-搜索精度的精确控制，条件是否是同时满足还是只需满足一个即可
-
-```txt
-=======================只需满足remark含有java或者developer即可=======================
-GET /student/java/_search
-{
-  "query": {
-    "match": {
-      "remark": "java developer"
-    }
-  }
-}
-==========================必须满足remark含有java和developer=========================
-GET /student/java/_search
-{
-  "query": {
-    "match": {
-      "remark": {
-        "query": "java developer",	//operator为or时，与第一个案例搜索语法效果一致
-        "operator": "and"
-      }
-    }
-  }
-}
-=============必须满足remark含有一定数量的java、developer、architect===================
-GET /student/java/_search
-{
-  "query": {
-    "match": {
-      "remark": {
-        "query":  "java developer architect",
-        "minimum_should_match": 2			//相当于67%=>66.66%需要向前进位
-      }
-    }
-  }
-}
-```
-
-### boost权重控制
-
-设置指定字段的权重值，控制相关度分数
-
-```txt
-GET /student/java/_search
-{
-  "query": {
-    "bool": {
-      "should": [
-        {
-          "term": {
-            "remark": {
-              "value": "developer",
-              "boost":2				//默认值为1
-            }
-          }
-        },
-        {
-          "term": {
-            "remark": {
-              "value": "architect"
-            }
-        }
-        }
-      ]
-    }
-  }
-}
-```
-
-**多shard环境中相关度分数不准确问题**
-
-​	在ElasticSearch的搜索结果中，相关度分数不是一定准确的。相同的数据，使用相同的搜索条件搜索，得到的相关度分数可能有误差。只要数据量达到一定程度，相关度分数误差就会逐渐趋近于0。
-
-![relevance](/img/searchengine/relevance.png)
-
-​	在shard0中，有100个document中包含java词组。在shard1中，有10个document中包含java词组，在执行搜索的时候，ES计算相关度分数时，就会出现计算不准确的问题。因为ES计算相关度分数是在shard本地计算的。根据TF/IDF算法，在shard0中的document相关度分数会低于shard1中的相关度分数。
 
 ### 搜索策略
 
@@ -1410,7 +1318,7 @@ GET student/java/_search
 
 **most fields策略是尽可能匹配更多的字段，所以会导致精确搜索结果排序问题。又因为cross fields搜索，不能使用minimum_should_match来去除长尾数据。所以在使用most fields和cross fields策略搜索数据的时候，都有不同的缺陷。所以商业项目开发中，都推荐使用best fields策略实现搜索。**
 
-### Suggest搜索建议
+### suggest搜索建议
 
 实现suggest的时，其构建的不是倒排索引，也不是正排索引，是纯的用于进行前缀搜索的一种特殊的数据结构，而且会全部放在内存中，所以suggest search进行的前缀搜索提示，性能非常高。
 
@@ -1457,88 +1365,6 @@ GET /suggest/doc/_search
 
 ### 近似匹配
 
-**短语搜索**
-
-```txt
-GET /es/doc/_search
-{
-  "query": {
-    "match_phrase": {
-      "note": {
-        "query": "importance people", //必须满足此短语
-        "slop": 4                     //可以移动4次实现短语匹配，移动次数越少分数越高
-      }
-    }
-  }
-}
-```
-
-​	match phrase原理：在进行短语搜索的时候其实进行了分词操作，将短语进行分词之后在倒排索引中检索数据，检查匹配到的索引在同一个文档中是否连续（利用position判断）。【使用`GET _analyze`可以查看分词信息】
-
-**召回率和精准度平衡**
-
-召回率：搜索结果比例
-
-精准度：搜索结果的准确率
-
-如果在搜索的时候，只使用match phrase语法，会导致召回率底下，因为搜索结果中必须包含短语（包括proximity search）。如果在搜索的时候，只使用match语法，会导致精准度底下，因为搜索结果排序是根据相关度分数算法计算得到。可将两者同时使用，平衡召回率和精准度。
-
-```txt
-GET /es/doc/_search
-{
-  "query": {
-    "bool": {
-      "must": [
-        {
-          "match": {
-            "note": "importance people"
-          }
-        },
-        {
-          "match_phrase": {
-            "note": {
-              "query": "importance people",
-              "slop": 50
-            }
-          }
-        }
-      ]
-    }
-  }
-}
-```
-
-**搜索的优化**
-
-match一般来说，比match phrase效率高10倍左右，比proximity search高20倍左右
-
-优化的思路是：尽量减少proximity search搜索的document数量。即先用match来搜索出需要的数据，再用proximity search来提高term距离较近的document的相关度分数，从而影响结果排序，这个过程也叫rescore（重计分）。再rescore的时候，尽量使用分页，毕竟用户通常只会查看搜索数据的前几页。
-
-```txt
-GET /es/doc/_search
-{
-  "query": {
-    "match": {
-      "note": "importance people"
-    }
-  },
-  "rescore": {              //开始重计分
-    "query": {
-      "rescore_query": {    //重新计分查询
-        "match_phrase": {
-            "note": {
-              "query": "importance people",
-              "slop": 50
-            }
-          }
-      }
-    },
-    "window_size": 50       //对match搜索结果的前多少条数据执行rescore操作
-  },
-  "from": 0,
-  "size": 2 
-}
-```
 
 **前缀匹配搜索**
 
@@ -1593,7 +1419,7 @@ GET /es/doc/_search
 
 **搜索推荐**
 
-其原理和match phrase类似，是先使用match匹配term数据，然后在指定的slop移动次数范围内，前缀匹配。max_expansions是用于指定prefix最多匹配多少个term，超过这个数量就不再匹配了。
+其原理和`match phrase`类似，是先使用match匹配term数据，然后在指定的slop移动次数范围内，前缀匹配。
 
 ```txt
 GET /es/doc/_search
@@ -1603,14 +1429,14 @@ GET /es/doc/_search
       "note": {
         "query": "happiest of peo",
         "slop": 3,
-        "max_expansions": 3			//匹配出3个以后就不再进行匹配
+        "max_expansions": 3			//用于指定prefix最多匹配多少个term，超过这个数量就不再匹配了
       }
     }
   }
 }
 ```
 
-这种语法的限制是只有最后一个term会执行前缀搜索，因为效率较低，如果使用一定要使用max_expansions限定
+这种语法与的`match phrase`的区别只有最后一个term是执行前缀搜索的，因为效率较低，如果使用一定要使用max_expansions限定
 
 **ngram分词机制**
 
@@ -2247,6 +2073,38 @@ GET _scripts/test
 
 ```txt
 DELETE _scripts/test
+```
+
+### 排序&分页&指定返回字段&仅获取数量
+
+<span style="color:red">当字段类型为text时，使用字符串类型的字段作为排序依据会有问题【ES对字段数据做分词，建立倒排索引。分词后，先使用哪一个单词做排序是不固定的】，此时需要在此字段上建立keyword类型的子字段，或者建立fielddata。</span>
+
+```txt
+GET /kibana_sample_data_ecommerce/_search
+{
+  // 返回_source元数据的字段，如果_source被禁用则需在建立索引时指定是否store【默认false】,然后使用stored_fields获取
+  "_source": ["customer_id","customer_first_name","customer_full_name"],
+  "sort": [
+    {
+      "total_quantity": {
+        "order": "desc"
+      }
+    }
+  ],
+  "from": 100,
+  "size": 20
+}
+
+GET /es/doc/_count
+{
+  "query": {
+    "match": {
+      "note": {
+        "query": "only"
+      }
+    }
+  }
+}
 ```
 
 ## 八、查询过滤
@@ -3306,7 +3164,94 @@ GET /_analyze
   "text": ["中国人民共和国国歌"]
 }
 ```
+## 十二、ES分布式架构分析
 
+### 分布式机制的透明隐藏特性
+
+​	ElasticSearch本身就是一个分布式系统，就是为了处理海量数据的应用。隐藏了复杂的分布式机制，简化了配置和操作的复杂度。ElasticSearch在现在的互联网环境中，盛行的原因，主要的核心就是分布式的简化。
+
+​	ElasticSearch隐藏的分布式内容：分片机制、集群发现、负载均衡、路由请求、集群扩容、shard重分配等。
+
+### 节点变化时的数据重平衡
+
+​	在节点发生变化时，ES的cluster会自动调整每个节点中的数据，也就是shard的重新分配。这个过程叫做rebalance。rebalance目的是为了提高性能，理论上，当数据量达到一定级别的时候，每个shard分片上的数据量是均等的。那么每个节点管理的shard数量是均等的情况，ES集群才能提供最好的服务性能。
+
+### master节点作用
+
+​	维护集群元数据的节点。如：索引的变更（创建和删除）对应的元数据保存在master节点中。
+
+​	master不是请求的唯一接收节点。只是维护元数据的特殊节点。不会导致单点瓶颈。
+
+​	集群在默认配置中，会自动的选举出master节点。元数据是一个收集管理的过程。不是一个必要的不可替代的数据。master如果宕机，集群会选举出新的master，新的master会在集群的所有节点中重新收集集群元数据并管理。
+
+### 节点平等的分布式架构
+
+- 节点平等
+
+  每个节点都能接收客户端请求。不会造成单点压力。
+
+- 自动请求路由
+
+  节点在接收到客户端请求时，会自动的识别应该由哪个节点处理本次请求，并实现请求的转发。
+
+- 响应收集
+
+  在自动请求路由后，接收客户端请求的节点会自动的收集其他节点的处理结果，并统一响应给客户端。
+
+​	![node-equality](/img/searchengine/node-equality.png)
+
+1）客户端请求ElasticSearch集群，搜索“张三”数据。请求发送到节点4。此操作代表节点的平等性。集群中每个节点的功能都是一致的。
+
+2）节点4将请求路由到节点1上。实现数据的搜索。这是自动请求路径的过程。
+
+3）节点1处理结束后，搜索结果会发送给节点4。这是响应收集的过程。
+
+4）节点4将最终结果响应给客户端，这种操作就屏蔽了集群对客户端的影响。
+
+### 并发冲突
+
+- **使用内置_version**【7.x版本以后废弃】
+
+  全量替换（乐观锁）：ElasticSearch会检查请求中的version和存储中的version是否相等。如果不相等报错，如果相等则修改。
+
+  ```txt
+  PUT /test_index/my_type/1?version=4
+  {
+    "name":"doc_new_01"
+  }
+  ```
+
+- **使用external version**
+
+  ElasticSearch提供了一个特性，可以自定义version实现ES内置的\_version元数据版本管理功能。与元数据\_version的区别是：元数据比对必须完全一致，且external version必须比元数据_version数据大。成功后\_version修改为提供的external version数值。
+
+  ```txt
+  PUT /test_index/my_type/1?version=9&version_type=external
+  {
+    "name":"doc_new_new_01"
+  }
+  ```
+
+- **使用partial update乐观锁**
+
+  在ElasticSearch中，使用partial update更新数据时，内部自动使用乐观锁控制数据的并发安全。如果出现版本不一致的时候，ElasticSearch会提示更新失败。可以通过命令中的参数实现手工管理乐观锁。【retry_on_conflict和version参数不能同时使用】
+
+  ```txt
+  POST /test_index/my_type/1/_update?retry_on_conflict=3  #retry_on_conflict尝试次数
+  {
+    "name":"doc_new_post_01"
+  }
+  ```
+
+- **使用`if_seq_no`和`if_primary_term`替代内置_version**
+
+  ```txt
+  PUT /test_index/my_type/1?if_seq_no=6&if_primary_term=3
+  {
+    "name":"doc_new_01"
+  }
+  ```
+  
 ## 十三、Document写入原理
 
 ​	ElasticSearch为了实现搜索的近实时，结合了内存buffer、OS cache、disk三种存储，尽可能的提升搜索能力。ElasticSearch的底层使用lucene实现。在lucene中一个index是分为若干个segment（分段）的，每个segment都会存放index中的部分数据。在ElasticSearch中，是将一个index先分解成若干shard，在shard中，使用若干segment来存储具体的数据。
@@ -3333,7 +3278,7 @@ GET /_analyze
 
 ### 算法介绍
 
-​	ES中使用的是term frequency / inverse document frequency算法，简称TF/IDF算法。是ElasticSearch相关度评分算法的一部分，也是最重要的部分。
+​	ES中使用了term frequency / inverse document frequency算法，简称TF/IDF算法。是ElasticSearch相关度评分算法的一部分，也是最重要的部分。【ES5.x之后使用的是BM25模型，是对TF/IDF算法的优化】
 
 `TF `：计算搜索条件分词后，各词条在document的field中出现了多少次，出现次数越多，相关度越高。
 
@@ -3341,7 +3286,8 @@ GET /_analyze
 
 `Field-length Norm`：在匹配成功后，计算field字段数据的长度，长度越大，相关度越低。【TF算法的一部分】
 
-ES中底层计算相关度的时候，不是简单的加减乘除，有其特有的算法
+> ES中底层计算相关度的时候，不是简单的加减乘除，有其特有的算法。<span style="color:red">且与文档所存在的shard相关</span>
+>
 
 ```txt
 GET /es/doc/_search
@@ -3355,7 +3301,7 @@ GET /es/doc/_search
 }
 ```
 
-### 相关**度分数计算步骤**
+### 相关度分数计算步骤
 
 **第一步：boolean model**
 
@@ -3370,6 +3316,14 @@ GET /es/doc/_search
 ​	向量空间模型算法。用于计算多个term对一个document的搜索相关度分数。
 
 ​	ElasticSearch会根据一个term对于所有document的相关度分数，来计算得出一个query vector。在根据多个term对于一个document的相关度分数，来计算得出若干document vector。将这些计算结果放入一个向量空间，再通过一些数学算法来计算document vector相对于query vector的相似度，来得到最终相关度分数。
+
+### 多shard环境中相关度分数不准确问题
+
+​	在ElasticSearch的搜索结果中，相关度分数不是一定准确的。相同的数据，使用相同的搜索条件搜索，得到的相关度分数可能有误差。只要数据量达到一定程度，相关度分数误差就会逐渐趋近于0。
+
+![relevance](/img/searchengine/relevance.png)
+
+​	在shard0中，有100个document中包含java词组。在shard1中，有10个document中包含java词组，在执行搜索的时候，ES计算相关度分数时，就会出现计算不准确的问题。因为ES计算相关度分数是在shard本地计算的。根据TF/IDF算法，在shard0中的document相关度分数会低于shard1中的相关度分数。
 
 ### 调节、优化相关对评分的方式
 
@@ -3423,7 +3377,7 @@ GET /es/doc/_search
           "note": "enough"
         }
       },
-      "negative_boost": 0.2
+      "negative_boost": 0.2    //降低negative下的得分
     }
   }
 }
