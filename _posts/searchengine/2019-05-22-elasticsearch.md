@@ -161,6 +161,8 @@ su es
 ./bin/elasticsearch -E cluster.name=my_cluster -E node.name=node_1 -Epath.data=my_cluster_data_1 -E http.port=5200
 ```
 
+配置集群参数`discovery.zen.minimum_master_nodes:【投票通过数一般为 可投票机器数/2 + 1】`避免集群脑裂
+
 ### 安装Kibana
 
 第一步、修改客户端访问控制。修改`config/kibana.yml`
@@ -3256,13 +3258,21 @@ GET /_analyze
 
 ​	ElasticSearch为了实现搜索的近实时，结合了内存buffer、OS cache、disk三种存储，尽可能的提升搜索能力。ElasticSearch的底层使用lucene实现。在lucene中一个index是分为若干个segment（分段）的，每个segment都会存放index中的部分数据。在ElasticSearch中，是将一个index先分解成若干shard，在shard中，使用若干segment来存储具体的数据。
 
-![document-write-process](/img/searchengine/document-write-process.png)
+<img src="/img/searchengine/document-write-process.png" style="zoom:67%;" />
 
-1）客户端发起增删改请求
+### Document写入过程
 
-2）将请求的document写入到buffer。并默认每秒刷新一次buffer
+1）客户端发起增删改请求，请求发送到协调节点（任意节点都能成为协调节点）
 
-3）在将document写入buffer的同时也会将本次操作的具体内容写入到translog中，这个日志文件记录了所有操作过程。其意义在于保证异常宕机尽可能少的丢失数据
+2）通过`hash(routing)%number_of_primary_shards`将请求转发到对应的主分片，主分片也会将请求转发到副本分片上【routing默认为id，也可指定routing】
+
+3）副本分片接收请求到并创建成功之后返回给主分片，主分片再结合自身情况发送创建成功或失败到协调节点，协调节点将结果返回给客户端
+
+### Document写入细节
+
+3）将请求的document写入到buffer【内存缓冲区】。并默认每秒刷新一次buffer
+
+4）在将document写入buffer的同时也会将本次操作的具体内容写入到translog中，这个日志文件记录了所有操作过程。其意义在于保证异常宕机尽可能少的丢失数
 
 4）ElasticSearch每秒中都会刷新buffer，将buffer中的数据保存到index segment中
 
