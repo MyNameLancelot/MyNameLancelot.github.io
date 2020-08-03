@@ -539,9 +539,11 @@ PUT /book_index
 }
 ```
 
-### 字段的index&index_options&store
+### 字段的index&index_options&store&enable
 
-store：是否存储此字段，<span style="color:red">store设置和_source无关</span>
+enable：仅存储不做查询和聚合分析
+
+store：是否存储此字段，默认false，<span style="color:red">store设置和_source无关</span>
 
 index：代表字段是否建立倒排索引
 
@@ -1204,6 +1206,8 @@ GET /_search/scroll
   "scroll": "1m",
   "scroll_id" : "【上次搜索返回的scroll_id】"
 }
+=====================================删除快照======================================
+DELETE /_search/scroll/_all
 ```
 
 ### 搜索策略
@@ -2088,9 +2092,16 @@ GET /kibana_sample_data_ecommerce/_search
   "_source": ["customer_id","customer_first_name","customer_full_name"],
   "sort": [
     {
-      "total_quantity": {
-        "order": "desc"
-      }
+      "total_quantity": "desc"
+    },
+    {
+      "_score":"desc"  // 如果没用有分数排序，ES将不会进行打分操作
+    },
+    {
+      "_doc":"asc"     // 使用lucene索引时的先后顺序，分布式下可能重复
+    },
+    {
+     "_id":"desc"      // 使用id的顺序排序
     }
   ],
   "from": 100,
@@ -2120,20 +2131,20 @@ GET /es/doc/_search
 {
   "query": {
     "bool": {
-     "filter": {		//过滤，在已有的搜索结果中进行过滤。满足条件的返回。
-        "range": {
-          "qt": {
-            "gt": 16
-          }
-        }
-      },
       "must": [
         {
           "match": {
             "name": "test_doc_2"
           }
         }
-      ]
+      ],
+      "filter": {		//过滤，在已有的搜索结果中进行过滤。满足条件的返回。
+        "range": {
+          "qt": {
+            "gt": 16
+          }
+        }
+      }
     }
   }
 }
@@ -2192,7 +2203,7 @@ GET /es/doc/_search
 GET /_search?from=0&size=10               // from从第几条开始查询，size返回的条数
 ```
 
-​	执行搜索时请求发送到协调节点中，协调节点将搜索请求发送给所有的节点，而数据可能分部在多个节点中，所以会造成以下现象：集群有4个节点，每个节点有1个分片（primary shard），发起上述请求时，每个节点会返回150条数据，协调节点一共接收到600条数据，进行排序并取其中第100~150条数据，如果页数过深会造成效率低下问题
+​	执行搜索时请求发送到协调节点中，协调节点将搜索请求发送给所有的节点，而数据可能分部在多个节点中，所以会造成以下现象：集群有4个节点，每个节点有1个分片（primary shard），发起上述请求时，每个节点会返回150条数据，协调节点一共接收到600条数据，进行排序并取其中第100~150条数据，如果页数过深会造成效率低下问题。
 
 ### match底层转换
 
@@ -2314,172 +2325,7 @@ GET /student/java/_search
 }
 ```
 
-*建议，如果不怕麻烦，尽量使用转换后的语法执行搜索，效率更高。*
-
-### 搜索语法分析
-
-​	validate语法可以对搜索语法进行分析。检查是否有错误语法。可以辅助搜索语法分析，排除错误。通常用于复杂搜索，检查语法格式。
-
-```txt
-==================================对所有index进行校验===================================
-GET _validate/query?explain			//_validate==>进行校验   explain==>具有说明性的解释
-{
-  "query": {
-    "match": {
-      "note": "people"
-    }
-  }
-}
-==================================对指定index进行校验===================================
-GET /es/doc/_validate/query?explain
-{
-  "query": {
-    "match": {
-      "note": "people"
-    }
-  }
-}
-```
-
-### Term Vector
-
-term vector是用于获取document中的某个field内的各个term的统计信息。这些统计信息包含下述内容：
-
-- term information: 
-  - term frequency in the field（term在一个field中出现次数）
-  - term positions（term在field中的下标）
-  -  start and end offsets（起始结束下标）
-  - term payloads（term编号，由ES维护）
-
-- term statistics: 【term_statistics=true】
-  -  total term frequency（一个term在所有document中出现的频率）
-  - document frequency（有多少document包含这个term）
-
-- field statistics: 
-  - document count（有多少document包含这个field）
-  - sum of document frequency（一个field中所有term的document frequency之和）
-  -  sum of total term frequency（一个field中的所有term的term frequency in the field之和）
-
-term statistics和field statistics并不精准，不会被考虑有的doc可能被删除的情况，因为不是即时删除document数据，所以在统计上会有误差。
-
-通常来说，term vector很少使用，如果使用都是用于对某些数据进行数据探查。
-
-**term vector数据的出现时机**
-
-- index-time
-
-  在创建index的时候，通过mapping开启term vector统计，在document录入index的过程中就会自动完成统计信息的记录。适合频繁进行term vector数据探查的index使用。
-
-  ```txt
-  PUT /vector
-  {
-    "mappings": {
-      "doc": {
-        "properties": {
-          "text": {
-            "type": "text",
-            "term_vector": "with_positions_offsets_payloads",
-            "store": true,
-            "analyzer": "english"
-          },
-          "fullname": {
-            "type": "text",
-            "analyzer": "english"
-          }
-        }
-      }
-    }
-  }
-  ```
-
-- query-time
-
-  在查询term vector数据的时候，现场进行数据统计并返回结果，这种方式也称为on the fly。适合在很少进行term vector数据探查的index使用。
-
-  ```txt
-  GET /vector/doc/1/_termvectors
-  {
-    "fields" : ["text"],
-    "offsets" : true,
-    "payloads" : true,
-    "positions" : true,
-    "term_statistics" : true,
-    "field_statistics" : true
-  }
-  ```
-
-**multi term vector**
-
-一次性查看若干个document中的term vector
-
-```txt
-GET _mtermvectors
-{
-   "docs": [
-      {
-         "_index": "vector",
-         "_type": "doc",
-         "_id": "2",
-         "term_statistics": true
-      },
-      {
-         "_index": "vector",
-         "_type": "doc",
-         "_id": "1",
-         "fields": ["text"]
-      }
-   ]
-}
-```
-
-**探查指定term的term vector**
-
-构建文档探查指定term的vector信息
-
-```txt
-GET /vector/doc/_termvectors
-{
-  "doc" : {
-    "fullname" : "Leo Li",
-    "text" : "hello test"
-  },
-  "fields" : ["text", "fullname"],
-  "offsets" : true,
-  "payloads" : true,
-  "positions" : true,
-  "term_statistics" : true,
-  "field_statistics" : true,
-  "per_field_analyzer" : {
-    "text": "english"					//指定分词器
-  }
-}
-```
-
-**term vector filter**
-
-```txt
-GET /vector/doc/_termvectors
-{
-  "doc" : {
-    "fullname" : "Leo Li",
-    "text" : "hello testing"
-  },
-  "fields" : ["text", "fullname"],
-  "offsets" : true,
-  "payloads" : true,
-  "positions" : true,
-  "term_statistics" : true,
-  "field_statistics" : true,
-  "per_field_analyzer" : {
-    "text": "english"
-  },
-  "filter" : {
-    "max_num_terms" : 3,				//最多现实多少个term的统计数据
-    "min_term_freq" : 1,				//term在一个field中最少出现次数
-    "min_doc_freq" : 1					//term在一个document中最少出现次数
-  }
-}
-```
+建议，如果不怕麻烦，尽量使用转换后的语法执行搜索，效率更高。
 
 ## 十、聚合搜索
 
@@ -2499,7 +2345,9 @@ PUT /products_index/phone_type/_mapping
 }
 ```
 
-### 词元统计
+### Bucket[分桶类型]
+
+#### terms
 
 在ElasticSearch中默认为分组数据做排序使用的是`_count`[统计个数]执行降序排列。也可以使用`_key`[统计列的内容]元数据
 
@@ -2520,161 +2368,9 @@ GET /cars/sales/_search
 }
 ```
 
-### 计算平均值
+#### range
 
-```txt
-GET /products_index/phone_type/_search
-{
-  "size": 0,              //返回查询命中记录，如果为0则不返回
-  "aggs": {
-    "avg_price": {        //聚合返回结果集的标签名
-      "avg": {            //计算平均值
-        "field": "price"  //计算的字段
-      }
-    }
-  }
-}
-```
-
-### 最大值&最小值&总计
-
-```txt
-GET /cars/sales/_search
-{
-  "size": 0, 
-  "aggs": {
-    "max_price": {
-      "max": {						//最大值
-        "field": "price"
-      }
-    },
-    "min_price": {
-      "min": {						//最小值
-        "field": "price"
-      }
-    },
-    "sum_price": {					//总计
-      "sum": {
-        "field": "price"
-      }
-    }
-  }
-}
-```
-
-### 聚合嵌套【下钻】
-
-聚合是可以嵌套的，内层聚合是依托于外层聚合的结果之上实现聚合计算。
-
-```txt
-=================================父聚合不使用子聚合字段==================================
-GET /products_index/phone_type/_search
-{
-  "query": {
-    "match": {
-      "name": "plus"
-    }
-  },
-  "aggs": {
-    "count_term_tags": {     //聚合进行词元统计
-      "terms": {
-        "field": "tags"
-      },
-      "aggs": {              //在词元统计的结果之下进行求平均值
-        "avg_price": {
-          "avg": {
-            "field": "price"
-          }
-        }
-      }
-    }
-  }
-}
-================================父聚合使用子聚合字段排序=================================
-GET /cars/sales/_search
-{
-  "size": 0, 
-  "aggs": {
-    "group_by_color": {
-      "terms": {
-        "field": "color",
-        "order": {					//只能使用直接子聚合，不能使用孙子代
-          "avg_by_price": "asc"
-        }
-      },
-      "aggs": {
-        "avg_by_price": {
-          "avg": {
-            "field": "price"
-          }
-        }
-      }
-    }
-  }
-}
-```
-
-### 聚合平铺
-
-聚合类嵌套的聚合条件是平级关系
-
-```txt
-GET /cars/sales/_search
-{
-  "size": 0, 
-  "aggs": {
-    "group_by_color": {
-      "terms": {
-        "field": "color"
-      },
-      "aggs": {
-        "avg_by_price_color": {    //和group_by_brand平级
-          "avg": {
-            "field": "price"
-          }
-        },
-        "group_by_brand": {        //和avg_by_price_color平级
-          "terms": {
-            "field": "brand"
-          }
-        }
-      }
-    }
-  }
-}
-```
-
-### 聚合排序
-
-聚合中如果使用order排序的话，要求排序字段必须是一个聚合相关字段【聚合下的子聚合命名】
-
-```txt
-GET /products_index/phone_type/_search
-{
-  "size": 0, 
-  "aggs": {
-    "count_term_tags": {
-      "terms": {
-        "field": "tags",
-        "order": {
-          "avg_price": "asc"  //使用子聚合avg_price排序
-        }
-      },
-      "aggs": {
-        "avg_price": {        //子聚合avg_price
-          "avg": {
-            "field": "price"
-          }
-        }
-      }
-    }
-  }
-}
-```
-
-### 范围区间
-
-指定分组区间，统计区间数据个数
+通过指定数值的范围来设定分桶规则
 
 ```txt
 ======================================range划分=======================================
@@ -2702,20 +2398,69 @@ GET /products_index/phone_type/_search
     }
   }
 }
+```
+
+#### data_range
+
+通过指定日期的范围来设定分桶规则
+
+```txt
+GET /cars/sales/_search
+{
+  "query": {
+    "match_all": {}
+  },
+  "_source": "sold_date",
+  "aggs": {
+    "rang_price": {				
+      "date_range": {
+        "field": "sold_date",
+        "ranges": [
+          {
+            "from": "2015-01-01",
+            "to": "2017-01-01"
+          },
+          {
+            "from": "2017-01-01",
+            "to": "2019-01-01"
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+#### histogram
+
+以固定间隔的策略来分割数据
+
+```txt
 ====================================histogram划分=====================================
 GET /cars/_search
 {
   "size": 0, 
   "aggs": {
     "histogarm_by_price": {
-      "histogram": {				//以10w区间划分
+      "histogram": {			
         "field": "price",
-        "interval": 100000,			//区间间隔
-        "min_doc_count" : 1			//区间最少要满足多少数据才能显示，默认0
+        "interval": 10000,     //以1w区间划分
+        "min_doc_count" : 0,   //区间最小数量，0代表即使此区间无数据也返回
+        "extended_bounds": {   
+          "min": 100000,       //仅min_doc_count为0时有效，为其实统计位置
+          "max": 2000000       //当max指定的值超过实际最大值时有效，否则按照实际最大值统计
+        }
       }
     }
   }
 }
+```
+
+#### data_histogram
+
+针对日期，以固定间隔的策略来分割数据
+
+```txt
 ==================================date_histogram划分==================================
 GET /cars/_search
 {
@@ -2735,6 +2480,13 @@ GET /cars/_search
     }
   }
 }
+```
+
+#### geo_distance
+
+根据距离来分割数据
+
+```txt
 ===================================地理范围聚合划分=====================================
 GET /hotel_app/hotels/_search
 {
@@ -2769,102 +2521,50 @@ GET /hotel_app/hotels/_search
 }
 ```
 
-### top_hits聚合
+### Metric[指标分析类型]
 
-对组内的数据进行排序，并选择其中排名高的数据，那么可以使用top_hits来实现。
+指标分析类型分为单值分析和多值分析两类
 
-- top_hits中的属性size代表取组内多少条数据（默认为10）
+- 单值
+    - min，max，avg，sum
+    - cardinality
+- 多值
+    - stats，extended stats
+    - percentile，percentile rank
+    - top hits
 
-- sort代表组内使用什么字段什么规则排序（默认使用`_doc`的asc规则排序）
-
-- source代表结果中包含document中的那些字段（默认包含全部字段）
-
-```txt
-GET /cars/_search
-{
-  "size": 0,
-  "aggs": {
-    "group_by_brank": {               //先根据brank分组
-      "terms": {
-        "field": "brand"
-      },
-      "aggs": {
-        "price_rank_two": {               //计算各分组类价钱最高的2个
-          "top_hits": {
-            "size": 2,
-            "sort": [{"price": "desc"}],  //排序字段
-            "_source": {                  //返回doc的信息
-              "includes": ["model", "price"]
-            }
-          }
-        }
-      }
-    }
-  }
-}
-```
-
-### Global Bucket
-
-在聚合统计数据的时候，有些时候需要对比部分数据和总体数据。global是用于定义一个全局bucket，这个bucket会忽略query的条件，检索所有document进行对应的聚合统计。
+#### min，max，avg，sum
 
 ```txt
-GET /cars/_search
+GET /cars/sales/_search
 {
   "size": 0, 
-  "query": {
-    "term": {
-      "brand": "大众"
-    }
-  },
   "aggs": {
-    "w_avg_by_price": {
-      "avg": {
+    "max_price": {
+      "max": {						//最大值
         "field": "price"
       }
     },
-    "aggs": {
-      "global": {},         //不使用query搜索条件进行统计
-      "aggs": {
-        "all_avg_by_price": {
-          "avg": {
-            "field": "price"
-          }
-        }
+    "min_price": {
+      "min": {						//最小值
+        "field": "price"
+      }
+    },
+    "sum_price": {			  //总计
+      "sum": {
+        "field": "price"
+      }
+    },
+    "avg_price": {        //聚合返回结果集的标签名
+      "avg": {            //计算平均值
+        "field": "price"  //计算的字段
       }
     }
   }
 }
 ```
 
-### 聚合内filter
-
-这个过滤器只对query搜索得到的结果执行filter过滤。如果filter放在aggs外部，过滤器则会过滤所有的数据。
-
-```txt
-GET /cars/_search
-{
-  "size": 0,
-  "aggs": {
-    "group_by_brand_not_w": {
-      "filter": {       //过滤Query之后的条件
-        "terms": {
-          "brand": ["大众","奥迪"]
-        }
-      },
-      "aggs": {
-        "group_by_brand": {
-          "terms": {
-            "field": "brand"
-          }
-        }
-      }
-    }
-  }
-}
-```
-
-### 去除重复
+#### cardinality
 
 使用`cardinality`语法去除重复数据后，统计数据量。这种语法的计算类似SQL中的distinct count计算。
 
@@ -2927,55 +2627,57 @@ PUT /cars
 
 单个文档节省的时间是非常少的，但是如果聚合一亿数据，每个字段多花费10纳秒的时间，那么在每次查询时都会额外增加1秒，如果我们要在非常大量的数据里面使用 cardinality ，我们可以权衡使用。
 
-### 百分比算法
+#### stats，extended stats
 
-**percentiles**
+`stats`会返回`count`、`min`、`max`、`avg`、`sum`统计信息
 
-将数字字段从小到大排序，取百分比位置数据的值。用于计算百分比数据的。如：PT50、PT90、PT99等
+`extended stats`会返回比`stats`多`sum_of_squares`[平方和]、`variance`[方差]、`std_deviation`[标准差]、`std_deviation_bounds`[标准差的上下值]
 
 ```txt
-GET /percentiles/logs/_search
+GET /cars/sales/_search
 {
+  "size": 0, 
   "aggs": {
-    "r": {
-      "percentiles": {
-        "field": "latency",
-        "percents": [
-          50,					//取50%位置数据值
-          90,					//取90%位置数据值
-          99					//取99%位置数据值
-        ]
+    "price_stats": {
+      "stats": {
+        "field": "price"
+      }
+    },
+    "price_extended_stats": {
+      "extended_stats": {
+        "field": "price"
       }
     }
   }
 }
 ```
 
-**percentile_rank**
+#### percentiles，percentile_rank
 
-可用于统计SLA【提供的服务的标准】如网站访问延迟的SLA是：确保所有的请求的访问延时都在200毫秒以内（大型公司一般都是这种标准）
+percentiles：将数字字段从小到大排序，取百分比位置数据的值。用于计算百分比数据的。如：PT50、PT90、PT99等
 
-如果延时超过1秒，升级到A级故障，代表网站性能有严重问题。
+percentile_rank：给定一个值，查看它的排名
 
 ```txt
-GET /percentiles/logs/_search
+GET /cars/sales/_search
 {
   "aggs": {
-    "group_by_province": {
-      "terms": {
-        "field": "province"
-      },
-      "aggs": {
-        "percentile_ranks_latency": {
-          "percentile_ranks": {
-            "field": "latency",
-            "values": [
-              200,
-              1000
-            ],
-            "keyed" : false
-          }
-        }
+    "price_percentiles": {
+      "percentiles": {
+        "field": "price",
+        "percents": [
+          50,					//取50%位置数据值
+          90,					//取90%位置数据值
+          99					//取99%位置数据值
+        ]
+      }
+    },
+    "price_percentiles_rank": {
+      "percentile_ranks": {
+        "field": "price",
+        "values": [
+          1899000      //查询1899000能站多少名
+        ]
       }
     }
   }
@@ -2989,18 +2691,18 @@ percentiles和percentile_ranks底层采用的都是TDigest算法，是用很多�
 参数compression用于限制节点的最大数目，限制为：20 * compression。这个参数的默认值为100。即默认提供2000个节点。一个节点大约使用 32 字节的内存，所以在最坏的情况下（例如，大量数据有序存入），默认设置会生成一个大小约为 64KB 的 TDigest算法空间。 在实际应用中，数据会更随机，所以 TDigest 使用的内存会更少。
 
 ```txt
-GET /test_percentiles/logs/_search
+GET /cars/sales/_search
 {
   "aggs": {
-    "r": {
+    "price_percentiles": {
       "percentiles": {
-        "field": "latency",
+        "field": "price",
         "percents": [
           50,
           90,
           99
         ],
-        "tdigest": {				//percentile_ranks同理
+        "tdigest": {				
           "compression": 200
         }
       }
@@ -3009,7 +2711,332 @@ GET /test_percentiles/logs/_search
 }
 ```
 
-### 海量bucket优化
+#### top_hits
+
+对组内的数据进行排序，并选择其中排名高的数据，那么可以使用top_hits来实现。
+
+- top_hits中的属性size代表取组内多少条数据（默认为10）
+
+- sort代表组内使用什么字段什么规则排序（默认使用`_doc`的asc规则排序）
+
+- source代表结果中包含document中的那些字段（默认包含全部字段）
+
+```txt
+GET /cars/_search
+{
+  "size": 0,
+  "aggs": {
+    "group_by_brank": {               //先根据brank分组
+      "terms": {
+        "field": "brand"
+      },
+      "aggs": {
+        "price_rank_two": {               //计算各分组类价钱最高的2个
+          "top_hits": {
+            "size": 2,
+            "sort": [{"price": "desc"}],  //排序字段
+            "_source": {                  //返回doc的信息
+              "includes": ["model", "price"]
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### Pipeline[管道分析类型]
+
+管道分析，根据输出位置的不同可以分为
+
+- parent：结果内嵌到现有聚合结果集中
+    - derivative【求导】
+    - moving average【移动平均】
+    - cumulative sum【累计求和】
+
+```txt
+GET /cars/sales/_search
+{
+  "size": 0,
+  "aggs": {
+    "sold_date_agg": {
+      "date_histogram": {
+        "field": "sold_date",
+        "interval": "month",
+        "min_doc_count": 1
+      },
+      "aggs": {
+        "avg_price": {
+          "avg": {
+            "field": "price"
+          }
+        },
+        "derivative_price": {              //按月分割，求每月平均值的导数
+          "derivative": {
+            "buckets_path": "avg_price"
+          }
+        },
+        "moving_average_price": {          //按月分割，求每月移动平均值的导数
+          "moving_avg": {
+            "buckets_path": "avg_price"
+          }
+        },
+        "cumulative_sum_price": {          //按月分割，求每月平均值的累计求和
+          "cumulative_sum": {
+            "buckets_path": "avg_price"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+- sibling：结果与现有聚合分析同级
+    - max_bucket，min_bucket，avg_bucket，sum_bucket
+    - stats_bucket，extended_stats_bucket
+    - percentiles_bucket
+
+```text
+GET /cars/sales/_search
+{
+  "size": 0,
+  "aggs": {
+    "brand_terms": {
+      "terms": {
+        "field": "brand"
+      },
+      "aggs": {
+        "avg_price": {
+          "avg": {
+            "field": "price"
+          }
+        }
+      }
+    },
+    "min_price_car": {            //得到每个品牌价钱平均值的最小值
+      "min_bucket": {
+        "buckets_path": "brand_terms>avg_price"
+      }
+    },
+    "max_price_car": {            //得到每个品牌价钱平均值的最大值
+      "max_bucket": {
+        "buckets_path": "brand_terms>avg_price"
+      }
+    },
+    "sum_price_car": {            //得到每个品牌价钱平均值的总合
+      "sum_bucket": {
+        "buckets_path": "brand_terms>avg_price"
+      }
+    },
+    "avg_price_car": {            //得到每个品牌价钱平均值的总合的平均值
+      "avg_bucket": {
+        "buckets_path": "brand_terms>avg_price"
+      }
+    },
+    "stats_price_car" : {         //得到每个品牌价钱平均值的state信息
+      "stats_bucket": {
+        "buckets_path": "brand_terms>avg_price"
+      }
+    },
+    "extended_stats_price_car" : {//得到每个品牌价钱平均值的extended_stats_bucket信息
+      "extended_stats_bucket": {
+        "buckets_path": "brand_terms>avg_price"
+      }
+    },
+    "percentiles_price_car" : {  //得到每个品牌价钱平均值的percentiles信息
+      "percentiles_bucket": {
+        "buckets_path": "brand_terms>avg_price",
+        "percents": [
+          10,
+          50,
+          90
+        ]
+      }
+    }
+  }
+}
+```
+
+### 聚合嵌套
+
+聚合是可以嵌套的，内层聚合是依托于外层聚合的结果之上实现聚合计算。
+
+```txt
+GET /products_index/phone_type/_search
+{
+  "query": {
+    "match": {
+      "name": "plus"
+    }
+  },
+  "aggs": {
+    "count_term_tags": {     //聚合进行词元统计
+      "terms": {
+        "field": "tags"
+      },
+      "aggs": {              //在词元统计的结果之下进行求平均值
+        "avg_price": {
+          "avg": {
+            "field": "price"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### 聚合平铺
+
+聚合类嵌套的聚合条件是平级关系
+
+```txt
+GET /cars/sales/_search
+{
+  "size": 0, 
+  "aggs": {
+    "group_by_color": {
+      "terms": {
+        "field": "color"
+      },
+      "aggs": {
+        "avg_by_price_color": {    //和group_by_brand平级
+          "avg": {
+            "field": "price"
+          }
+        },
+        "group_by_brand": {        //和avg_by_price_color平级
+          "terms": {
+            "field": "brand"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### 聚合排序
+
+聚合中如果使用order排序的话，要求排序字段必须是一个聚合相关字段，可使用`_count`，`_key`这些元数据进行排序
+
+```txt
+//使用子聚合avg_price排序
+//如果引用子聚合分析的子聚合分析需要使用>连接
+//如果子聚合是用stats等多值指标分析，需用.属性的方式
+GET /products_index/phone_type/_search
+{
+  "size": 0, 
+  "aggs": {
+    "count_term_tags": {
+      "terms": {
+        "field": "tags",
+        "order": {
+          "avg_price": "asc" 
+        }
+      },
+      "aggs": {
+        "avg_price": {        //子聚合avg_price
+          "avg": {
+            "field": "price"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### 改变聚合的作用范围
+
+#### 聚合内过滤
+
+这个过滤器只对query搜索得到的结果执行filter过滤，即聚合的实际数据比查询数据少。
+
+```txt
+GET /cars/_search
+{
+  "size": 0,
+  "aggs": {
+    "group_by_brand_not_w": {
+      "filter": {       //过滤Query之后的条件
+        "terms": {
+          "brand": ["大众","奥迪"]
+        }
+      },
+      "aggs": {
+        "group_by_brand": {
+          "terms": {
+            "field": "brand"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+#### Global Bucket
+
+在聚合统计数据的时候，有些时候需要对比部分数据和总体数据。global是用于定义一个全局bucket，这个bucket会忽略query的条件，检索所有document进行对应的聚合统计。
+
+```txt
+GET /cars/_search
+{
+  "size": 0, 
+  "query": {
+    "term": {
+      "brand": "大众"
+    }
+  },
+  "aggs": {
+    "w_avg_by_price": {
+      "avg": {
+        "field": "price"
+      }
+    },
+    "aggs": {
+      "global": {},         //不会使用query搜索条件进行统计
+      "aggs": {
+        "all_avg_by_price": {
+          "avg": {
+            "field": "price"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+#### post_filter
+
+只过滤搜索结果，而不过滤聚合的过滤器。即聚合结果不会发生变化，而搜索显示的数据会发生变化。
+
+```txt
+// 聚合显示所有品牌，搜索结果只有大众
+GET /cars/sales/_search
+{
+  "post_filter": {
+    "term": {
+      "brand": "大众"
+    }
+  }, 
+  "size": 10,
+  "aggs": {
+    "brand_terms": {
+      "terms": {
+        "field": "brand",
+        "size": 10
+      }
+    }
+  }
+}
+```
+
+### 深度聚合和广度聚合
 
 默认ElasticSearch执行聚合分析时，是按照top_hits深度优先的方式去执行的。会计算出每一项结果。但是遇到计算销量前五的品牌中前十的车型这种问题时，使用深度优先计算不太合适，应该逐层聚合bucket，并过滤后，在当前层的结果基础上再次执行下一层的聚合（广度优先）。
 
@@ -3036,7 +3063,9 @@ GET /cars/_search
 }
 ```
 
-### 聚合算法简介
+### 聚合算法精准度
+
+#### 大数据聚合时精准度概论
 
 - **易并行聚合算法**
 
@@ -3044,19 +3073,44 @@ GET /cars/_search
 
 - **近似聚合算法**
 
-  有些聚合分析算法是很难使用易并行算法解决的，如：count(distinct)。这个时候ES会采取近似聚合的方式来进行计算。近似聚合结果不完全准确，但是效率非常高，一般效率是精准算法的数十倍。
+  有些聚合分析算法是很难使用易并行算法解决的，如：Terms。这个时候ES会采取近似聚合的方式来进行计算。近似聚合结果不完全准确，但是效率非常高，一般效率是精准算法的数十倍。
 
   近似聚合： 延时一般在100毫秒左右，有5%左右的错误率。
 
   精准算法： 延时一般在若干秒到若干小时之间，不会有任何错误。（批处理）
 
-**三角选择原则**
+- **三角选择原则** 
 
-精准度 + 实时性 ：一定是数据量很小的时候，通常都在单机中执行，可以随时调用。
+    精准度 + 实时性 ：一定是数据量很小的时候，通常都在单机中执行，可以随时调用。
 
-精准度 + 大数据 ： 这是非实时的计算，是在大数据存在的情况下，保证数据计算的精准度，一次计算可能需要若干小时才能完成，通常都是批处理程序。如：hadoop
+    精准度 + 大数据 ： 这是非实时的计算，是在大数据存在的情况下，保证数据计算的精准度，一次计算可能需要若干小时才能完成，通常都是批处理程序。如：hadoop
 
-大数据 + 实时性 ： 这是一种不精准的计算，近似估计，一般都会有一定错误率（一般5%以内）。如ES中的近似聚合算法。
+    大数据 + 实时性 ： 这是一种不精准的计算，近似估计，一般都会有一定错误率（一般5%以内）。如ES中的近似聚合算法。
+
+#### ES非精准聚合控制
+
+- 设置`shard`数量为1，消除问题，但此时无法承载大量数据
+- 聚合时合理设置`shard_size`大小，即每次从`shard`上获取额外数据，以提升精准度。默认为`size` * 1.5 + 10
+
+```txt
+GET /cars/sales/_search
+{
+  "size": 0,
+  "aggs": {
+    "brand_terms": {
+      "terms": {
+        "field": "brand",
+        "size": 10,
+        "order": {
+          "_count": "desc"
+        },
+        "shard_size": 50,                   //每个分片返回50个数据
+        "show_term_doc_count_error": true   //显示统计出错的最大值，如果为0则是精确计算 
+      }
+    }
+  }
+}
+```
 
 ## 十一、同义词与分词器
 
@@ -3462,57 +3516,6 @@ GET /fscore/doc/_search
 
 ## 十五、数据建模
 
-### 模拟关系型数据库数据建模
-
-```txt
-PUT /product
-{
-  "mappings": {
-    "doc": {
-      "properties": {
-        "pid": {
-          "type": "integer"
-        },
-        "productName": {
-          "type": "text",
-          "analyzer": "ik_max_word"
-        },
-        "remark": {
-          "type": "text",
-          "analyzer": "ik_max_word"
-        },
-        "price": {
-          "type": "integer"
-        },
-        "cid": {							//和category建立关联关系的字段
-          "type": "integer"
-        }
-      }
-    }
-  }
-}
-
-PUT /category
-{
-  "mappings": {
-    "category": {
-      "properties": {
-        "cid": {
-          "type": "integer"
-        },
-        "categoryName": {
-          "type": "text",
-          "analyzer": "ik_max_word"
-        },
-         "pid": {							//和product建立关联关系的字段
-          "type": "integer"
-        }
-      }
-    }
-  }
-}
-```
-
 ###  一对一数据建模
 
 一般对数据进行组合存储。将某一个数据结构作为一部分（对象类型属性）实现数据的存储。
@@ -3532,7 +3535,7 @@ PUT person_index
         "age": {
           "type": "byte"
         },
-        "identification_id": {
+        "identification_id": {     //身份证信息和个人是一对一关系
           "properties": {
             "id_no": {
               "type": "keyword"
@@ -3586,54 +3589,24 @@ PUT /user
     }
   }
 }
-==================================多个地址对应一个用户==================================
-PUT address
-{
-  "mappings": {
-    "doc" : {
-      "properties": {
-        "province" : {
-          "type" : "keyword"
-        },
-        "city" : {
-          "type" : "keyword"
-        },
-        "street" : {
-          "type" : "keyword"
-        },
-        "user" : {
-          "properties": {
-            "login_name" : {
-              "type" : "keyword"
-            },
-            "nick_name" : {
-              "type" : "keyword"
-            }
-          }
-        }
-      }
-    }
-  }
-}
 ```
 
-优点：思想简单，建模方便
+优点：思想简单，建模方便，查询方便
 
 缺点：数据大量冗余、耦合程度高、不易修改与维护
 
 **nested object**
 
-如果使用`一个用户对应多个地址`的存储方式，查询市和街道同时满足条件会返回大量不是我们想要的数据【返回中包含市匹配而街道不匹配的和街道匹配而市不匹配的】,原因是ElasticSearch对底层对象做了扁平化处理。
+如果使用"一个用户对应多个地址"的存储方式，查询市和街道同时满足条件会返回大量不是我们想要的数据【返回中包含市匹配而街道不匹配的和街道匹配而市不匹配的】,原因是ElasticSearch对底层对象做了扁平化处理。
 
 ```txt
+//查询北京、建材城西路上述数据也会返回但是并不是我们需要的
 {
   "login_name" : "jack",
   "address.province" : [ "北京", "天津" ],
   "address.city" : [ "北京", "天津" ]
   "address.street" : [ "西三旗东路", "古文化街" ]
 }
-
-//查询北京、建材城西路上述数据也会返回但是并不是我们需要的
 ```
 
 建立nested索引使ElasticSearch不进行扁平化处理
@@ -3674,17 +3647,21 @@ ElasticSearch内部存储结构会变为
 
 ```txt
 {
-  "login_name" : "jack"
-}
-{
-  "address.province" : "北京",
-  "address.city" : "北京"，
-  "address.street" : "西三旗东路"
-}
-{
-  "address.province" : "北京",
-  "address.city" : "北京",
-  "address.street" : "西三旗东路",
+  {
+    "login_name" : "jack"
+  },
+  [
+    {
+      "address.province" : "北京",
+      "address.city" : "北京"，
+      "address.street" : "西三旗东路"
+    },
+    {
+      "address.province" : "北京",
+      "address.city" : "北京",
+      "address.street" : "西三旗东路",
+    }
+  ]
 }
 ```
 
@@ -3777,68 +3754,6 @@ GET /user_index/user/_search
 
 虽然语法变的复杂了，但是在数据的读写操作上都不会有错误发生，是推荐的设计方式。
 
-### 文件系统数据建模
-
-用于实现文件目录搜索
-
-```txt
-=======================================创建索引========================================
-PUT /code
-{
-  "settings": {
-    "analysis": {
-      "analyzer": {
-        "path_analyzer": {                //创建路径分析器
-          "tokenizer": "path_hierarchy"
-        }
-      }
-    }
-  },
-  "mappings": {
-    "doc": {
-      "properties": {
-        "path": {
-          "type": "text",
-          "analyzer": "path_analyzer",    //使用路径分析器
-          "fields": {
-            "stand": {
-              "type": "text",
-              "analyzer": "standard"
-            }
-          }
-        },
-         "author": {
-          "type": "text",
-          "analyzer": "standard"
-        },
-        "content": {
-          "type": "text",
-          "analyzer": "standard"
-        }
-      }
-    }
-  }
-}
-=======================================查询数据========================================
-GET /code/doc/_search
-{
-  "query": {
-    "match": {
-      "path": "/com"             //只能搜索出/com/kun路径开始的doc
-    }
-  }
-}
-
-GET /code/doc/_search
-{
-  "query": {
-    "match": {
-      "path.stand": "/com/kun"  //能搜索包含/com/kun的路径
-    }
-  }
-}
-```
-
 ### 父子关系数据建模
 
 父子关系数据建模是模拟关系型数据库的建模方式，用不同的索引保存各自的数据，通过底层提供的父子关系，让ElasticSearch辅助实现类似关系型数据库的多表联合查询。这种建模方式，数据几乎没有冗余，且查询效率高。
@@ -3912,6 +3827,22 @@ GET /ecommerce_products_index/ecommerce/_search
     }
   }
 }
+
+===============================查询满足条件的父类型的子类型===============================
+GET /ecommerce_products_index/ecommerce/_search
+{
+  "query": {
+    "has_parent": {
+      "parent_type": "category",
+      "query": {
+        "match": {
+          "category_name": "电脑"
+        }
+      }
+    }
+  }
+}
+
 ===============================查询满足条件的子类型的父类型===============================
 GET /ecommerce_products_index/ecommerce/_search
 {
@@ -3924,20 +3855,6 @@ GET /ecommerce_products_index/ecommerce/_search
             "gte": 500000,
             "lte": 1000000
           }
-        }
-      }
-    }
-  }
-}
-===============================查询满足条件的父类型的子类型===============================
-GET /ecommerce_products_index/ecommerce/_search
-{
-  "query": {
-    "has_parent": {
-      "parent_type": "category",
-      "query": {
-        "match": {
-          "category_name": "电脑"
         }
       }
     }
@@ -3975,16 +3892,72 @@ GET /ecommerce_products_index/ecommerce/_search
   }
 }
 ```
+### 文件系统数据建模
 
-###  祖孙三代关系数据模型
+用于实现文件目录搜索
 
-原理和父子关系数据模型一致，就是在数据层级关系上更加深入。`type`为`join`用于描述关系的字段mapping继续向下扩展即可。
+```txt
+=======================================创建索引========================================
+PUT /code
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "path_analyzer": {                //创建路径分析器
+          "tokenizer": "path_hierarchy"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "doc": {
+      "properties": {
+        "path": {
+          "type": "text",
+          "analyzer": "path_analyzer",    //使用路径分析器
+          "fields": {
+            "stand": {
+              "type": "text",
+              "analyzer": "standard"
+            }
+          }
+        },
+         "author": {
+          "type": "text",
+          "analyzer": "standard"
+        },
+        "content": {
+          "type": "text",
+          "analyzer": "standard"
+        }
+      }
+    }
+  }
+}
+=======================================查询数据========================================
+GET /code/doc/_search
+{
+  "query": {
+    "match": {
+      "path": "/com"             //只能搜索出/com/kun路径开始的doc
+    }
+  }
+}
 
+GET /code/doc/_search
+{
+  "query": {
+    "match": {
+      "path.stand": "/com/kun"  //能搜索包含/com/kun的路径
+    }
+  }
+}
+```
 ## 十六、重建索引&零停机
 
 ### 重建索引-reindex
 
-​	索引类型一旦建立便不可更改，如果要修改数据类型，只能重建索引：用新的设置创建新的索引并把文档从旧的索引复制到新的索引。
+索引类型一旦建立便不可更改，如果要修改数据类型，只能重建索引：用新的设置创建新的索引并把文档从旧的索引复制到新的索引。
 
 **方法一：用 scroll 从旧的索引检索批量文档 ，然后用 bulk API 把文档推送到新的索引中**
 
@@ -4042,10 +4015,12 @@ POST /_bulk
 
 ```txt
 //默认情况下一次批处理1000条记录，也可支持远程索引重建
-POST _reindex
+//wait_for_completion=false 后台执行执行，返回任务id，通过id查看进度  GET _tasks/[taskId]
+POST _reindex?wait_for_completion=false
 {
+	"conflicts": "proceed",  //冲突时覆盖并继续
   "source": {
-    "index": "old_index"
+    "index": "old_index"   //还可以添加query条件
   }, 
   "dest": {
     "index": "new_index"
@@ -4250,797 +4225,3 @@ PUT /fieddata_filter
   }
 }
 ```
-
-## 十八、JAVA API
-
-### 创建连接客户端
-
-```java
- @Test
-public void testCreateClient() {
-    //设置Cluster名称
-    Settings settings =Settings.builder()
-        .put("cluster.name","elasticsearch")
-        .build();
-
-    //获取transportClient用于操作文档
-    TransportClient transportClient = new PreBuiltTransportClient(settings);
-
-    //设置链接主机的ip和端口
-    transportClient.addTransportAddress(
-        new TransportAddress(new InetSocketAddress("192.168.1.155", 9300)));
-
-    //获取AdminClient用于操作Cluster和indices
-    AdminClient adminClient = transportClient.admin();
-
-    //获取indicesClient用于操作索引
-    IndicesAdminClient indicesClient = adminClient.indices();
-
-    //获取ClusterClient用于操作集群
-    ClusterAdminClient clusterClient = adminClient.cluster();
-}
-```
-
-### 索引操作
-
-- **创建索引**
-
-```java
- @Test
-public void testCreateIndex() throws IOException {
-    //==============================创建indicesClient开始==============================
-    Settings settings =Settings.builder()
-        .put("cluster.name","elasticsearch")
-        .build();
-    /*
-	 * 执行创建索引逻辑，创建创建索引的预编译请求构建器
-	 * ES的操作命令是文本，是计算机硬件不可识别的
-	 * ES接收到文本命令后，必须先编译成机器码，再执行命令
-	 * ES客户端提供了预编译能力。客户端发送命令的时候，就是可运行的机器码
-	 */
-    TransportClient transportClient = new PreBuiltTransportClient(settings);
-    transportClient.addTransportAddress(
-        new TransportAddress(new InetSocketAddress("192.168.1.155", 9300)));
-    IndicesAdminClient indicesClient = transportClient.admin().indices();
-    //==============================创建indicesClient结束==============================
-
-    CreateIndexRequestBuilder createIndexBuilder = indicesClient.prepareCreate("student");
-    /*
-     * 通过构建器增加settings设置。
-     * PUT /student
-     * {
-     *  "settings" : {
-     *  	"number_of_shards" : 2,
-     *  	"number_of_replicas" : 1
-     *  }
-     * }
-     */
-    createIndexBuilder.setSettings(
-        Settings.builder()
-        .put("number_of_shards", 2)
-        .put("number_of_replicas", 1)
-    );
-    /*
-     *  通过构建器增加mapping设置
-     *  PUT /student
-     *  {
-     *   "mappings" : {
-     *       "java" : {
-     *           "properties" : {
-     *                "fieldName" : {
-     *                     "type" : "text", 
-     *                     "analyzer" : "english", 
-     *                     “fielddata”: true
-     *                }
-     *           }
-     *       }
-     *   }
-     *  }
-     */
-    XContentBuilder mapping = XContentFactory.jsonBuilder()
-        .startObject()
-            .startObject("properties")
-                .startObject("fieldName")
-                    .field("type","text")
-                    .field("analyzer","english")
-                    .field("fielddata", true)
-                .endObject()
-            .endObject()
-        .endObject();
-
-    createIndexBuilder.addMapping("java", mapping);
-
-    //返回信息
-    CreateIndexResponse response = createIndexBuilder.get();
-    System.out.println("index name : " + response.index());
-    System.out.println("acknowledged : " + response.isAcknowledged());
-    System.out.println("shards acknowledged : " + response.isShardsAcknowledged());
-}
-```
-
-- **修改索引Settings**
-
-```java
-/**
- * 更新索引settings配置
- * 在ES中，索引创建后，不能修改primary shard数量，但是可以修改replica shard 数量。
- */
-@Test
-public void testUpdateIndexSettings() {
-    //==============================创建indicesClient开始==============================
-    Settings settings =Settings.builder()
-        .put("cluster.name","elasticsearch")
-        .build();
-    TransportClient transportClient = new PreBuiltTransportClient(settings);
-    transportClient.addTransportAddress(
-        new TransportAddress(new InetSocketAddress("192.168.1.155", 9300)));
-    IndicesAdminClient indicesClient = transportClient.admin().indices();
-    //==============================创建indicesClient结束==============================
-
-    UpdateSettingsRequestBuilder updateSettingsBuilder = indicesClient.prepareUpdateSettings("student");
-
-    //设置新的Settings
-    updateSettingsBuilder.setSettings(
-        Settings.builder()
-        .put("number_of_replicas" , 0)
-    );
-    //发送请求
-    AcknowledgedResponse response = updateSettingsBuilder.get();
-    //返回信息
-    System.out.println("acknowledged : " + response.isAcknowledged());
-}
-```
-
-- **修改索引Mapping**
-
-```java
-/**
- * 更新索引mapping配置。
- * 此操作就是为已有的index增加新的mapping配置。并不是真正的修改。index mapping创建后，不可变。
- */
-@Test
-public void testUpdateIndexMappings() throws IOException {
-    //==============================创建indicesClient开始==============================
-    Settings settings =Settings.builder()
-        .put("cluster.name","elasticsearch")
-        .build();
-    TransportClient transportClient = new PreBuiltTransportClient(settings);
-    transportClient.addTransportAddress(
-        new TransportAddress(new InetSocketAddress("192.168.1.155", 9300)));
-    IndicesAdminClient indicesClient = transportClient.admin().indices();
-    //==============================创建indicesClient结束==============================
-
-    PutMappingRequestBuilder putMappingBuilder = indicesClient.preparePutMapping("student");
-    putMappingBuilder.setType("java");
-    /*
-	 * PUT /student/_mapping/java
-	 * {
-	 *  "propeties" : {
-	 *      "remark" : {
-	 *          "type" : "text" , "analyzer" : "standard"
-	 *      }
-	 *  }
-	 * }
-     */
-    XContentBuilder mapping = XContentFactory.jsonBuilder()
-        .startObject()
-            .startObject("properties")
-                .startObject("remark")
-                    .field("type", "text")
-                    .field("analyzer", "standard")
-                .endObject()
-            .endObject()
-        .endObject();
-    putMappingBuilder.setSource(mapping);
-
-    //发送请求
-    AcknowledgedResponse response = putMappingBuilder.get();
-    //返回信息
-    System.out.println("acknowledged : " + response.isAcknowledged());
-}
-```
-
-- **删除索引**
-
-```java
-@Test
-public void testDeleteIndex() {
-    //==============================创建indicesClient开始==============================
-    Settings settings =Settings.builder()
-        .put("cluster.name","elasticsearch")
-        .build();
-    TransportClient transportClient = new PreBuiltTransportClient(settings);
-    transportClient.addTransportAddress(
-        new TransportAddress(new InetSocketAddress("192.168.1.155", 9300)));
-    IndicesAdminClient indicesClient = transportClient.admin().indices();
-    //==============================创建indicesClient结束==============================
-    DeleteIndexRequestBuilder deleteIndexBuilder = indicesClient.prepareDelete("student");
-    //发送请求
-    AcknowledgedResponse response = deleteIndexBuilder.get();
-    //返回信息
-    System.out.println("acknowledged : " + response.isAcknowledged());
-}
-```
-
-### 文档操作
-
-- **创建文档**
-
-```java
-/**
- * 新增/覆盖document数据。
- */
-@Test
-public void testCreateDocument() throws IOException {
-    //=============================创建TransportClient开始=============================
-    Settings settings = Settings.builder()
-        .put("cluster.name", "elasticsearch")
-        .build();
-    TransportClient transportClient = new PreBuiltTransportClient(settings);
-    transportClient.addTransportAddress(
-        new TransportAddress(new InetSocketAddress("192.168.1.155", 9300)));
-    //=============================创建TransportClient结束=============================
-
-    IndexRequestBuilder indexBuilder = transportClient.prepareIndex("student", "java", "1");
-
-    /*
-     * 当作为全量替换使用时，可以使用外部版本实现乐观锁控制。
-     * VersionType.INTERNAL - 使用内部版本号进行控制。、
-     * VersionType.EXTERNAL - 使用外部版本号控制。
-     */
-    indexBuilder.setVersionType(VersionType.EXTERNAL);
-    indexBuilder.setVersion(5);
-
-    //如果设置create为true则必须为创建操作，文档存在则报错
-    //indexBuilder.setCreate(true);
-    
-    /**
-      * PUT /student/java/1?version_type=external&version=5
-      * {
-      *   "fieldName":"10001",
-      *   "remark" : "number one"
-      * }
-      */
-    XContentBuilder document = XContentFactory.jsonBuilder()
-        .startObject()
-        .field("fieldName","10001")
-        .field("remark", "number one")
-        .endObject();
-
-    //发送请求并得到返回数据
-    IndexResponse response = indexBuilder.setSource(document).get();
-    System.out.println("_index : " + response.getIndex());
-    System.out.println("_type : " + response.getType());
-    System.out.println("_id : " + response.getId());
-    System.out.println("_version : " + response.getVersion());
-    System.out.println("status : " + response.status());
-
-    //关闭客户端
-    transportClient.close();
-}
-```
-
-- **更新文档**
-
-```java
- /**
-   * 修改Document partial update
-  */
-@Test
-public void testPartialUpdateDocument() throws IOException {
-    //=============================创建TransportClient开始=============================
-    Settings settings = Settings.builder()
-        .put("cluster.name", "elasticsearch")
-        .build();
-    TransportClient transportClient = new PreBuiltTransportClient(settings);
-    transportClient.addTransportAddress(
-        new TransportAddress(new InetSocketAddress("192.168.1.155", 9300)));
-    //=============================创建TransportClient结束=============================
-
-    UpdateRequestBuilder updateBuilder = transportClient.prepareUpdate("student", "java", "1");
-
-    
-    /**
-      * POST /student/java/1/_update?retry_on_conflict=3
-      * {
-      *   "doc":{
-      *      "remark" : "number two"
-      *   }
-      * }
-      */
-    XContentBuilder document = XContentFactory.jsonBuilder()
-        .startObject()
-        .field("remark", "number two")
-        .endObject();
-    updateBuilder.setDoc(document);
-
-    updateBuilder.setRetryOnConflict(3);    //设置retry次数
-    //发送请求
-    UpdateResponse response = updateBuilder.get();
-    //返回数据
-    System.out.println("_index : " + response.getIndex());
-    System.out.println("_type : " + response.getType());
-    System.out.println("_id : " + response.getId());
-    System.out.println("_version : " + response.getVersion());
-    System.out.println("status : " + response.status());
-    transportClient.close();
-}
-```
-
-- **使用脚本实现partial update**
-
-```java
-@Test
-public void testUpdateWithScript(){
-    //=============================创建TransportClient开始=============================
-    Settings settings = Settings.builder()
-        .put("cluster.name", "elasticsearch")
-        .build();
-    TransportClient transportClient = new PreBuiltTransportClient(settings);
-    transportClient.addTransportAddress(
-        new TransportAddress(new InetSocketAddress("192.168.1.155", 9300)));
-    //=============================创建TransportClient结束=============================
-
-    UpdateRequestBuilder UpdateBuilder = transportClient.prepareUpdate("student", "java", "1");
-    //设置脚本
-    UpdateRequestBuilder updateRequest = UpdateBuilder.setScript(new Script("ctx._source.age=\"45\""));
-
-    //发送执行脚本请求
-    UpdateResponse response = updateRequest.get();
-
-    //返回数据
-    System.out.println("_index : " + response.getIndex());
-    System.out.println("_type : " + response.getType());
-    System.out.println("_id : " + response.getId());
-    System.out.println("_version : " + response.getVersion());
-    System.out.println("status : " + response.status());
-
-    transportClient.close();
-}
-```
-
-- **插入或更新**
-
-```java
- /*
-  * upsert:如果对应id的document存在，则实现更新操作。如果对应的document不存在，则创建document。
-  * 如果本次的upsert操作是新增，则忽略update操作。
-  * 如果本次的upsert操作是更新，则忽略insert操作。
-  */
-@Test
-public void testUpsertDocument() throws IOException {
-    //=============================创建TransportClient开始=============================
-    Settings settings = Settings.builder()
-        .put("cluster.name", "elasticsearch")
-        .build();
-    TransportClient transportClient = new PreBuiltTransportClient(settings);
-    transportClient.addTransportAddress(
-        new TransportAddress(new InetSocketAddress("192.168.1.155", 9300)));
-    //=============================创建TransportClient结束=============================
-
-    UpdateRequestBuilder updateBuilder = transportClient.prepareUpdate("student", "java", "5");
-
-    //新增文档
-    XContentBuilder insertDoc = XContentFactory.jsonBuilder()
-        .startObject()
-        .field("name", "james gosling")
-        .field("age", 45)
-        .field("join_date", "2017-01-01")
-        .field("remark", "java architect")
-        .endObject();
-
-    //更新文档
-    XContentBuilder updateDoc = XContentFactory.jsonBuilder()
-        .startObject()
-        .field("name", "james gosling")
-        .field("age", 45)
-        .field("join_date", "2017-01-01")
-        .field("remark", "java architect")
-        .endObject();
-
-    //设置upsert
-    updateBuilder.setDoc(updateDoc).setUpsert(insertDoc);
-
-    //发送请求
-    UpdateResponse response = updateBuilder.get();
-
-    //返回数据
-    System.out.println("_index : " + response.getIndex());
-    System.out.println("_type : " + response.getType());
-    System.out.println("_id : " + response.getId());
-    System.out.println("_version : " + response.getVersion());
-    System.out.println("status : " + response.status());
-
-    transportClient.close();
-}
-```
-
-- **查询文档**
-
-  - 查询单个文档
-
-  ```java
-  @Test
-  public void testGetDocument(){
-      //===========================创建TransportClient开始===========================
-      Settings settings = Settings.builder()
-          .put("cluster.name", "elasticsearch")
-          .build();
-      TransportClient transportClient = new PreBuiltTransportClient(settings);
-      transportClient.addTransportAddress(
-          new TransportAddress(new InetSocketAddress("192.168.1.155", 9300)));
-      //===========================创建TransportClient结束===========================
-  
-      //GET /student/java/5
-      GetRequestBuilder getBuilder = transportClient.prepareGet("student", "java", "5");
-  
-      //发送请求
-      GetResponse response = getBuilder.get();
-  
-      //得到返回_source
-      Map<String, Object> sourceAsMap = response.getSourceAsMap();
-  
-      //遍历_source
-      for (Map.Entry<String, Object> entry : sourceAsMap.entrySet()) {
-          System.out.println(entry.getKey()+" - "+entry.getValue());
-      }
-  }
-  ```
-
-  - 查询多个文档
-
-  ```java
-  @Test
-  public void testMGetDocument(){
-      //===========================创建TransportClient开始===========================
-      Settings settings = Settings.builder()
-          .put("cluster.name", "elasticsearch")
-          .build();
-      TransportClient transportClient = new PreBuiltTransportClient(settings);
-      transportClient.addTransportAddress(
-          new TransportAddress(new InetSocketAddress("192.168.1.155", 9300)));
-      //===========================创建TransportClient结束===========================
-  
-      /**
-        * GET /student/java/_mget
-        * {
-        *   "ids":["1","5"]
-        * }
-        */
-      MultiGetRequestBuilder multiGetBuilder = transportClient.prepareMultiGet();
-      multiGetBuilder.add("student", "java", "1", "5");
-  
-      //发送请求
-      MultiGetResponse response = multiGetBuilder.get();
-  
-      //得到响应数组数据
-      MultiGetItemResponse[] multiGetItemResponses = response.getResponses();
-      //遍历响应数组
-      for (MultiGetItemResponse itemRespons : multiGetItemResponses) {
-          //拿到id
-          System.out.println("id:" + itemRespons.getId());
-          //遍历_source
-          Map<String, Object> sourceAsMap = itemRespons.getResponse().getSourceAsMap();
-          for (Map.Entry<String, Object> entry : sourceAsMap.entrySet()) {
-              System.out.println(entry.getKey()+" - "+entry.getValue());
-          }
-      }
-      transportClient.close();
-  }
-  ```
-
-- **删除文档**
-
-```java
-@Test
-public void testDeleteDocument(){
-    //=============================创建TransportClient开始=============================
-    Settings settings = Settings.builder()
-        .put("cluster.name", "elasticsearch")
-        .build();
-    TransportClient transportClient = new PreBuiltTransportClient(settings);
-    transportClient.addTransportAddress(
-        new TransportAddress(new InetSocketAddress("192.168.1.155", 9300)));
-    //=============================创建TransportClient结束=============================
-
-    /**
-     * DELETE /student/java/1
-     */
-    DeleteRequestBuilder deleteBuilder = transportClient.prepareDelete("student", "java", "1");
-
-    //发送请求
-    DeleteResponse response = deleteBuilder.get();
-
-    //返回信息
-    System.out.println("_index : " + response.getIndex());
-    System.out.println("_type : " + response.getType());
-    System.out.println("_id : " + response.getId());
-    System.out.println("_version : " + response.getVersion());
-    System.out.println("status : " + response.status());
-}
-```
-
-- **bulk 批处理**
-
-```java
-/**
-  * bulk api 批量操作
-  * bulk api大多数情况都是循环加入具体的操作规则。
-  * 通常一个bulk请求中只有一类批量处理。
-  */
-@Test
-public void testBulk() throws IOException {
-    //=============================创建TransportClient开始=============================
-    Settings settings = Settings.builder()
-        .put("cluster.name", "elasticsearch")
-        .build();
-    TransportClient transportClient = new PreBuiltTransportClient(settings);
-    transportClient.addTransportAddress(
-        new TransportAddress(new InetSocketAddress("192.168.1.155", 9300)));
-    //=============================创建TransportClient结束=============================
-
-   /**
-     * PUT /_bulk
-     * {
-     *   { "create" : { "_index" : "student" , "_type" : "java", "_id" : "2" } }
-     *   { "fieldName":"10002", "remark" : "number two"}
-     *   { "delete" : { "_index" : "test_index", "_type" : "my_type", "_id" : "1" } }
-     * }
-     */
-    //创建预编译bulk
-    BulkRequestBuilder bulkBuilder = transportClient.prepareBulk();
-
-    //创建bulk中的新增文档请求
-    IndexRequestBuilder indexBuilder = transportClient.prepareIndex("student", "java","2");
-    XContentBuilder inserDoc = XContentFactory.jsonBuilder()
-        .startObject()
-            .field("fieldName","10002")
-            .field("remark", "number two")
-        .endObject();
-    indexBuilder.setSource(inserDoc);
-
-    //创建bulk中的删除文档请求
-    DeleteRequestBuilder deleteBuilder = transportClient.prepareDelete("student", "java", "1");
-
-    //将请求加入bulk
-    bulkBuilder.add(indexBuilder);
-    bulkBuilder.add(deleteBuilder);
-
-    BulkResponse bulkResponse = bulkBuilder.get();
-
-    //hasFailures获取本次bulk请求的响应中，是否有错误
-    if(bulkResponse.hasFailures()) {
-        System.out.println("本次操作有错误情况！！！");
-    }
-
-    //遍历bulk的每项返回信息
-    for (BulkItemResponse itemResponse : bulkResponse) {
-        System.out.println("_index : " + itemResponse.getIndex());
-        System.out.println("_type : " + itemResponse.getType());
-        System.out.println("_id : " + itemResponse.getId());
-        System.out.println("_version : " + itemResponse.getVersion());
-        System.out.println("is failed : " + itemResponse.isFailed());
-        System.out.println("failure message : " + itemResponse.getFailureMessage());
-    }
-}
-```
-
-### 搜索操作
-
-```java
-/**
-     * GET /student/java/_search
-     * {
-     *   "query": {
-     *     "bool": {
-     *       "must": [
-     *         {
-     *           "match": {
-     *           "remark": "java"
-     *           }
-     *         }
-     *       ],
-     *       "filter": {
-     *         "range": {
-     *           "age": {
-     *             "gt": 20,
-     *             "lt": 48
-     *           }
-     *         }
-     *       }
-     *     }
-     *   },
-     *   "from": 0,
-     *   "size": 20
-     * }
-     */
-@Test
-public void testSearch() {
-    //=============================创建TransportClient开始=============================
-    Settings settings = Settings.builder()
-        .put("cluster.name", "elasticsearch")
-        .build();
-    TransportClient transportClient = new PreBuiltTransportClient(settings);
-    transportClient.addTransportAddress(
-        new TransportAddress(new InetSocketAddress("192.168.1.155", 9300)));
-    //=============================创建TransportClient结束=============================
-    SearchRequestBuilder searchBuilder = transportClient.prepareSearch("student");
-    searchBuilder.setTypes("java");
-
-    //设置查询
-    searchBuilder.setQuery(QueryBuilders.matchQuery("remark", "java"));
-
-    //设置过滤
-    searchBuilder.setPostFilter(QueryBuilders.rangeQuery("age").gt(20).lt(48));
-
-    //设置分页
-    searchBuilder.setFrom(0);
-    searchBuilder.setSize(20);
-
-    // 返回SearchResponse对象。内部的数据结构和rest api访问的结果一致。
-    SearchResponse response = searchBuilder.get();
-
-    System.out.println("took : " + response.getTook());
-    System.out.println("time_out : " + response.isTimedOut());
-    System.out.println("total shards : " + response.getTotalShards());
-
-    System.out.println("hits.total : " + response.getHits().getTotalHits());
-    System.out.println("hits.max_score : " + response.getHits().getMaxScore());
-
-    SearchHit[] hits = response.getHits().getHits();
-
-    for(int i = 0; i < hits.length; i++){
-        System.out.println(hits[i].getSourceAsString());
-    }
-}
-```
-
-### 聚合操作
-
-```java
-/**
-  * GET /student/java/_search
-  * {
-  *   "aggs": {
-  *     "group_by_date": {
-  *       "date_histogram": {
-  *         "field": "join_date",
-  *         "interval": "year"
-  *       },
-  *       "aggs": {
-  *         "avg_by_age": {
-  *           "avg": {
-  *             "field": "age"
-  *           }
-  *         }
-  *       }
-  *     }
-  *   }
-  * }
-  */
-@Test
-public void testAggregationSearch(){
-    //=============================创建TransportClient开始=============================
-    Settings settings = Settings.builder()
-        .put("cluster.name", "elasticsearch")
-        .build();
-    TransportClient transportClient = new PreBuiltTransportClient(settings);
-    transportClient.addTransportAddress(
-        new TransportAddress(new InetSocketAddress("192.168.1.155", 9300)));
-    //=============================创建TransportClient结束=============================
-
-    SearchRequestBuilder searchBuilder = transportClient.prepareSearch("student");
-    searchBuilder.setTypes("java");
-
-    //创建子聚合操作
-    AvgAggregationBuilder subAggregationBuilder = AggregationBuilders.avg("avg_by_age").field("age");
-
-    // 增加聚合， ES的聚合可以无限嵌套，建议不超过5层。 嵌套方式为 subAggregation
-    DateHistogramAggregationBuilder aggregationBuilder = AggregationBuilders.dateHistogram("group_by_date")
-        .field("join_date")
-        .dateHistogramInterval(DateHistogramInterval.YEAR)
-        .subAggregation(subAggregationBuilder);
-
-    searchBuilder.addAggregation(aggregationBuilder);
-
-    //如果search请求中增加了aggregation聚合分析的话，可以使用execute方法来发起请求。 相当于是get()方法
-    SearchResponse response = searchBuilder.execute().actionGet();
-
-    Histogram groupByDateAggr = (Histogram)response.getAggregations().get("group_by_date");
-
-    for (Histogram.Bucket bucket : groupByDateAggr.getBuckets()) {
-        // 输出聚合数据的内容， 数据内容包括key, key_as_string, doc_count
-        System.out.println(bucket.getKeyAsString() + " - " + bucket.getDocCount());
-        // 获取子聚合项，如果聚合内容是计算结果，而不是统计值，则直接获取计算结果 - value。 如果是统计值，获取统计信息docCount
-        Avg avgByAge = (Avg) bucket.getAggregations().asMap().get("avg_by_age");
-        System.out.println(avgByAge.getName() + " - " + avgByAge.getValueAsString());
-    }
-}
-```
-
-## 十九、Logstash
-
-### 从数据库MySQL中增量导入数据到ES
-
-**第一步：环境准备**
-
-- 数据库如果做增量数据导入，必须提高一个可控边界。可控边界一般使用自增主键或者时间戳
-
-- logstash不能创建ElasticSearch中的索引，所以需要手工创建索引
-
-- 导入mysql驱动jar包。最佳保存在$logstash_home/config目录中
-
-**第二步：定义logstash-mysql增量导入配置文件**
-
-$logstash_home/config创建文件logstash-mysql-es.conf
-
-```conf
-input {
-  jdbc {
-    # mysql相关jdbc配置
-    jdbc_connection_string => "jdbc:mysql://192.168.1.117:3306/logstash?useUnicode=true&characterEncoding=utf-8&useSSL=false"
-    jdbc_user => "root"
-    jdbc_password => "123456"
-
-    # jdbc连接mysql驱动的文件目录
-    jdbc_driver_library => "./config/mysql-connector-java-5.1.5.jar"
-    jdbc_driver_class => "com.mysql.jdbc.Driver"
-    jdbc_paging_enabled => true
-    jdbc_page_size => "50000"
-
-    jdbc_default_timezone =>"Asia/Shanghai"
-
-    # 可以直接写SQL语句在此处，使用大于等于避免丢失数据。如下：
-    statement => "select * from test_logstash where update_time >= :sql_last_value"
-    
-    # 也可以将SQL定义在文件中，如下：
-    #statement_filepath => "./config/jdbc.sql"
-
-    # 这里类似crontab,可以定制定时操作，比如每分钟执行一次同步(分 时 天 月 年)
-    schedule => "* * * * *"
-    
-    # 在ES6.x版本中，不需要定义type。即使定义，logstash也是自动创建索引type为doc，将此处定义的type作为document的一部分保存
-    #type => "test"
-
-    # 是否记录上次执行结果, 如果为真，将会把上次执行到的tracking_column字段的值记录下来，保存到last_run_metadata_path指定的文件中，对磁盘的存储压力太大
-    #record_last_run => true
-
-    # 是否需要记录某个column的值，如果record_last_run为真，可以自定义我们需要track的column名称，此时该参数就要为true。否则默认track的是timestamp的值
-    use_column_value => true
-
-    # 如果use_column_value为真,需配置此参数.track的数据库column名,该column必须是递增的. 一般是mysql主键
-    tracking_column => "update_time"
-    
-    tracking_column_type => "timestamp"
-
-    last_run_metadata_path => "./logstash_capital_bill_last_id"
-
-    # 是否清除last_run_metadata_path的记录,如果为真那么每次都相当于从头开始查询所有的数据库记录
-    clean_run => false
-
-    #是否将字段(column)名称转小写
-    lowercase_column_names => false
-  }
-}
-
-output {
-  elasticsearch {
-    hosts => "localhost:9200"       #如果是多个ES,使用逗号分隔多个ip和端口
-    index => "mysql_datas"          #索引名称 
-    document_id => "%{id}"          #数据库中数据与ES中document数据关联的字段，此处代表数据库中的id字段和ES中的document的id关联
-    template_overwrite => true      #是否使用模板，开启效率更高
-  }
-
-  # 这里输出调试，正式运行时可以注释掉
-  stdout {
-      codec => json_lines
-  } 
-}
-```
-
-**第三步：启动**
-
-```shell
-bin/logstash -f config/logstash-mysql-es.conf
-```
-
