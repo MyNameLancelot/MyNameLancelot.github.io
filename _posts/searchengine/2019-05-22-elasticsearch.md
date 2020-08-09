@@ -180,6 +180,8 @@ su es
 ./bin/kibana
 ```
 
+> 查看集群状态可安装cerebro软件
+
 ## 三、Kibana简单命令
 
 ### 查看健康状态
