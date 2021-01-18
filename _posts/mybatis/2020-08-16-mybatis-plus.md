@@ -570,6 +570,47 @@ public void testDynamicTableName() {
 }
 ```
 
-## 六、Demo工程
+### 多数据源
 
-[demo工程地址]()
+**第一步：YAML配置**
+
+```yaml
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/*.xml
+spring:
+  datasource:
+    dynamic:
+      druid:
+        initial-size: 1
+        max-active: 20
+        min-idle: 3
+        max-wait: 60000
+        time-between-eviction-runs-millis: 60000
+      strict: true
+      primary: source201
+      datasource:
+        # 名称可以随意
+        source1:
+          username: username
+          password: password
+          driver-class-name: com.mysql.jdbc.Driver
+          url: url
+        source2:
+          username: username
+          password: password
+          driver-class-name: com.mysql.jdbc.Driver
+          url: url
+```
+
+**第二步：Service的实现类加入注解`@DS`**
+
+```java
+public interface xxxService extends IService<CategoryMap> {
+}
+
+@Service
+@DS("source1")
+public class xxxServiceImpl extends ServiceImpl<xxxMapper, xxx> implements xxxService {
+}
+```
+
