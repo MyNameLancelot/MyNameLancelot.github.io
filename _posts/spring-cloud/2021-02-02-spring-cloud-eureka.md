@@ -2,7 +2,7 @@
 layout: post
 title: "spring cloud eureka使用详解"
 date: 2021-02-02 16:42:30
-categories: Spring Cloud
+categories: Spring-Cloud
 keywords: "eureka"
 description: "eureka使用详解"
 ---
