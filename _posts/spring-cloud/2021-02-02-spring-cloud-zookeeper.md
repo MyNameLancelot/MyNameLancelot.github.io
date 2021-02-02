@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "spring cloud zoozkeeper使用详解"
+title: "spring cloud zookeeper使用详解"
 date: 2021-02-02 16:42:30
 categories: Spring-Cloud
-keywords: "spring cloud zoozkeeper"
-description: "spring-cloud-zoozkeeper使用详解"
+keywords: "spring cloud zookeeper"
+description: "spring-cloud-zookeeper使用详解"
 ---
 
 ## 一、简介
