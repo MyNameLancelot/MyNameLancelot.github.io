@@ -65,11 +65,11 @@ feign:
       enabled: true
       # 可使用Gzip解压缩
       useGzipDecoder: true
-	client:
+  client:
     config:
-    	# 全局设置
+      # 全局设置
       default:
-      	# 发生请求读取结果的超时时间
+        # 发生请求读取结果的超时时间
         read-timeout: 10000
         # 连接超时时间
         connection-timeout: 2000
@@ -89,10 +89,10 @@ feign:
   client:
     config:
       default:
-      	# NONE: 不开启日志(默认)
-      	# BASIC:记录请求方法、URL、响应状态、执行时间
-      	# HEADERS: 在BASIC基础上 加载请求/响应头
-      	# FULL: 在HEADERS基础上 增加body和请求元数据
+        # NONE: 不开启日志(默认)
+        # BASIC:记录请求方法、URL、响应状态、执行时间
+        # HEADERS: 在BASIC基础上 加载请求/响应头
+        # FULL: 在HEADERS基础上 增加body和请求元数据
         logger-level: FULL
         
 logging:
@@ -120,8 +120,8 @@ public Retryer feignRetryer() {
 feign:
   client:
     config:
-    	default:
-		 		retryer: com.kun.springcloud.config.SimpleRetryer
+      default:
+        retryer: com.kun.springcloud.config.SimpleRetryer
       CLOUD-PAYMENT-SERVICE:
         read-timeout: 1000
         retryer: com.kun.springcloud.config.SimpleRetryer
