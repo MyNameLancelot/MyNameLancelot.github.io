@@ -120,7 +120,7 @@ spring:
 
 ```yaml
 spring:
-	cloud:
+  cloud:
     bus:
       trace:
         # 总线事件跟踪，访问/trace可获得更新信息
