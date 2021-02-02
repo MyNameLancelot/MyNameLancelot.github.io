@@ -57,15 +57,15 @@ spring:
     gateway:
       discovery:
         locator:
-        	# 是否从注册中心读取服务
+          # 是否从注册中心读取服务
           enabled: true
       routes:
-      		# 服务的ID，唯一即可一般与微服务的service name一致
+          # 服务的ID，唯一即可一般与微服务的service name一致
         - id: cloud-order-service
-        	# lb表示负载均衡
+          # lb表示负载均衡
           uri: lb://cloud-order-service
           predicates:
-          	# 路径匹配,所有order的请求都转发到cloud-order-service
+            # 路径匹配,所有order的请求都转发到cloud-order-service
             - Path=/order/**
 ```
 
