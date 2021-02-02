@@ -2,7 +2,7 @@
 layout: post
 title: "spring cloud config使用详解"
 date: 2021-02-02 16:42:30
-categories: “Spring Cloud”
+categories: "Spring Cloud"
 keywords: "Spring Cloud Config,Spring Cloud Config使用详解 "
 description: "Spring Cloud Config使用详解"
 ---
