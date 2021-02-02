@@ -20,25 +20,6 @@ description: "eureka使用详解"
 **一、导入依赖**
 
 ```xml
-<!-- 
-  父项目对它的主要影响的导入
-	<dependencyManagement>
-		<dependency>
-    	<groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-dependencies</artifactId>
-      <version>2.2.11.RELEASE</version>
-      <type>pom</type>
-      <scope>import</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-dependencies</artifactId>
-      <version>Hoxton.SR8</version>
-      <type>pom</type>
-      <scope>import</scope>
-    </dependency>
-  </dependencyManagement>
- -->
 <dependencies>
   <dependency>
     <groupId>org.springframework.cloud</groupId>
