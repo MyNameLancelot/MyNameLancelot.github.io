@@ -1,3 +1,12 @@
+---
+layout: post
+title: "spring cloud zoozkeeper使用详解"
+date: 2021-02-02 16:42:30
+categories: Spring-Cloud
+keywords: "spring cloud zoozkeeper"
+description: "spring-cloud-zoozkeeper使用详解"
+---
+
 ## 一、简介
 
 ​	Zookeeper作为知名的分布式调度系统，我们也可以利用其作为配置中心。其wacth 主动通知机制， 可以将node节点数据变更信息及时通知到client端。<span style="color:red">【注册的服务节点为zookeeper的临时节点，即客户端退出节点删除】</span>
