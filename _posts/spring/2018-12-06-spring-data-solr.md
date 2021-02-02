@@ -2,7 +2,7 @@
 layout: post
 title: "spring-data-solr的应用"
 date: 2018-12-06 16:07:31
-categories: spring-data
+categories: spring
 ---
 
 # 一、集成spring-data-solr
