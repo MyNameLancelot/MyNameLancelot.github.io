@@ -63,7 +63,7 @@ public class PaymentApplication8007 {
 
 ```yaml
 feign:
-	hystrix:
+  hystrix:
     enabled: true
 ```
 
@@ -152,13 +152,13 @@ public class PaymentServiceFallbackImpl implements PaymentService {
 
 /**
   * 如果需要定制方法级别限制，需配置YAML[超时时间等也要考虑Feign设置的因素]
-  *	hystrix:
-	*		command:
-  *			PaymentService#getPaymentByIdTimeOut(Long):
-  *				execution:
-  *					isolation:
-  *						thread:
-  *							timeoutInMilliseconds: 2000
+  * hystrix:
+  *   command:
+  *     PaymentService#getPaymentByIdTimeOut(Long):
+  *       execution:
+  *         isolation:
+  *           thread:
+  *             timeoutInMilliseconds: 2000
   */
 // 指定服务降级的处理类
 @FeignClient(name = "CLOUD-PAYMENT-SERVICE", fallback = PaymentServiceFallbackImpl.class)
@@ -372,6 +372,3 @@ turbine:
 ```
 
 **第四步：访问Dashboard端的地址`ip:port/hystrix`**，填入`http://[terbine-IP]:[port]/turbine.stream`
-
-### 
-
