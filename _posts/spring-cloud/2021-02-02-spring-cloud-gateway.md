@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "spring-cloud-gateway使用详解"
+title: "spring cloud gateway使用详解"
 date: 2021-02-02 16:42:30
-categories: Spring-Cloud
-keywords: "spring-cloud-gateway"
+categories: Spring Cloud
+keywords: "spring cloud gateway"
 description: "spring-cloud-gateway使用详解"
 ---
 
