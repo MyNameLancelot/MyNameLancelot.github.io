@@ -117,7 +117,7 @@ public FilterRegistrationBean sentinelFilterRegistration() {
 <div style="clear:both;width:100%;float:left;">
 <div>
 <img src="/img/sentinel/RT.png"  style="width:49%;float:left"/>
-<img src="/img/sentinel/exceptionnum.png" style="width:49%float:right"/>
+<img src="/img/sentinel/exceptionnum.png" style="width:49%; float:right"/>
 </div>
 <div style="margin-top:8px;clear:both">
 <img src="/img/sentinel/exceptionnum2.png" style="margin:8px auto;zoom:60%;display:block" />
