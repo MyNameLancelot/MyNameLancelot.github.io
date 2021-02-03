@@ -63,7 +63,7 @@ db.password=youdontknow
 
 **第二步：配置YAML**
 
-```YAML
+```yaml
 spring:
   application:
     name: cloud-order-service
@@ -126,10 +126,10 @@ public class RestTemplateConfig {
 spring:
   cloud:
     nacos:
-    	# nacos地址
+      # nacos地址
       server-addr: localhost:8848
       config:
-      	# 文件后缀
+        # 文件后缀
         file-extension: yaml
         # namespace的区分 
         namespace: DEV
