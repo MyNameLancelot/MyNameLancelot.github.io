@@ -92,8 +92,8 @@ public FilterRegistrationBean sentinelFilterRegistration() {
 
 <div style="clear:both;width:100%;float: left;">
 <div>
-<img src="/img/sentinel/quickerror.png"  style="zoom:52%;float:left"/>
-<img src="/img/sentinel/warnup.png" style="zoom:52%;float:right"/>
+<img src="/img/sentinel/quickerror.png"  style="width:49%;float:left"/>
+<img src="/img/sentinel/warnup.png" style="width:49%;float:right"/>
 </div>
 <div style="margin-top:8px;clear:both">
 <img src="/img/sentinel/queuewait.png" style="margin:8px auto;zoom:60%;display:block" />
