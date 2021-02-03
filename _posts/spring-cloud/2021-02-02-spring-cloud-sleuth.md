@@ -51,6 +51,6 @@ spring:
     # zipkin地址
     base-url: http://localhost:9411/
   sleuth:
-  	# 采样率0-1
+    # 采样率0-1
     sampler: 1
 ```
