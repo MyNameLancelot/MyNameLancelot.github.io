@@ -52,10 +52,10 @@ Sentinel可以针对调用者进行限流，填写微服务名，指定对哪个
 <div style="clear:both;width:100%;float: left;">
 <div style="clear:both">
 <img src="/img/sentinel/direct.png"  style="width:49%;float:left"/>
-<img src="/img/sentinel/guanlian.png" style="width:49%;float:left"/>
+<img src="/img/sentinel/guanlian.png" style="width:49%;float:rigth"/>
 </div>
 <div style="margin-top:8px;clear:both">
-<img src="/img/sentinel/簇点.png" style="margin:0 auto;zoom:52%;" />
+<img src="/img/sentinel/簇点.png" style="margin:8px auto;zoom:60%;display:block" />
 </div>
 </div>
 
@@ -93,10 +93,10 @@ public FilterRegistrationBean sentinelFilterRegistration() {
 <div style="clear:both;width:100%;float: left;">
 <div>
 <img src="/img/sentinel/quickerror.png"  style="zoom:52%;float:left"/>
-<img src="/img/sentinel/warnup.png" style="zoom:52%;float:left"/>
+<img src="/img/sentinel/warnup.png" style="zoom:52%;float:right"/>
 </div>
-<div style="margin-top:8px">
-<img src="/img/sentinel/queuewait.png" style="zoom:52%;" />
+<div style="margin-top:8px;clear:both">
+<img src="/img/sentinel/queuewait.png" style="margin:8px auto;zoom:60%;display:block" />
 </div>
 </div>
 
@@ -117,10 +117,10 @@ public FilterRegistrationBean sentinelFilterRegistration() {
 <div style="clear:both;width:100%;float:left;">
 <div>
 <img src="/img/sentinel/RT.png"  style="zoom:50%;float:left"/>
-<img src="/img/sentinel/exceptionnum.png" style="zoom:52%;float:left"/>
+<img src="/img/sentinel/exceptionnum.png" style="zoom:52%;float:right"/>
 </div>
-<div>
-<img src="/img/sentinel/exceptionnum2.png" style="zoom:52%;" />
+<div style="margin-top:8px;clear:both">
+<img src="/img/sentinel/exceptionnum2.png" style="margin:8px auto;zoom:60%;display:block" />
 </div>
 </div>
 
