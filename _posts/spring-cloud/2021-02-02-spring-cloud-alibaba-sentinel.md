@@ -37,9 +37,10 @@ Sentinel可以针对调用者进行限流，填写微服务名，指定对哪个
 - 线程数：设置最多支持的线程数量【并非一个请求对应一个线程】
 
 <div style="clear:both;width:100%;float: left;">
-<img src="assets/QPS.png"  style="zoom:52%;float:left" />
-<img src="assets/thread.png" style="zoom:52%;float:right" />
+<img src="/img/sentinel/QPS.png"  style="zoom:52%;float:left" />
+<img src="/img/sentinel/thread.png" style="zoom:52%;float:right" />
 </div>
+
 
 
 **流控模式**
@@ -50,13 +51,14 @@ Sentinel可以针对调用者进行限流，填写微服务名，指定对哪个
 
 <div style="clear:both;width:100%;float: left;">
 <div>
-<img src="assets/direct.png"  style="zoom:52%;float:left"/>
-<img src="assets/guanlian.png" style="zoom:52%;float:left"/>
+<img src="/img/sentinel/direct.png"  style="zoom:52%;float:left"/>
+<img src="/img/sentinel/guanlian.png" style="zoom:52%;float:left"/>
 </div>
 <div style="margin-top:8px">
-<img src="assets/簇点.png" style="zoom:52%;" />
+<img src="/img/sentinel/簇点.png" style="zoom:52%;" />
 </div>
 </div>
+
 
 使用簇点链路时可能需要展开链路关系，基本不用
 
@@ -90,13 +92,14 @@ public FilterRegistrationBean sentinelFilterRegistration() {
 
 <div style="clear:both;width:100%;float: left;">
 <div>
-<img src="assets/quickerror.png"  style="zoom:52%;float:left"/>
-<img src="assets/warnup.png" style="zoom:52%;float:left"/>
+<img src="/img/sentinel/quickerror.png"  style="zoom:52%;float:left"/>
+<img src="/img/sentinel/warnup.png" style="zoom:52%;float:left"/>
 </div>
 <div style="margin-top:8px">
-<img src="assets/queuewait.png" style="zoom:52%;" />
+<img src="/img/sentinel/queuewait.png" style="zoom:52%;" />
 </div>
 </div>
+
 ## 三、热点参数降流
 
 ​	热点参数限流会统计传入参数中的热点参数，并根据配置的限流阈值与模式，对包含热点参数的资源调用进行限流，热点参数限流可以看做是一种特殊的流量控制，仅对包含热点参数的资源调用生效
@@ -113,13 +116,14 @@ public FilterRegistrationBean sentinelFilterRegistration() {
 
 <div style="clear:both;width:100%;float:left;">
 <div>
-<img src="assets/RT.png"  style="zoom:50%;float:left"/>
-<img src="assets/exceptionnum.png" style="zoom:52%;float:left"/>
+<img src="/img/sentinel/RT.png"  style="zoom:50%;float:left"/>
+<img src="/img/sentinel/exceptionnum.png" style="zoom:52%;float:left"/>
 </div>
 <div>
-<img src="assets/exceptionnum2.png" style="zoom:52%;" />
+<img src="/img/sentinel/exceptionnum2.png" style="zoom:52%;" />
 </div>
 </div>
+
 ## 五、Sentinel 系统自适应
 
 ​	Sentinel系统自适应保护从整体维度对应用入口流量进行控制，结合应用的Load、总体平均RT、入口QPS和线程数等几个维度的监控指标，让系统的入口流量和系统的负载达到一个平衡，让系统尽可能跑在最大吞吐量的同时保证系统整体的稳定性。
