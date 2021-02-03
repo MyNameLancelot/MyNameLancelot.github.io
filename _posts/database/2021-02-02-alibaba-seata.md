@@ -560,7 +560,7 @@ registry {
   loadBalanceVirtualNodes = 10
 
   nacos {
-  	# 为Nacos注册的服务名，1.4版本和Spring Cloud对接时发现serviceName被写死了为serverAddr，所以必须为此值
+    # 为Nacos注册的服务名，1.4版本和Spring Cloud对接时发现serviceName被写死了为serverAddr，所以必须为此值
     application = "serverAddr"
     serverAddr = "192.168.22.1:8848"
     # 为Nacos注册的组名，1.4版本和Spring Cloud对接时发现group被写死了为DEFAULT_GROUP，所以必须为此值
@@ -573,17 +573,17 @@ registry {
     password = ""
   }
 
-	# 如果配置文件在Nacos需要将type = "nacos"，一般情况使用的是file.conf则为file
-	config {
-  	type = "nacos"
-	  nacos {
-    	serverAddr = "192.168.22.1:8848"
-    	namespace = "DEV"
-  	  group = "DEFAULT_GROUP"
-	    username = ""
-    	password = ""
-  	}
-	}
+  # 如果配置文件在Nacos需要将type = "nacos"，一般情况使用的是file.conf则为file
+  config {
+    type = "nacos"
+    nacos {
+      serverAddr = "192.168.22.1:8848"
+      namespace = "DEV"
+      group = "DEFAULT_GROUP"
+      username = ""
+      password = ""
+    }
+  }
 }
 ```
 
