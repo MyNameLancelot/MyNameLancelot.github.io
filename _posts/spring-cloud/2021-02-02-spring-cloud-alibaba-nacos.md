@@ -69,10 +69,10 @@ spring:
     name: cloud-order-service
   cloud:
     nacos:
-    	# nacos地址
+      # nacos地址
       server-addr: localhost:8848
       discovery:
-      	# namespace的区分
+        # namespace的区分
         namespace: DEV
         # 所属组
         group: WYK_GROUP
