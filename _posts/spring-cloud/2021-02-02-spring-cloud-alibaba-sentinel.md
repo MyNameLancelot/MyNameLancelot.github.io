@@ -37,8 +37,8 @@ Sentinel可以针对调用者进行限流，填写微服务名，指定对哪个
 - 线程数：设置最多支持的线程数量【并非一个请求对应一个线程】
 
 <div style="clear:both;width:100%;float: left;">
-<img src="/img/sentinel/QPS.png"  style="zoom:52%;float:left" />
-<img src="/img/sentinel/thread.png" style="zoom:52%;float:right" />
+<img src="/img/sentinel/QPS.png"  style="width:49%;float:left" />
+<img src="/img/sentinel/thread.png" style="width:49%;float:right" />
 </div>
 
 
@@ -51,10 +51,10 @@ Sentinel可以针对调用者进行限流，填写微服务名，指定对哪个
 
 <div style="clear:both;width:100%;float: left;">
 <div>
-<img src="/img/sentinel/direct.png"  style="zoom:52%;float:left"/>
-<img src="/img/sentinel/guanlian.png" style="zoom:52%;float:left"/>
+<img src="/img/sentinel/direct.png"  style="width:49%;float:left"/>
+<img src="/img/sentinel/guanlian.png" style="width:49%;float:left"/>
 </div>
-<div style="margin-top:8px">
+<div style="margin-top:8px auto">
 <img src="/img/sentinel/簇点.png" style="zoom:52%;" />
 </div>
 </div>
