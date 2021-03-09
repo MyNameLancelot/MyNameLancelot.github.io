@@ -29,10 +29,10 @@ title: 王钰坤博客首页
 				</div>
 			</section>
 
-		<!-- Wrapper -->
+			<!-- Wrapper -->
 			<div id="wrapper">
 
-				<!-- Intro -->
+					<!-- Intro -->
 					<section id="intro" class="wrapper style1 fullscreen fade-up">
 						<div class="inner">
 							<h1>欢迎您</h1>
@@ -43,20 +43,20 @@ title: 王钰坤博客首页
 						</div>
 					</section>
 
-					{% for category in site.categories}
-						<section id="{{ category | first }}" class="wrapper style1 fade-up">
-							<div class="inner">
-								<h2>{{ category | first }}</h2>
-								<div class="features">
-									{% for post in category.last %}
-									<section>
-										<span class="icon major fa-code"></span>
-										<h3><a href="{{ post.url }}" style="border-bottom:none">{{ post.title }}</a></h3>
-									</section>
-									{% endfor %}
-								</div>
+					{% for category in site.categories %}
+					<section id="{{ category | first }}" class="wrapper style1 fade-up">
+						<div class="inner">
+							<h2>{{ category | first }}</h2>
+							<div class="features">
+								{% for post in category.last %}
+								<section>
+									<span class="icon major fa-code"></span>
+									<h3><a href="{{ post.url }}" style="border-bottom:none">{{ post.title }}</a></h3>
+								</section>
+								{% endfor %}
 							</div>
-						</section>
+						</div>
+					</section>
 					{% endfor %}
 			</div>
 
