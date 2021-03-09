@@ -12,9 +12,7 @@ title: 王钰坤博客首页
 		<!--[if lte IE 9]><link rel="stylesheet" href="{{ site.url }}/assets/main/css/ie9.css" /><![endif]-->
 		<!--[if lte IE 8]><link rel="stylesheet" href="{{ site.url }}/assets/main/css/ie8.css" /><![endif]-->
 	</head>
-	<body class="custom-scroll-6">
-
-		
+	<body class="custom-scroll-6">		
 		<!-- Sidebar -->
 			<section id="sidebar" class="custom-scroll-4" style="height:85vh">
 				<div class="inner">
@@ -97,6 +95,12 @@ title: 王钰坤博客首页
 		var psuedo = document.createElement("div");
 		psuedo.style.cssText = "height:100%;width:2px;left:4px;background:#808080;position:absolute;z-index:1";
 		custom4.scrollBarHolder.appendChild(psuedo);
+		
+		var custom6 = new scrollbot(".custom-scroll-6");
+
+		document.querySelector("#destroy").onclick = function(){
+			custom6.destroy();
+		}
 		
 		document.onreadystatechange = function(){
 			custom4.refresh();
