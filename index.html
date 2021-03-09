@@ -18,7 +18,7 @@ title: 王钰坤博客首页
 	}	
 	</style>
 
-	<body class="custom-scroll-6">		
+	<body>		
 		<!-- Sidebar -->
 			<section id="sidebar" class="custom-scroll-4" style="height:85vh">
 				<div class="inner">
@@ -102,15 +102,9 @@ title: 王钰坤博客首页
 		psuedo.style.cssText = "height:100%;width:2px;left:4px;background:#808080;position:absolute;z-index:1";
 		custom4.scrollBarHolder.appendChild(psuedo);
 		
-		var custom6 = new scrollbot(".custom-scroll-6");
 
-		document.querySelector("#destroy").onclick = function(){
-			custom6.destroy();
-		}
-		
 		document.onreadystatechange = function(){
 			custom4.refresh();
-			custom6.refresh();
 		}
 
 			
