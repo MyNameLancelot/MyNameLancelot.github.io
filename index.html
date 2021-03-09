@@ -12,11 +12,11 @@ title: 王钰坤博客首页
 		<!--[if lte IE 9]><link rel="stylesheet" href="{{ site.url }}/assets/main/css/ie9.css" /><![endif]-->
 		<!--[if lte IE 8]><link rel="stylesheet" href="{{ site.url }}/assets/main/css/ie8.css" /><![endif]-->
 	</head>
-	<body>
+	<body class="custom-scroll-6">
 
 		
 		<!-- Sidebar -->
-			<section id="sidebar" class="custom-scroll-2">
+			<section id="sidebar" class="custom-scroll-4">
 				<div class="inner">
 					<nav >
 						<ul>
@@ -38,7 +38,7 @@ title: 王钰坤博客首页
 							<h1>欢迎您</h1>
 							<p>此网站为王钰坤的个人博客，主要记录编程开发知识。有JAVA、数据库、大数据等。。。
 							<ul class="actions">
-								<li><a href="#one" class="button scrolly">Learn more</a></li>
+								<li><a href="#java" class="button scrolly">Learn more</a></li>
 							</ul>
 						</div>
 					</section>
@@ -85,22 +85,22 @@ title: 王钰坤博客首页
 	
 	<script>
 
-		
 
-		custom2 = new scrollbot(".custom-scroll-2",10).setStyle({
+		custom4 = new scrollbot(".custom-scroll-4",10).setStyle({
 			"background":"#202020",
-			"z-index":"2"
+			"z-index":"2",
+			"border-radius":"50%",
+			"height":"10px"
 		},{
 			"background":"rgba(0,0,0,0)"
 		});
 		var psuedo = document.createElement("div");
 		psuedo.style.cssText = "height:100%;width:2px;left:4px;background:#808080;position:absolute;z-index:1";
-		custom2.scrollBarHolder.appendChild(psuedo);
-		
-
+		custom4.scrollBarHolder.appendChild(psuedo);
 		
 		document.onreadystatechange = function(){
-			custom2.refresh();
+			custom4.refresh();
+			custom6.refresh();
 		}
 
 			
