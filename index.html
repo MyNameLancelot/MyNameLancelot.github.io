@@ -80,5 +80,30 @@ title: 王钰坤博客首页
 			<script src="{{ site.url }}/assets/main/js/util.js"></script>
 			<!--[if lte IE 8]><script src="{{ site.url }}/assets/main/js/ie/respond.min.js"></script><![endif]-->
 			<script src="{{ site.url }}/assets/main/js/main.js"></script>
+			<script src="{{ site.url }}/assets/main/scroll/js/scrollbot.js" type="text/javascript"></script>
+			<script  src="{{ site.url }}/assets/main/scrolljs/scrollreveal.min.js" type="text/javascript"></script>
+	
+	<script>
+
+		
+
+		custom2 = new scrollbot(".custom-scroll-2",10).setStyle({
+			"background":"#202020",
+			"z-index":"2"
+		},{
+			"background":"rgba(0,0,0,0)"
+		});
+		var psuedo = document.createElement("div");
+		psuedo.style.cssText = "height:100%;width:2px;left:4px;background:#808080;position:absolute;z-index:1";
+		custom2.scrollBarHolder.appendChild(psuedo);
+		
+
+		
+		document.onreadystatechange = function(){
+			custom2.refresh();
+		}
+
+			
+	</script>
 	</body>
 </html>
