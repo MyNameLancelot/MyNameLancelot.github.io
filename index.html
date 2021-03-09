@@ -44,14 +44,14 @@ title: 王钰坤博客首页
 					</section>
 
 					{% for category in site.categories %}
-							<section id="{{ category | first }}" class="wrapper style3 fade-up">
+						<section id="{{ category | first }}" class="wrapper style3 fade-up">
 							<div class="inner">
 								<h2>{{ category | first }}</h2>
 								<div class="features">
 									{% for post in category.last %}
 									<section>
 										<span class="icon major fa-code"></span>
-										<h3><a href="{{ post.url }}">{{ post.title }}</a></h3>
+										<h3><a href="{{ post.url }}" style="border-bottom:none">{{ post.title }}</a></h3>
 									</section>
 									{% endfor %}
 								</div>
@@ -61,8 +61,8 @@ title: 王钰坤博客首页
 			</div>
 
 		
-		<!-- Footer -->
-			<footer id="footer" class="wrapper style1-alt">
+			<!-- Footer -->
+			<footer id="footer" class="wrapper style1-alt" style="text-align:center">
 				<div class="inner">
 					<ul class="menu">
 						<li>Copyright © By-WangYuKun, All Rights Reserved</li>
@@ -70,7 +70,7 @@ title: 王钰坤博客首页
 				</div>
 			</footer>
 
-		<!-- Scripts -->
+			<!-- Scripts -->
 			<script src="{{ site.url }}/assets/main/js/jquery.min.js"></script>
 			<script src="{{ site.url }}/assets/main/js/jquery.scrollex.min.js"></script>
 			<script src="{{ site.url }}/assets/main/js/jquery.scrolly.min.js"></script>
