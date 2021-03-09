@@ -43,10 +43,8 @@ title: 王钰坤博客首页
 						</div>
 					</section>
 
-					{% assign loopIndex = 1 %}
-					loopIndex = {{ loopIndex }}
 					{% for category in site.categories}
-						<section id="{{ category | first }}" class="wrapper style1 fade-up">
+						<section id="{{ category | first }}" {% cycle ' class="wrapper style1 fade-up', ' class="wrapper style2 fade-up', ' class="wrapper style3 fade-up' %}>
 							<div class="inner">
 								<h2>{{ category | first }}</h2>
 								<div class="features">
