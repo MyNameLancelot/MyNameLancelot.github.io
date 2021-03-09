@@ -1,43 +1,147 @@
---- 
-title: 首页 
----
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>{{ page.title }}</title>
-	<link rel="shortcut icon" href="{{ site.url }}/assets/favicon.ico" />
-	<link rel="bookmark"href="{{ site.url }}/assets/favicon.ico" />
-    <link rel="stylesheet" href="{{ site.url }}/assets/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ site.url }}/assets/bootstrap-toc.min.css">
-    <link rel="stylesheet" href="{{ site.url }}/assets/gh-fork-ribbon.min.css" />
-    <link rel="stylesheet" href="{{ site.url }}/assets/screen.css" media="screen" charset="utf-8">
-    <script src="{{ site.url }}/assets//jquery-2.1.4.min.js"></script>
-    <script src="{{ site.url }}/assets/bootstrap.min.js" ></script>
-    <script src="{{ site.url }}/assets/bootstrap-toc.min.js"></script>
-  </head>
-<body data-spy="scroll" data-target="#toc">
-    <div class="container">
-    <div class="row">
-      <!-- sidebar, which will move to the top on a small screen -->
-      <div class="col-lg-3">
-        <nav id="toc" data-toggle="toc" data-spy="affix"></nav>
-      </div>
-      <!-- main content area -->
-         <div class="col-lg-9">
-		 <div class="pagetitle">目录索引</div>
-		 {% for category in site.categories %}
-			<h2>{{ category | first }}</h1>
-			{% for post in category.last %}
-				<h3>{{ post.date | date:"%Y/%m/%d"}} —— <a href="{{ post.url }}">{{ post.title }}</a></h2>
-			{% endfor %}
+	<head>
+		<title>王钰坤博客首页</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!--[if lte IE 8]><script src="{{ site.url }}/assets/main/js/ie/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="{{ site.url }}/assets/main/css/main.css" />
+		<!--[if lte IE 9]><link rel="stylesheet" href="{{ site.url }}/assets/main/css/ie9.css" /><![endif]-->
+		<!--[if lte IE 8]><link rel="stylesheet" href="{{ site.url }}/assets/main/css/ie8.css" /><![endif]-->
+	</head>
+	<body>
+
+		{% for category in site.categories %}
+		<!-- Sidebar -->
+			<section id="sidebar">
+				<div class="inner">
+					<nav>
+						<ul>
+						
+							<li><a href="#intro">首页</a></li>
+							<li><a href="#{{ category | first }}">{{ category | first }}</a></li>
+							<li><a href="#one">Java编程</a></li>
+							<li><a href="#two">数据库</a></li>
+							<li><a href="#three">大数据</a></li>
+						</ul>
+					</nav>
+				</div>
+			</section>
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Intro -->
+					<section id="intro" class="wrapper style1 fullscreen fade-up">
+						<div class="inner">
+							<h1>欢迎您</h1>
+							<p>此网站为王钰坤的个人博客，主要记录编程开发知识。有JAVA、数据库、大数据等。。。
+							<ul class="actions">
+								<li><a href="#one" class="button scrolly">Learn more</a></li>
+							</ul>
+						</div>
+					</section>
+
+				<!-- One -->
+					<section id="one" class="wrapper style2 spotlights">
+						<section>
+							<a href="#" class="image"><img src="images/pic01.jpg" alt="" data-position="center center" /></a>
+							<div class="content">
+								<div class="inner">
+									<h2>Sed ipsum dolor</h2>
+									<p>Phasellus convallis elit id ullamcorper pulvinar. Duis aliquam turpis mauris, eu ultricies erat malesuada quis. Aliquam dapibus.</p>
+									<ul class="actions">
+										<li><a href="#" class="button">Learn more</a></li>
+									</ul>
+								</div>
+							</div>
+						</section>
+						<section>
+							<a href="#" class="image"><img src="images/pic02.jpg" alt="" data-position="top center" /></a>
+							<div class="content">
+								<div class="inner">
+									<h2>Feugiat consequat</h2>
+									<p>Phasellus convallis elit id ullamcorper pulvinar. Duis aliquam turpis mauris, eu ultricies erat malesuada quis. Aliquam dapibus.</p>
+									<ul class="actions">
+										<li><a href="#" class="button">Learn more</a></li>
+									</ul>
+								</div>
+							</div>
+						</section>
+						<section>
+							<a href="#" class="image"><img src="images/pic03.jpg" alt="" data-position="25% 25%" /></a>
+							<div class="content">
+								<div class="inner">
+									<h2>Ultricies aliquam</h2>
+									<p>Phasellus convallis elit id ullamcorper pulvinar. Duis aliquam turpis mauris, eu ultricies erat malesuada quis. Aliquam dapibus.</p>
+									<ul class="actions">
+										<li><a href="#" class="button">Learn more</a></li>
+									</ul>
+								</div>
+							</div>
+						</section>
+					</section>
+
+				<!-- Two -->
+					<section id="two" class="wrapper style3 fade-up">
+						<div class="inner">
+							<h2>数据库知识</h2>
+							<div class="features">
+								<section>
+									<span class="icon major fa-code"></span>
+									<h3>Lorem ipsum amet</h3>
+									<p>Phasellus convallis elit id ullam corper amet et pulvinar. Duis aliquam turpis mauris, sed ultricies erat dapibus.</p>
+								</section>
+								<section>
+									<span class="icon major fa-lock"></span>
+									<h3>Aliquam sed nullam</h3>
+									<p>Phasellus convallis elit id ullam corper amet et pulvinar. Duis aliquam turpis mauris, sed ultricies erat dapibus.</p>
+								</section>
+								<section>
+									<span class="icon major fa-cog"></span>
+									<h3>Sed erat ullam corper</h3>
+									<p>Phasellus convallis elit id ullam corper amet et pulvinar. Duis aliquam turpis mauris, sed ultricies erat dapibus.</p>
+								</section>
+								<section>
+									<span class="icon major fa-desktop"></span>
+									<h3>Veroeros quis lorem</h3>
+									<p>Phasellus convallis elit id ullam corper amet et pulvinar. Duis aliquam turpis mauris, sed ultricies erat dapibus.</p>
+								</section>
+								<section>
+									<span class="icon major fa-chain"></span>
+									<h3>Urna quis bibendum</h3>
+									<p>Phasellus convallis elit id ullam corper amet et pulvinar. Duis aliquam turpis mauris, sed ultricies erat dapibus.</p>
+								</section>
+								<section>
+									<span class="icon major fa-diamond"></span>
+									<h3>Aliquam urna dapibus</h3>
+									<p>Phasellus convallis elit id ullam corper amet et pulvinar. Duis aliquam turpis mauris, sed ultricies erat dapibus.</p>
+								</section>
+							</div>
+						</div>
+					</section>
+
+			</div>
+
 		{% endfor %}
-      </div>
-    </div>
-	<footer>
-		<p>Copyright © By-WangYuKun, All Rights Reserved</p>
-    </footer>
-  </div>
-</body>
+		
+		<!-- Footer -->
+			<footer id="footer" class="wrapper style1-alt">
+				<div class="inner">
+					<ul class="menu">
+						<li>&copy; WangYuKun. All rights reserved.</li>
+					</ul>
+				</div>
+			</footer>
+
+		<!-- Scripts -->
+			<script src="{{ site.url }}/assets/main/js/jquery.min.js"></script>
+			<script src="{{ site.url }}/assets/main/js/jquery.scrollex.min.js"></script>
+			<script src="{{ site.url }}/assets/main/js/jquery.scrolly.min.js"></script>
+			<script src="{{ site.url }}/assets/main/js/skel.min.js"></script>
+			<script src="{{ site.url }}/assets/main/js/util.js"></script>
+			<!--[if lte IE 8]><script src="{{ site.url }}/assets/main/js/ie/respond.min.js"></script><![endif]-->
+			<script src="{{ site.url }}/assets/main/js/main.js"></script>
+
+	</body>
 </html>
