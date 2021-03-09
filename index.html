@@ -33,7 +33,7 @@ title: 王钰坤博客首页
 			<div id="wrapper">
 
 					<!-- Intro -->
-					<section id="intro" class="wrapper style1 fullscreen fade-up">
+					<section id="intro" class="wrapper style fullscreen fade-up">
 						<div class="inner">
 							<h1>欢迎您</h1>
 							<p>此网站为王钰坤的个人博客，主要记录编程开发知识。有JAVA、数据库、大数据等。。。
@@ -44,7 +44,10 @@ title: 王钰坤博客首页
 					</section>
 
 					{% for category in site.categories %}
-					<section id="{{ category | first }}" class="wrapper style1 fade-up">
+					<section id="{{ category | first }}"
+
+					{% cycle 'class="wrapper style1 fade-up"', 'class="wrapper style2 fade-up"', 'class="wrapper style3 fade-up"' %}
+					>
 						<div class="inner">
 							<h2>{{ category | first }}</h2>
 							<div class="features">
