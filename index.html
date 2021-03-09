@@ -43,9 +43,10 @@ title: 王钰坤博客首页
 						</div>
 					</section>
 
-1
+					2
+					{% cycle '1' '2' '3' as infocycle %}
 					{% for category in site.categories}
-						<section id="{{ category | first }}" class="wrapper style{{% cycle '1', '2', '3' %}} fade-up">
+						<section id="{{ category | first }}" class="wrapper style{% cycle infocycle %} fade-up">
 							<div class="inner">
 								<h2>{{ category | first }}</h2>
 								<div class="features">
