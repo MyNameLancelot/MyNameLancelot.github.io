@@ -43,7 +43,8 @@ title: 王钰坤博客首页
 						</div>
 					</section>
 
-					{% for category in site.categories; assign loopIndex = 1%}
+					{% assign loopIndex = 1 %}
+					{% for category in site.categories}
 						<section id="{{ category | first }}" class="wrapper style{{ loopIndex }} fade-up">
 							<div class="inner">
 								<h2>{{ category | first }}</h2>
