@@ -49,8 +49,10 @@ title: 王钰坤博客首页
 					</section>
 					{% for category in site.categories %}
 					<section id="{{ category | first }}"
-
-					{% cycle 'class="wrapper style1 fade-up"', 'class="wrapper style2 fade-up"', 'class="wrapper style3 fade-up"' %}
+                             style="rgba(255, 255, 255, 0.05)"
+					{% cycle 'class="wrapper style1 fade-up"  ',
+							 'class="wrapper style2 fade-up"  ',
+							 'class="wrapper style3 fade-up"  ' %}
 					>
 						<div class="inner">
 							<h2>{{ category | first }}</h2>
