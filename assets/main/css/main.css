@@ -2059,6 +2059,7 @@
 			width: 50%;
 			border: solid 1px rgba(255, 255, 255, 0.15);
 			position: relative;
+			background: rgba(255, 255, 255, 0.05);
 		}
 
 
