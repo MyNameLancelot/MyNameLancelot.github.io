@@ -2074,7 +2074,7 @@
 				border-top-width: 0;
 			}
 
-			.features section:nth-child(2n+2) {
+			.features section:nth-child(2n+4) {
 				border-top-width: 0;
 				border-left-width: 0;
 			}
