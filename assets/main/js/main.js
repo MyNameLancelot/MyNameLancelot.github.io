@@ -113,7 +113,9 @@
 									// No locked links? Deactivate all links and activate this section's one.
 										if ($sidebar_a.filter('.active-locked').length == 0) {
 
-											console.debug(document.body.scrollHeight );
+											var currTop = (document.documentElement && document.documentElement.scrollTop) ||  document.body.scrollTop;
+											var docHeight = document.body.scrollHeight
+											$(".custom-scroll-4 .scrollbot-scrollbar-holder .scrollbot-scrollbar")[0].style.top = currTop / docHeight + '%'
 											$sidebar_a.removeClass('active');
 											$this.addClass('active');
 
