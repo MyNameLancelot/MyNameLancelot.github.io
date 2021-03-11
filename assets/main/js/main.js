@@ -118,8 +118,13 @@
 											((document.documentElement && document.documentElement.scrollTop) ||  document.body.scrollTop);
 											var docHeight = document.body.scrollHeight
 											$("#sidebar .scrollbot-scrollbar-holder .scrollbot-scrollbar").prop("style").top = currTop / docHeight * 100 + '%'
+											var event = document.createEvent('HTMLEvents');
+											// initEvent接受3个参数：
+											// 事件类型，是否冒泡，是否阻止浏览器的默认行为
+											event.initEvent("scroll", false, true);
+											//触发document上绑定的click事件
+											document.querySelector('div.scrollbot-inner-parent').dispatchEvent(event);
 											
-											//document.querySelector('div.scrollbot-inner-parent').scrollTo(0,312);
 											$sidebar_a.removeClass('active');
 											$this.addClass('active');
 
