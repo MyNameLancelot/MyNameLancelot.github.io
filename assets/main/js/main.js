@@ -117,7 +117,10 @@
 											(document.documentElement.clientHeight || document.body.clientHeight) +
 											((document.documentElement && document.documentElement.scrollTop) ||  document.body.scrollTop);
 											var docHeight = document.body.scrollHeight
-											$(".custom-scroll-4 .scrollbot-scrollbar-holder .scrollbot-scrollbar").prop("style").top = currTop / docHeight * 100 + '%'
+											$("#sidebar .scrollbot-scrollbar-holder .scrollbot-scrollbar").prop("style").top = currTop / docHeight * 100 + '%'
+											
+											$('#sidebar .scrollbot-inner-parent').trigger("scroll");
+
 											$sidebar_a.removeClass('active');
 											$this.addClass('active');
 
