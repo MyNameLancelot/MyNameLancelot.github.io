@@ -73,14 +73,6 @@ scrollbot = function(e, w) {
           this.scrollBarHolder.style[p] = this.sBH[p];
       }
 
-	  this.scrollFunc = function() {
-          _this.scrollBar.style.top = _this.inP.scrollTop * 100 / _this.inP.scrollHeight + (_this.sbHeight - parseFloat(_this.sB.height)) * _this.inP.scrollTop / (_this.inP.scrollHeight - _this.inP.clientHeight) + "%";
-          if ("onScrollF" in _this) {
-              _this.onScrollF();
-          }
-
-      }
-
 
       this.inP.addEventListener("scroll", function() {
           _this.scrollBar.style.top = _this.inP.scrollTop * 100 / _this.inP.scrollHeight + (_this.sbHeight - parseFloat(_this.sB.height)) * _this.inP.scrollTop / (_this.inP.scrollHeight - _this.inP.clientHeight) + "%";
