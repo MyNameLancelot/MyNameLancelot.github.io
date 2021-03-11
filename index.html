@@ -61,10 +61,12 @@ title: 王钰坤博客首页
 							<h2>{{ category | first }}</h2>
 							<div class="features">
 								{% for post in category.last %}
+								<a href="{{ post.url }}" style="border-bottom:none;cursor:pointer" >
 								<section>
 									<span class="icon major fa-code"></span>
-									<h3><a href="{{ post.url }}" style="border-bottom:none">{{ post.title }}</a></h3>
+									<h3>{{ post.title }}</h3>
 								</section>
+								</a>
 								{% endfor %}
 							</div>
 						</div>
