@@ -23,6 +23,7 @@ title: 王钰坤博客首页
 	</style>
 
 	<body>		
+		<div id="all">
 		<!-- Sidebar -->
 			<section id="sidebar" class="custom-scroll-4" style="height:85vh">
 				<div class="inner">
@@ -109,7 +110,7 @@ title: 王钰坤博客首页
 		custom4.scrollBarHolder.appendChild(psuedo);
 		
 
-		custom2 = new scrollbot("body",10).setStyle({
+		custom2 = new scrollbot("#all",10).setStyle({
 			"background":"#202020",
 			"z-index":"2"
 		},{
@@ -126,5 +127,7 @@ title: 王钰坤博客首页
 
 			
 	</script>
+    </div>
+
 	</body>
 </html>
