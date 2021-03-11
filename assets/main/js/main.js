@@ -114,7 +114,7 @@
 										if ($sidebar_a.filter('.active-locked').length == 0) {
 
 											var currTop = 
-											(document.documentElement.clientHeight || document.body.clientHeight) +
+											(document.documentElement.clientHeight || document.body.clientHeight) * 0.2 +
 											((document.documentElement && document.documentElement.scrollTop) ||  document.body.scrollTop);
 											var docHeight = document.body.scrollHeight
 											$("#sidebar .scrollbot-scrollbar-holder .scrollbot-scrollbar").prop("style").top = currTop / docHeight * 100 + '%'
