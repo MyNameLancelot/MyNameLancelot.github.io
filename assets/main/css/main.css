@@ -3605,10 +3605,7 @@
 				position: relative;
 			}
 
-				#sidebar nav > ul > li:first-child {
-					margin: 0;
-				}
-
+			
 				#sidebar nav > ul > li:nth-child(1) {
 					-moz-transition-delay: 0.45s;
 					-webkit-transition-delay: 0.45s;
