@@ -16,6 +16,11 @@
 
 	$(function() {
 
+		var navLi = $("div.inner nav ul li");
+		
+		var scrollOneStepDis = parseInt(navLi.css("marginTop")) +  parseInt(navLi.css("height"));
+
+
 		var	$window = $(window),
 			$body = $('body'),
 			$sidebar = $('#sidebar');
@@ -112,13 +117,10 @@
 
 									// No locked links? Deactivate all links and activate this section's one.
 										if ($sidebar_a.filter('.active-locked').length == 0) {
-
-										//	var currTop = 
-										//	(document.documentElement.clientHeight || document.body.clientHeight) * 0.2 +
-										//	((document.documentElement && document.documentElement.scrollTop) ||  document.body.scrollTop);
-										//	var docHeight = document.body.scrollHeight
-										//	$("#sidebar .scrollbot-scrollbar-holder .scrollbot-scrollbar").prop("style").top = currTop / docHeight * 100 + '%'
-   
+											var selCondition = "nav a[href='" + this.selector + "']"
+											var scrollTopV =  scrollOneStepDis * $(".custom-scroll-4 ul li").index($(selCondition).parents("li")) + "px";
+											$(".custom-scroll-4 .scrollbot-outer-parent .scrollbot-inner-parent").animate({scrollTop: scrollTopV}, 500);  
+											
 											$sidebar_a.removeClass('active');
 											$this.addClass('active');
 
