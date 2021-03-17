@@ -119,7 +119,7 @@
 										if ($sidebar_a.filter('.active-locked').length == 0) {
 											var selCondition = "nav a[href='" + this.selector + "']"
 											var scrollTopV =  scrollOneStepDis * $(".custom-scroll-4 ul li").index($(selCondition).parents("li")) + "px";
-											$(".custom-scroll-4 .scrollbot-outer-parent .scrollbot-inner-parent").animate({scrollTop: scrollTopV}, 500);  
+											$(".custom-scroll-4 .scrollbot-outer-parent .scrollbot-inner-parent").animate({scrollTop: scrollTopV}, 100);  
 											
 											$sidebar_a.removeClass('active');
 											$this.addClass('active');
