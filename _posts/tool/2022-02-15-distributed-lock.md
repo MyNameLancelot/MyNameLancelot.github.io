@@ -277,6 +277,8 @@ public void testRedissionSemaphoreKey() throws InterruptedException {
 
 ​	zookeeper实现分布式锁的原理就是多个节点同时在一个指定的节点下面创建<span style="color:red">临时会话顺序节点</span>，谁创建的节点序号最小，谁就获得了锁。并且其他节点就会监听序号比自己小的节点【利用zookeeper的Watcher机制】，一旦序号比自己小的节点被删除了，其他节点就会得到相应的事件，然后查看自己是否为序号最小的节点，如果是，则获取锁。
 
+​	zookeeper实现的分布式锁是CP的，性能没redis的高。但是不用担心redis主从架构，主节点挂掉从节点还没同步数据造成的锁失效。
+
 <img src="/img/distributed-lock/zookeeper-lock-principle.png" alt="zookeeper-lock-principle" style="zoom:50%;" />
 
 可重入是利用JDK线程ThreadId是否相同判断的
