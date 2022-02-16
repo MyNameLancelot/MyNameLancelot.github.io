@@ -89,7 +89,7 @@ return redis.call('pttl', KEYS[1]);
 
 加锁脚本流程解读
 
-<img src="C:/img/distributed-lock/lock_script.png" alt="lock_script" style="zoom: 50%;" />
+<img src="/img/distributed-lock/lock_script.png" alt="lock_script" style="zoom: 50%;" />
 
 **解锁脚本**
 
@@ -123,13 +123,13 @@ return nil;
 
 解锁脚本流程解读
 
-<img src="C:/img/distributed-lock/unlock_script.png" alt="unlock_script" style="zoom:50%;" />
+<img src="/img/distributed-lock/unlock_script.png" alt="unlock_script" style="zoom:50%;" />
 
 广播解锁消息的作用：通知其它争抢锁阻塞住的线程，从阻塞中解除，并再次去争抢锁
 
 **加锁和解锁总流程图**
 
-![lock_unlock_flower](C:/img/distributed-lock/lock_unlock_flower.png)
+![lock_unlock_flower](/img/distributed-lock/lock_unlock_flower.png)
 
 ### Redission的使用
 
@@ -277,7 +277,7 @@ public void testRedissionSemaphoreKey() throws InterruptedException {
 
 ​	zookeeper实现分布式锁的原理就是多个节点同时在一个指定的节点下面创建<span style="color:red">临时会话顺序节点</span>，谁创建的节点序号最小，谁就获得了锁。并且其他节点就会监听序号比自己小的节点【利用zookeeper的Watcher机制】，一旦序号比自己小的节点被删除了，其他节点就会得到相应的事件，然后查看自己是否为序号最小的节点，如果是，则获取锁。
 
-<img src="C:/img/distributed-lock/zookeeper-lock-principle.png" alt="zookeeper-lock-principle" style="zoom:50%;" />
+<img src="/img/distributed-lock/zookeeper-lock-principle.png" alt="zookeeper-lock-principle" style="zoom:50%;" />
 
 可重入是利用JDK线程ThreadId是否相同判断的
 
