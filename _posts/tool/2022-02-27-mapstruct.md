@@ -399,12 +399,12 @@ MapStruct转换结果完全正确，符合预期
 
 自定义属性的转换方式，很多时候需要自定义属性转换能力
 
-@Mapping(target = "price", expression = "java(com.kun.utils.NumberUtils.toNumberRoundUp(userInfo.getPrice(), 2, \"#0.00\"))")
+@Mapping(target = "price", expression = "java(com.kun.utils.NumberUtils.toRoundUp(userInfo.getPrice(), 2, \"#0.00\"))")
 
 ```java
 public class NumberUtils {
 
-    public static String toNumberRoundUp(BigDecimal bigDecimal, int newScale, String format) {
+    public static String toRoundUp(BigDecimal bigDecimal, int newScale, String format) {
         BigDecimal resultDecimal = bigDecimal.setScale(newScale, BigDecimal.ROUND_UP);
         DecimalFormat df = new DecimalFormat(format);
         return df.format(resultDecimal);
