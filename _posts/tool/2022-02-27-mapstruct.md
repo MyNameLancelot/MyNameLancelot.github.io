@@ -307,9 +307,8 @@ public void traditionalWayTest() {
   basicUserInfoVO.setName(user.getName());
   basicUserInfoVO.setUserId(user.getId());
   basicUserInfoVO.setBirthDate(DATA_FORMAT.format(user.getBirthDate()));
-  log.info("userInfo={} => basicUserInfoVo={}",
-           JSON.toJSONString(user),
-           JSON.toJSONString(basicUserInfoVO));
+  log.info("userInfo={}", JSON.toJSONString(user));
+  log.info("basicUserInfoVo={}", JSON.toJSONString(basicUserInfoVO));
 }
 ```
 
@@ -326,16 +325,16 @@ public void beanUtilsWayTest() {
   UserInfo user = userInfoDao.getUser(1L);
   BasicUserInfoVO basicUserInfoVO = new BasicUserInfoVO();
   BeanUtils.copyProperties(user, basicUserInfoVO);
-  log.info("userInfo={} => basicUserInfoVo={}", 
-           JSON.toJSONString(user), 
-           JSON.toJSONString(basicUserInfoVO));
+  log.info("userInfo={}", JSON.toJSONString(user));
+  log.info("basicUserInfoVo={}", JSON.toJSONString(basicUserInfoVO));
 }
 ```
 
 输出结果
 
 ```log
-userInfo={"birthDate":937739959000,"id":1,"name":"jack"} => basicUserInfoVo={"name":"jack"}
+userInfo={"birthDate":937739959000,"id":1,"name":"jack"} 
+basicUserInfoVo={"name":"jack"}
 ```
 
 BeanUtils当属性名称不一致时，结果是有问题的。且如果转换的是不同包的对象，即使属性名一样，也是无法转换的
@@ -363,16 +362,16 @@ public abstract class UserConvert {
 public void mapStructTest() {
   UserInfo user = userInfoDao.getUser(1L);
   BasicUserInfoVO basicUserInfoVO = UserConvert.INSTANCE.entity2BasicUserInfoVO(user);
-  log.info("userInfo={} => basicUserInfoVo={}", 
-           JSON.toJSONString(user),
-           JSON.toJSONString(basicUserInfoVO));
+  log.info("userInfo={}", JSON.toJSONString(user));
+  log.info("basicUserInfoVo={}", JSON.toJSONString(basicUserInfoVO));
 }
 ```
 
 输出结果
 
 ```log
-userInfo={"birthDate":937739959000,"id":1,"name":"jack"} => basicUserInfoVo={"birthDate":"1999-09-19 19:19:19","name":"jack","userId":1}
+userInfo={"birthDate":937739959000,"id":1,"name":"jack"}
+basicUserInfoVo={"birthDate":"1999-09-19 19:19:19","name":"jack","userId":1}
 ```
 
 MapStruct转换结果完全正确，符合预期
@@ -454,7 +453,7 @@ public abstract BasicUserInfoVO entity2BasicUserInfoVO(UserInfo userInfo1, UserI
 ```java
 @AfterMapping
 public void underAccountReminderJudge(UserInfo userInfo, @MappingTarget BasicUserInfoVO basicUserInfoVO) {
-  if (Objects.nonNull(userInfo.getPrice()) && userInfo.getPrice().compareTo(new BigDecimal("500.00")) >= 0 ) {
+  if (userInfo.getPrice() != null && userInfo.getPrice().compareTo(new BigDecimal("500.00")) >= 0 ) {
     basicUserInfoVO.setUnderAccountReminder(false);
   } else {
     basicUserInfoVO.setUnderAccountReminder(true);
@@ -477,7 +476,7 @@ public void underAccountReminderJudge(UserInfo userInfo, @MappingTarget BasicUse
     @Mapping(source = "name", target = "name"),
     @Mapping(source = "birthDate", target = "birthDate", dateFormat = "yyyy-MM-dd HH:mm:ss"),
     @Mapping(target = "price", 
-             expression = "java(com.kun.utils.NumberUtils.toNumberRoundUp(userInfo.getPrice(), 2, \"#0.00\"))")
+             expression = "java(com.kun.utils.NumberUtils.toRoundUp(userInfo.getPrice(), 2, \"#0.00\"))")
   }
 )
 public abstract BasicUserInfoVO entity2BasicUserInfoVO(UserInfo userInfo);
@@ -497,7 +496,7 @@ public abstract List<BasicUserInfoVO> entity2BasicUserInfoVOs(List<UserInfo> use
     @Mapping(source = "name", target = "name"),
     @Mapping(source = "birthDate", target = "birthDate", dateFormat = "yyyy-MM-dd HH:mm:ss"),
     @Mapping(target = "price", 
-             expression = "java(com.kun.utils.NumberUtils.toNumberRoundUp(userInfo.getPrice(), 2, \"#0.00\"))")
+             expression = "java(com.kun.utils.NumberUtils.toRoundUp(userInfo.getPrice(), 2, \"#0.00\"))")
   }
 )
 @Named("entity2BasicUserInfoVO")  // 指定名称
@@ -540,7 +539,7 @@ public UserInfoVO entity2UserInfoVO(UserInfo userInfo, List<UserAddressInfo> use
     @Mapping(source = "name", target = "name"),
     @Mapping(source = "birthDate", target = "birthDate", dateFormat = "yyyy-MM-dd HH:mm:ss"),
     @Mapping(target = "price",
-             expression = "java(com.kun.utils.NumberUtils.toNumberRoundUp(userInfo.getPrice(), 2, \"#0.00\"))")
+             expression = "java(com.kun.utils.NumberUtils.toRoundUp(userInfo.getPrice(), 2, \"#0.00\"))")
   }
 )
 @Named("entity2BasicUserInfoVO")
