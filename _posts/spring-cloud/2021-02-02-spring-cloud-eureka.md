@@ -11,7 +11,7 @@ description: "eureka使用详解"
 
 ​	Spring Cloud封装了Netflix公司开发的Eureka模块来实现服务注册和发现，Eureka采用了C-S的设计架构。Eureka Server 作为服务注册功能的服务器，它是服务注册中心。而系统中的其他微服务，作为Eureka 的客户端连接到Eureka Server并定时发送心跳。这样就可以通过Eureka Server来监控系统中各个微服务是否正常运行。Spring Cloud的一些其他模块就可以通过Eureka Server 来发现系统中的其他微服务。
 
-<img src="/img/eureka架构图.png" alt="eureka架构图" style="zoom:67%;" />
+<img src="/img/eureka/eureka架构图.png" alt="eureka架构图" style="zoom:67%;" />
 
 ## 二、Eureka Server搭建
 
