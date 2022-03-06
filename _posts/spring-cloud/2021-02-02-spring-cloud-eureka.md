@@ -130,7 +130,7 @@ eureka:
     prefer-ip-address: true
 ```
 
-![eureka注册显示](/img/eurekaeureka注册显示.png)
+![eureka注册显示](/img/eureka/eureka注册显示.png)
 
 **四、消费者调用服务**
 
