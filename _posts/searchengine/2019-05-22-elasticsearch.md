@@ -1139,7 +1139,7 @@ must - 必须符合要求，相当于java中的逻辑运算符 ==或&&。
 
 must_not - 必须不符合要求，相当于java中的逻辑运算符 ！
 
-should - 有任意条件符合要求即可，相当于java中的逻辑运算符 ||
+should - 有任意条件符合要求即可，相当于java中的逻辑运算符 {％raw％}||{％endraw％}
 
 ```txt
 GET /emp_index/emp_type/_search
@@ -1990,7 +1990,7 @@ GET cars/_search
 
 **一次性调用的template**
 
-此方式没太大意义，只能调用一层的template是没有意义的
+此方式没太大意义，只能调用一次的template是没有意义的
 
 {% raw %}
 
