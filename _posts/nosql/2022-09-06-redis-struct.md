@@ -449,10 +449,6 @@ QuickListNode结构
 - `attempted_compress`节点不能被压缩因为太小了
 - `extra `占位没用上
 
-
-
-
-
 ## 八、基本数据类型底层编码场景
 
 ### String
