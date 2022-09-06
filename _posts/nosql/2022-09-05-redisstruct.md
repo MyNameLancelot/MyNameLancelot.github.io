@@ -207,7 +207,7 @@ struct __attribute__ ((__packed__)) sdshdr64 {
   #define SDS_TYPE_BITS 3
   ```
 
-<img src="assets/sds.png" alt="SDS 结构" style="zoom:67%;" />
+<img src="/img/redis/sds.png" alt="SDS 结构" style="zoom:67%;" />
 
 ### 分配细节
 
