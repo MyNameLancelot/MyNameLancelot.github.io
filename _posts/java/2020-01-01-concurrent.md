@@ -21,7 +21,7 @@ description: "Java并发编程"
     <div style="font-weight:bold">从java代码的角度来进行划分</div>
 </div>
 
-![thread-status-java](assets\thread-status-java.png)
+![thread-status-java](../../img/concurrent/thread-status-java.png)
 
 ## 二、JDK创建线程的方式
 
