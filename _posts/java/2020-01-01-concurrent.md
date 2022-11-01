@@ -359,7 +359,7 @@ synchronized是一个：`非公平`、`悲观`、`独享`、`互斥`、`可重�
 
 **MarkWord 数据一览**
 
-![markworld](assets\markworld.png)
+![markworld](../../img/concurrent/markworld.png)
 
 #### 偏向锁的原理
 
@@ -401,11 +401,11 @@ synchronized是一个：`非公平`、`悲观`、`独享`、`互斥`、`可重�
 
 - 创建锁记录（Lock Record）对象，每个线程都的栈帧都会包含一个锁记录的结构，内部可以存储锁定对象的Mark Word
 
-<img src="assets\create_lock_record.png"  style="zoom:50%;" />
+<img src="../../img/concurrent/create_lock_record.png"  style="zoom:50%;" />
 
 - 让锁记录中 Object reference 指向锁对象，并尝试用 cas 替换 Object 的 Mark Word，将 Mark Word 的值存入锁记录
 
-<img src="assets\create_lock_success.png" alt="create_lock_success" style="zoom:50%;" />
+<img src="../../img/concurrent/create_lock_success.png" alt="create_lock_success" style="zoom:50%;" />
 
 > 如果 cas 失败，有两种情况
 >
@@ -413,7 +413,7 @@ synchronized是一个：`非公平`、`悲观`、`独享`、`互斥`、`可重�
 >
 > - 自己执行了 synchronized 锁重入，那么再添加一条 Lock Record 作为重入的计数，如果退出则计数减一
 
-<img src="assets\add_lock_record.png" style="zoom:43%;" />
+<img src="../../img/concurrent/add_lock_record.png" style="zoom:43%;" />
 
 **轻量级锁衍化过程细节描述**
 
@@ -431,7 +431,7 @@ synchronized是一个：`非公平`、`悲观`、`独享`、`互斥`、`可重�
 
 #### 重量级锁
 
-<img src="assets\monitor.png" alt="monitor" style="zoom:80%;" />
+<img src="../../img/concurrent/monitor.png" alt="monitor" style="zoom:80%;" />
 
 **重量级锁状态的消息头结构**
 
